@@ -1,0 +1,5 @@
+# General Songscope Project Gitignore
+.DS_Store
+.idea/
+.vscode/
+
