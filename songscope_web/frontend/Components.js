@@ -1,2 +1,3 @@
-import {HelloComponent} from "./components/Test.js";
-customElements.define("hello-component", HelloComponent);
+import './components/GoogleSignInButton';
+import A from './components/A';
+customElements.define('a-link', A);
