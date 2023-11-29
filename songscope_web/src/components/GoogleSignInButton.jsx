@@ -23,7 +23,7 @@ export default () => {
                 data-client_id={googleClientID}
                 data-context="signin"
                 data-ux_mode="redirect"
-                data-login_uri={`${rootURL}/api/auth/google`}
+                data-login_uri={`${rootURL}/api/auth/google-callback`}
                 data-auto_prompt="false"
             ></div>
             <div
