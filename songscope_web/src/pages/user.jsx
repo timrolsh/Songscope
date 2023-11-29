@@ -1,3 +1,4 @@
+import DBTesterButton from "@/components/DBTesterButton";
 import SignOutButton from "@/components/SignOutButton";
 import {useEffect, useState} from "react";
 
@@ -32,6 +33,8 @@ export default () => {
             <div>Songscope</div>
             <div>Welcome {name}</div>
             <SignOutButton />
+            <br></br>
+            <DBTesterButton />
         </>
     );
 };
