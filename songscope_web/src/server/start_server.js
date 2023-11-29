@@ -9,7 +9,7 @@ const nextApp = next({dev: devMode});
 nextApp.prepare().then(() => {
     const server = express();
     // Establish database connection
-    db.connect()
+    db.query("select NOW();")
         .then(() => {
             // Handle both get and post requests with Next.js API system
             server.get("*", (request, response) => {
