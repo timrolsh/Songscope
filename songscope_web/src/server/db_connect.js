@@ -1,12 +1,11 @@
-const pg = require('pg');
-// hardcoded for now, visit this page for how to use environment varibales as well
-// https://node-postgres.com/apis/client
+const mysql = require("mysql2");
 
-const db = new pg.Pool({
-    user: "root",
-    password: "root",
-    database: "postgres",
-    host: "localhost",
-    port: 5555
+// create the connection to database
+const db = mysql.createPool({
+    host: "sqlclassdb-instance-1.cqjxl5z5vyvr.us-east-2.rds.amazonaws.com",
+    user: "songscope",
+    database: "capstone_2324_songscope",
+    password: "2G7tQBQYd25q",
+    port: 3306
 });
 module.exports = db;

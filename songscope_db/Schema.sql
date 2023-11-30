@@ -1,85 +1,76 @@
--- useful for rerunning this script
-drop schema if exists songscope cascade;
+-- Use our assigneed schema
+USE capstone_2324_songscope;
 
-create schema songscope;
+-- Drop each table individually if they exist
+DROP TABLE IF EXISTS user;
+DROP TABLE IF EXISTS conversation;
+DROP TABLE IF EXISTS conversation_user;
+DROP TABLE IF EXISTS message;
+DROP TABLE IF EXISTS rating;
+DROP TABLE IF EXISTS comment;
+DROP TABLE IF EXISTS comment_like;
+DROP TABLE IF EXISTS reply;
+DROP TABLE IF EXISTS reply_like;
 
-create table songscope.user
+-- Create the user table
+CREATE TABLE user
 (
---     the id that our database will identify users by
-    id              integer not null primary key,
--- every user has a unique username and it must be unique, cannot be null
-    username        text    not null,
-    spotify_id      text,
-    google_id       text,
-    apple_id        text,
-    first_name      text,
-    last_name       text,
-    email           text,
-    password_hash   text,
-    profile_picture bytea
+    id              INT  NOT NULL PRIMARY KEY,
+    username        TEXT NOT NULL,
+    spotify_id      TEXT,
+    google_id       TEXT,
+    apple_id        TEXT,
+    first_name      TEXT,
+    last_name       TEXT,
+    email           TEXT,
+    password_hash   TEXT,
+    profile_picture BLOB
 );
 
-create table songscope.message
+-- Create the rating table
+CREATE TABLE rating
 (
-    user_id         integer   not null
-        constraint message_user_id_fk
-            references songscope."user",
-    time_sent       timestamp not null,
-    message_text    text      not null
+    spotify_work_id TEXT  NOT NULL,
+    rating          FLOAT NOT NULL,
+    user_id         INT   NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
---  works can have ratings made by users (the rating will be from 0 to 1 and will be a slider in the UI)
-create table songscope.rating
+-- Create the comment table
+CREATE TABLE comment
 (
-    spotify_work_id text    not null,
-    rating          float4  not null,
-    user_id         integer not null
-        constraint rating_user_id_fk
-            references songscope."user"
+    id              INT  NOT NULL PRIMARY KEY,
+    user_id         INT  NOT NULL,
+    spotify_work_id TEXT NOT NULL,
+    comment_text    TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
--- a user can comment on a work
-create table songscope.comment
+-- Create the comment_like table
+CREATE TABLE comment_like
 (
-    id              integer not null primary key,
-    user_id         integer not null
-        constraint comment_user_id_fk
-            references songscope."user",
-    spotify_work_id text    not null,
-    comment_text    text    not null
+    comment_id INT NOT NULL,
+    user_id    INT NOT NULL,
+    FOREIGN KEY (comment_id) REFERENCES comment (id),
+    FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
--- a user can make like a comment
+-- Create the reply table
+CREATE TABLE reply
 (
-    comment_id integer not null
-        constraint comment_like_comment_id_fk
-            references songscope.comment,
-    user_id    integer not null
-        constraint comment_like_user_id_fk
-            references songscope."user"
+    id         INT  NOT NULL PRIMARY KEY,
+    user_id    INT  NOT NULL,
+    comment_id INT  NOT NULL,
+    reply_text TEXT NOT NULL,
+    FOREIGN KEY (user_id) REFERENCES user (id),
+    FOREIGN KEY (comment_id) REFERENCES comment (id)
 );
 
--- a user can reply to a comment
-create table songscope.reply
+-- Create the reply_like table
+CREATE TABLE reply_like
 (
-    id         integer not null primary key,
-    user_id    integer not null
-        constraint comment_user_id_fk
-            references songscope."user",
-    comment_id integer not null
-        constraint reply_comment_id_fk
-            references songscope.comment,
-    reply_text text    not null
+    reply_id INT NOT NULL,
+    user_id  INT NOT NULL,
+    FOREIGN KEY (reply_id) REFERENCES reply (id),
+    FOREIGN KEY (user_id) REFERENCES user (id)
 );
-
--- a user can like a reply
-create table songscope.reply_like
-(
-    reply_id integer not null
-        constraint reply_like_reply_id_fk
-            references songscope.reply,
-    user_id  integer not null
-        constraint reply_like_user_id_fk
-            references songscope."user"
-);
-
