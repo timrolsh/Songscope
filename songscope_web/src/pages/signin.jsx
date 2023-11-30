@@ -5,7 +5,6 @@ export default () => {
         <>
             <div>Songscope</div>
             <GoogleSignInButton />
-            
         </>
     );
-}
+};
