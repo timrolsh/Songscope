@@ -1,16 +1,22 @@
 -- Use our assigneed schema
 USE capstone_2324_songscope;
 
+# disable foreign key checks so that tables could be droppped
+SET FOREIGN_KEY_CHECKS = 0;
+
 -- Drop each table individually if they exist
-DROP TABLE IF EXISTS user;
-DROP TABLE IF EXISTS conversation;
-DROP TABLE IF EXISTS conversation_user;
-DROP TABLE IF EXISTS message;
-DROP TABLE IF EXISTS rating;
-DROP TABLE IF EXISTS comment;
-DROP TABLE IF EXISTS comment_like;
-DROP TABLE IF EXISTS reply;
-DROP TABLE IF EXISTS reply_like;
+DROP TABLE IF EXISTS user cascade;
+DROP TABLE IF EXISTS conversation cascade;
+DROP TABLE IF EXISTS conversation_user cascade;
+DROP TABLE IF EXISTS message cascade;
+DROP TABLE IF EXISTS rating cascade;
+DROP TABLE IF EXISTS comment cascade;
+DROP TABLE IF EXISTS comment_like cascade;
+DROP TABLE IF EXISTS reply_like cascade;
+DROP TABLE IF EXISTS reply cascade;
+
+# re-enable foreign key checks for normal functionality
+SET FOREIGN_KEY_CHECKS = 1;
 
 -- Create the user table
 CREATE TABLE user
@@ -25,32 +31,6 @@ CREATE TABLE user
     email           TEXT,
     password_hash   TEXT,
     profile_picture BLOB
-);
-
--- Create the conversation table
-CREATE TABLE conversation
-(
-    id INT NOT NULL PRIMARY KEY
-);
-
--- Create the conversation_user table
-CREATE TABLE conversation_user
-(
-    conversation_id INT NOT NULL,
-    user_id         INT NOT NULL,
-    FOREIGN KEY (conversation_id) REFERENCES conversation (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
-);
-
--- Create the message table
-CREATE TABLE message
-(
-    conversation_id INT       NOT NULL,
-    user_id         INT       NOT NULL,
-    time_sent       TIMESTAMP NOT NULL,
-    message_text    TEXT      NOT NULL,
-    FOREIGN KEY (conversation_id) REFERENCES conversation (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
 -- Create the rating table
@@ -69,6 +49,8 @@ CREATE TABLE comment
     user_id         INT  NOT NULL,
     spotify_work_id TEXT NOT NULL,
     comment_text    TEXT NOT NULL,
+    # a user does not have to provide a timestamp for a comment
+    time            TIMESTAMP,
     FOREIGN KEY (user_id) REFERENCES user (id)
 );
 
