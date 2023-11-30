@@ -19,27 +19,8 @@ create table songscope.user
     profile_picture bytea
 );
 
-create table songscope.conversation
-(
-    id integer not null primary key
-);
-
--- each user can be a part of multiple conversations, and each conversation can have multiple users
-create table songscope.conversation_user
-(
-    conversation_id integer not null
-        constraint conversation_user_conversation_id_fk
-            references songscope.conversation,
-    user_id         integer not null
-        constraint conversation_user_user_id_fk
-            references songscope.user
-);
-
 create table songscope.message
 (
-    conversation_id integer   not null
-        constraint message_conversation_id_fk
-            references songscope.conversation,
     user_id         integer   not null
         constraint message_user_id_fk
             references songscope."user",
@@ -69,7 +50,6 @@ create table songscope.comment
 );
 
 -- a user can make like a comment
-create table songscope.comment_like
 (
     comment_id integer not null
         constraint comment_like_comment_id_fk
