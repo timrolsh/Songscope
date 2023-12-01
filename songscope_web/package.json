@@ -8,9 +8,11 @@
         "prod": "node src/server/start_server.js prod"
     },
     "dependencies": {
+        "dotenv": "^16.3.1",
         "express": "^4.18.2",
         "next": "14.0.3",
         "pg": "^8.11.3",
+        "qs": "^6.11.2",
         "react": "^18",
         "react-dom": "^18"
     },
