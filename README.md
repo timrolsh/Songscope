@@ -15,4 +15,5 @@ If iOS/Android Apps are ever made, there will be a formatting guide for those as
 - **React**: Allows for dynamic and interactive web pages with reusable components
 - **Express**: Used to handle HTTP requests and send them to Next.js's request handler
 - **MySQL**: Used for relational database management system
+- **TailwindCSS**: Used for styling the web application
 - **Spotify API**: Used to fetch music data
