@@ -1,5 +1,6 @@
 import DBTesterButton from "@/components/DBTesterButton";
 import SignOutButton from "@/components/SignOutButton";
+import SpotifyAPITester from "@/components/SpotifyAPITester";
 import {useEffect, useState} from "react";
 
 export default () => {
@@ -45,6 +46,8 @@ export default () => {
             <SignOutButton />
             <br></br>
             <DBTesterButton />
+            <br></br>
+            <SpotifyAPITester />
         </>
     );
 };
