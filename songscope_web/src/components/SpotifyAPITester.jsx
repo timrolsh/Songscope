@@ -9,7 +9,6 @@ export default () => {
                                 let albumArt = document.getElementById("album-art");
                                 albumArt.src = res;
                                 albumArt.style.visibility = "visible";
-                                
                             });
                         })
                         .catch((err) => {
@@ -19,7 +18,13 @@ export default () => {
             >
                 Click to fetch an album's art from the Spotify API
             </button>
-            <img id="album-art" src="" alt="Album Art" className="mx-auto" style={{ visibility: "hidden" }} />
+            <img
+                id="album-art"
+                src=""
+                alt="Album Art"
+                className="mx-auto"
+                style={{visibility: "hidden"}}
+            />
         </>
     );
 };
