@@ -1,7 +1,7 @@
 export default () => {
     return (
         <>
-            <input type="number" id="rating" name="rating" min="1" max="5" placeholder="Rating (1-5)" className="text-black"></input>
+            <input type="number" id="rating" name="rating" min="1" max="5" placeholder="Rating (1-5)" className="text-black w-48 h-8"></input>
             <br></br>
             <button
                 onClick={() => {
