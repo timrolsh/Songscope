@@ -3,14 +3,14 @@ export default () => {
         <>
             <button
                 onClick={() => {
-                    fetch("/api/db-test")
+                    fetch("/api/db-read-test")
                         .then((response) => {
                             response.text().then((text) => {
-                                alert(`Database test successful: ${text}`);
+                                alert(`Database read test successful: ${text}`);
                             });
                         })
                         .catch((err) => {
-                            alert(`Database test unsuccessful. Error: ${err}`);
+                            alert(`Database read test unsuccessful. Error: ${err}`);
                         });
                 }}
             >

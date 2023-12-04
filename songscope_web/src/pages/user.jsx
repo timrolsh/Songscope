@@ -1,5 +1,7 @@
-import DBTesterButton from "@/components/DBTesterButton";
+import DBReadTesterButton from "@/components/DBReadTesterButton";
+import DBWriteTesterButton from "@/components/DBWriteTesterButton";
 import SignOutButton from "@/components/SignOutButton";
+import SpotifyAPITester from "@/components/SpotifyAPITester";
 import {useEffect, useState} from "react";
 
 export default () => {
@@ -44,7 +46,11 @@ export default () => {
             </h3>
             <SignOutButton />
             <br></br>
-            <DBTesterButton />
+            <DBReadTesterButton />
+            <br></br>
+            <DBWriteTesterButton />
+            <br></br>
+            <SpotifyAPITester />
         </>
     );
 };
