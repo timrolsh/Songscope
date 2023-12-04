@@ -1,5 +1,5 @@
 const mysql = require("mysql2");
-require("dotenv").config();
+require("dotenv").config({path: `${__dirname}/../../../.env`});
 
 // check to make sure all environment variables are set
 if (
