@@ -17,8 +17,9 @@ export default () => {
     }
 
     return (
-        <>
+        <div className="after:-z-50">
             <div
+                className="w-full"
                 id="g_id_onload"
                 data-client_id={googleClientID}
                 data-context="signin"
@@ -35,6 +36,6 @@ export default () => {
                 data-size="large"
                 data-logo_alignment="left"
             ></div>
-        </>
+        </div>
     );
 };
