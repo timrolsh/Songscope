@@ -2,6 +2,7 @@ import DBReadTesterButton from "@/components/DBReadTesterButton";
 import DBWriteTesterButton from "@/components/DBWriteTesterButton";
 import SignOutButton from "@/components/SignOutButton";
 import SpotifyAPITester from "@/components/SpotifyAPITester";
+import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
 
 export default () => {
@@ -32,25 +33,7 @@ export default () => {
     }, []);
     return (
         <>
-            <div className="bg-clip-text flex palce-content-center w-full h-64 bg-gradient-to-r from-red-600 via-red-400 to-amber-300">
-                <h1 className="text-8xl text-center m-auto text-transparent font-semibold">Songscope</h1>
-            </div>
-            
-            <h3 className="pl-2 text-2xl font-semibold">
-                {
-                    name === "Loading..." ? 
-                        <span className="italic">Loading</span> : 
-                        <> Welcome <span className="italic">{name}</span> </>
-                        
-                }
-            </h3>
-            <SignOutButton />
-            <br></br>
-            <DBReadTesterButton />
-            <br></br>
-            <DBWriteTesterButton />
-            <br></br>
-            <SpotifyAPITester />
-        </>
+            <SideBar /> 
+       </>
     );
 };
