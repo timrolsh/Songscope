@@ -1,4 +1,5 @@
 import {useEffect, useState} from "react";
+require("dotenv").config();
 
 export default () => {
     const [rootURL, setRootURL] = useState("");
@@ -9,11 +10,10 @@ export default () => {
         script.async = true;
         document.body.appendChild(script);
     }, []);
-
-    let googleClientID = "197627608254-101bmkl3g7cr6v780l8vku2t9vsokvfa.apps.googleusercontent.com";
+    let googleClientID = process.env.GOOGLE_CLIENT_ID_DEV;
     // switch to prod client url if website is running on the prod url
     if (rootURL === "https://songscope.org") {
-        googleClientID = "197627608254-doe9u2ugvdeg8a0mr1flqq8dvjmcviui.apps.googleusercontent.com";
+        googleClientID = process.env.GOOGLE_CLIENT_ID_PROD;
     }
 
     return (
