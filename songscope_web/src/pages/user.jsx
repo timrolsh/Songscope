@@ -1,7 +1,3 @@
-import DBReadTesterButton from "@/components/DBReadTesterButton";
-import DBWriteTesterButton from "@/components/DBWriteTesterButton";
-import SignOutButton from "@/components/SignOutButton";
-import SpotifyAPITester from "@/components/SpotifyAPITester";
 import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
 
@@ -37,8 +33,8 @@ export default () => {
         <div className="flex flex-row h-full">
             <SideBar /> 
             <div className="w-4/5 h-screen overflow-auto">
-                <h1 className="text-4xl font-bold px-8 pt-4">Welcome, {name}!</h1>
-                <h2 className="text-2xl italic px-8 pt-4">Browse Songs, Albums, and Artists</h2>
+                <h1 className="text-3xl font-bold px-8 pt-4">Welcome, {name}!</h1>
+                <h2 className="text-xl italic px-8 pt-4">Browse Songs, Albums, and Artists</h2>
                 <div className="grid grid-cols-4 gap-8 p-8 overflow-auto">
                 {
                     [...Array(30)].map((_, i) => (
