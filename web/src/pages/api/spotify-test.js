@@ -23,7 +23,7 @@ const getAuth = async () => {
     return JSON.parse(await response.text()).access_token;
 };
 
-const getID = async (name, type) => {
+const search = async (name, type=["album", "artist", "playlist", "track"]) => {
     let access_token = await getAuth();
     const res = await fetch("https://api.spotify.com/v1/search?q=" + name + "&type=" + type, {
         method: "GET",
@@ -31,15 +31,16 @@ const getID = async (name, type) => {
             "Authorization": `Bearer ${access_token}`,
         }
     });
-    return JSON.parse(await res.text()).albums.items[0].id;
+    return JSON.parse(await res.text());
 }
 
 
 export default async (request, response) => {
     try {
         let access_token = await getAuth();
-        const res = await getID("Utopia", "album")
+        const res = await search("Travis Scott");
         response.statusCode = 200;
+        console.log("res", res);
         response.send(res);
     } catch (error) {
         console.error(error);
