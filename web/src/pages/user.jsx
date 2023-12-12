@@ -1,8 +1,7 @@
-import DBReadTesterButton from "@/components/DBReadTesterButton";
-import DBWriteTesterButton from "@/components/DBWriteTesterButton";
-import SignOutButton from "@/components/SignOutButton";
-import SpotifyAPITester from "@/components/SpotifyAPITester";
+import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
+
+import SongTile from "@/components/SongTile";
 
 export default () => {
     const [name, setName] = useState("Loading...");
@@ -31,26 +30,19 @@ export default () => {
         localStorage.signedIn = true;
     }, []);
     return (
-        <>
-            <div className="bg-clip-text flex palce-content-center w-full h-64 bg-gradient-to-r from-red-600 via-red-400 to-amber-300">
-                <h1 className="text-8xl text-center m-auto text-transparent font-semibold">Songscope</h1>
-            </div>
-            
-            <h3 className="pl-2 text-2xl font-semibold">
+        <div className="flex flex-row h-full">
+            <SideBar /> 
+            <div className="w-4/5 h-screen overflow-auto">
+                <h1 className="text-3xl font-bold px-8 pt-4">Welcome, {name}!</h1>
+                <h2 className="text-xl italic px-8 pt-4">Browse Songs, Albums, and Artists</h2>
+                <div className="grid grid-cols-4 gap-8 p-8 overflow-auto">
                 {
-                    name === "Loading..." ? 
-                        <span className="italic">Loading</span> : 
-                        <> Welcome <span className="italic">{name}</span> </>
-                        
+                    [...Array(30)].map((_, i) => (
+                        <SongTile key={i} />
+                    ))
                 }
-            </h3>
-            <SignOutButton />
-            <br></br>
-            <DBReadTesterButton />
-            <br></br>
-            <DBWriteTesterButton />
-            <br></br>
-            <SpotifyAPITester />
-        </>
+                </div>
+            </div>
+       </div>
     );
 };
