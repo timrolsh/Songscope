@@ -23,18 +23,24 @@ const getAuth = async () => {
     return JSON.parse(await response.text()).access_token;
 };
 
+const getID = async (name, type) => {
+    let access_token = await getAuth();
+    const res = await fetch("https://api.spotify.com/v1/search?q=" + name + "&type=" + type, {
+        method: "GET",
+        headers: {
+            "Authorization": `Bearer ${access_token}`,
+        }
+    });
+    return JSON.parse(await res.text()).albums.items[0].id;
+}
+
+
 export default async (request, response) => {
     try {
         let access_token = await getAuth();
-        const result = await fetch("https://api.spotify.com/v1/albums/2QRedhP5RmKJiJ1i8VgDGR", {
-            headers: {
-                Authorization: `Bearer ${access_token}`
-            }
-        });
-        let albumArtUrl = await result.json();
-        albumArtUrl = albumArtUrl.images[0].url;
+        const res = await getID("Utopia", "album")
         response.statusCode = 200;
-        response.send(albumArtUrl);
+        response.send(res);
     } catch (error) {
         console.error(error);
         response.statusCode = 500;
