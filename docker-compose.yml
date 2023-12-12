@@ -3,7 +3,7 @@ version: "3"
 services:
     db:
         build:
-            context: ./songscope_db
+            context: ./db
             dockerfile: Dockerfile
         ports:
             - ${DB_PORT}:3306
