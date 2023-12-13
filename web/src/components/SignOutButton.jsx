@@ -1,7 +1,7 @@
 export default () => {
     return (
         <button
-            className="px-4 py-2 bg-red-500 rounded-2xl drop-shadow-sm text-white font-semibold hover:bg-red-700 transition hover:-translate-y-0.5"
+            className="pl-4 py-1 bg-red-700/80 rounded-md drop-shadow-sm text-text hover:font-semibold hover:bg-red-700 transition-all hover:-translate-y-0.5 text-left"
             onClick={() => {
                 localStorage.signedIn = false;
                 localStorage.removeItem("token");
