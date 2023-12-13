@@ -32,7 +32,7 @@ export default () => {
     return (
         <div className="flex flex-row h-full">
             <SideBar /> 
-            <div className="w-4/5 h-screen overflow-auto">
+            <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <h1 className="text-3xl font-bold px-8 pt-4">Welcome, {name}!</h1>
                 <h2 className="text-xl italic px-8 pt-4">Browse Songs, Albums, and Artists</h2>
                 <div className="grid grid-cols-4 gap-8 p-8 overflow-auto">

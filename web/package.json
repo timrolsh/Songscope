@@ -3,6 +3,7 @@
     "version": "0.1.0",
     "private": true,
     "scripts": {
+        "devt": "next dev --turbo",
         "dev": "node src/server/start_server.js dev",
         "build": "next build",
         "prod": "node src/server/start_server.js prod"

@@ -62,7 +62,7 @@ export default () => {
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"profile"}/> 
-            <div className="w-4/5 h-screen overflow-auto">
+            <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <div className="pt-8 px-8">
                     <div className="flex flex-row space-x-4">
                         <div className="flex flex-col space-y-2 w-1/6">
@@ -77,12 +77,14 @@ export default () => {
                                 {/* <div className="w-5 h-5 rounded-2xl bg-lime-400 mb-auto"></div> */}
                             </div>
                         </div>
-                        <div className="w-1/2 text-lg">
-                            <h1 className="font-bold text-2xl mx-auto pb-4">{name}</h1>
-                            <h3>I love music, and I love sharing my thoughts with the world! Everyone should know what I think about all the songs, and I have the best music taste ever!</h3>
-                            <h3 className="text-text/50 italic font-light pt-8">Scoping out songs since: Nov 2, 2023</h3>
+                        <div className="w-1/2 sm:w-4/6 text-lg flex flex-col place-content-between">
+                            <div>
+                                <h1 className="font-bold text-2xl mx-auto">{name}</h1>
+                                <h3>I love music, and I love sharing my thoughts with the world! Everyone should know what I think about all the songs, and I have the best music taste ever!</h3>
+                            </div>
+                            <h3 className="text-text/50 italic font-light sm:pb-1">Scoping out songs since: Nov 2, 2023</h3>
                         </div>
-                        <div className="border-l-2 border-l-accent-neutral/20 pl-6 w-2/6">
+                        <div className="border-l-2 border-l-accent-neutral/20 pl-6 w-2/6 sm:w-1/6">
                             <h1 className="mr-auto font-semibold text-xl pb-3">Lifetime Stats</h1>
                             <div className="flex flex-col space-y-2">
                                 <div className="flex flex-row space-x-4">
