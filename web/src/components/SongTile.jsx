@@ -149,24 +149,24 @@ function SongInfo() {
     );
 }
 
-export default ({rating = false}) => {
+export default ({rating = false, songName, artistName, albumArt}) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
-
+    
     return (
         <>
         {showModal && <Modal showModal={showModal} setShowModal={setShowModal}/>}
             <div className="select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20" onClick={() => setShowModal(!showModal)}>
-            <Image 
-                src="https://media.pitchfork.com/photos/5eac22c8bae33a8e8fd0b191/1:1/w_450%2Cc_limit/Drake.jpg"
+            <Image
+                src={albumArt}
                 width={175}
                 height={175}
                 className="group-hover:border-accent-neutral/10 transition-all mx-auto mt-6 border border-accent-neutral/5 shadow-xl rounded-xl select-none"
             >
             </Image>
             <div className="flex flex-col select-text place-content-start pt-4"> 
-                <h1 className="text-xl font-bold text-center text-text/90 group-hover:text-text">Pain 1993</h1>
-                <span className="text-sm text-center font-light text-text/50 group-hover:text-text/80">Drake</span>
+                <h1 className="text-xl font-bold text-center text-text/90 group-hover:text-text">{songName}</h1>
+                <span className="text-sm text-center font-light text-text/50 group-hover:text-text/80">{artistName}</span>
             </div>
             {
                 rating && 
