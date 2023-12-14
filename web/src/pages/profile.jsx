@@ -5,7 +5,7 @@ import {useEffect, useState} from "react";
 
 function ReviewTile() {
     return (
-        <div className="rounded-xl border-2 h-32 w-64 px-4 py-2 border border-secondary/20 bg-secondary/5 flex flex-col">
+        <div className="rounded-xl h-32 w-64 px-4 py-2 border border-secondary/20 bg-secondary/5 flex flex-col">
             <h3 className="font-bold italic text-text/90">Pain 1993 - Drake</h3>
             <p className="font-normal text-secondary/90 text-sm">Why lorem text placeholder...</p>
             <div className="mt-auto flex flex-row place-content-between">
@@ -100,18 +100,19 @@ export default () => {
                             </div>
                         </div>
                     </div>
-                    <hr className="w-5/6 mr-auto border-t-2 my-6 border-secondary"></hr>
+                    <hr className="w-7/8 mr-auto border-t-2 my-6 border-secondary"></hr>
                     <div>
-                        <h2 className="text-2xl font-bold">Pinned Songs</h2>
-                        <div className="flex flex-row w-5/6 mx-auto place-content-around pt-5">
+                        <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
+                        <div className="flex flex-row w-full mx-auto place-content-between pt-5">
                             <SongTile key={1} />
                             <SongTile key={2} />
                             <SongTile key={3} />
+                            <SongTile key={4} />
                         </div>
                     </div>
                     <div className="pt-5">
-                        <h2 className="text-2xl font-bold">Top Reviews</h2>
-                        <div className="flex flex-row w-5/6 mx-auto place-content-around pt-5">
+                        <h2 className="text-2xl pl-2 font-bold">Top Reviews</h2>
+                        <div className="flex flex-row w-full mx-auto place-content-evenly pt-5">
                             <ReviewTile />
                             <ReviewTile />
                             <ReviewTile />
