@@ -29,16 +29,17 @@ export default () => {
         localStorage.name = userInfo.name;
         localStorage.signedIn = true;
     }, []);
+    // TODO --> Center this properly so it doesn't look bad
     return (
         <div className="flex flex-row h-full">
             <SideBar /> 
-            <div className="w-4/5 h-screen overflow-auto">
-                <h1 className="text-3xl font-bold px-8 pt-4">Welcome, {name}!</h1>
-                <h2 className="text-xl italic px-8 pt-4">Browse Songs, Albums, and Artists</h2>
-                <div className="grid grid-cols-4 gap-8 p-8 overflow-auto">
+            <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
+                <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {name}!</h1>
+                <h2 className="text-xl italic px-12 text-accent-neutral/50">Browse Songs, Albums, and Artists</h2>
+                <div className="grid grid-cols-4 gap-10 p-12 overflow-auto">
                 {
                     [...Array(30)].map((_, i) => (
-                        <SongTile key={i} />
+                        <SongTile key={i} rating={true}/>
                     ))
                 }
                 </div>
