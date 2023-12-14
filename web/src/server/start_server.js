@@ -8,6 +8,7 @@ const nextApp = next({ dev: devMode });
 
 nextApp.prepare().then(() => {
     const server = express();
+    server.use(express.json());
     // Establish database connection
     db.query("select NOW();", (error, results, fields) => {
         if (error) {
