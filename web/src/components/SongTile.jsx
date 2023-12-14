@@ -149,12 +149,10 @@ function SongInfo() {
     );
 }
 
-export default ({rating = false}) => {
+export default ({rating = false, songName, artistName, albumArt}) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
-
-
-export default ({songName, artistName, albumArt}) => {
+    
     return (
         <>
         {showModal && <Modal showModal={showModal} setShowModal={setShowModal}/>}
