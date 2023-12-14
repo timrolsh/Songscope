@@ -3,10 +3,10 @@ const nextConfig = {
     reactStrictMode: true,
     images: {
         remotePatterns: [
-            "^https://localhost/",
-            "^https://res.cloudinary.com/",
-            "^https://media.pitchfork.com/",
-            "^https://t4.ftcdn.net/"
+            {protocol: "https", hostname: "localhost"},
+            {protocol: "https", hostname: "res.cloudinary.com"},
+            {protocol: "https", hostname: "media.pitchfork.com"},
+            {protocol: "https", hostname: "t4.ftcdn.net"}
         ]
     }
 };
