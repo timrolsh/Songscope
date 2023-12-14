@@ -1,5 +1,5 @@
 const SpotifyWebApi = require("spotify-web-api-node");
-require("dotenv").config({path: `${__dirname}/../../../.env`});
+require("dotenv").config({ path: `${__dirname}/../../../.env` });
 
 var spotifyWebApi = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
@@ -42,6 +42,57 @@ class SpotifyApi {
                 albumArtUrl: result.body.images[0].url
             };
             return Promise.resolve(album);
+        });
+    }
+
+    getSong(songId) {
+        return executeMethod(spotifyWebApi.getTrack.bind(spotifyWebApi), songId).then((result) => {
+            let song = {
+                id: result.body.id,
+                name: result.body.name,
+                artist: result.body.artists[0].name,
+                artist_id: result.body.artists[0].id,
+                album: result.body.album.name,
+                album_id: result.body.album.id,
+                albumArtUrl: result.body.album.images[0].url
+            };
+            return Promise.resolve(song);
+        });
+    }
+
+    getSongsFromAlbum(albumId) {
+        return executeMethod(spotifyWebApi.getAlbumTracks.bind(spotifyWebApi), albumId).then((result) => {
+            let songs = [];
+            result.body.items.forEach((song) => {
+                songs.push({
+                    id: song.id,
+                    name: song.name,
+                    artist: song.artists[0].name,
+                    artist_id: song.artists[0].id,
+                    album: song.album.name,
+                    album_id: song.album.id,
+                    albumArtUrl: song.album.images[0].url
+                });
+            });
+            return Promise.resolve(songs);
+        });
+    }
+
+    getSongsFromPlaylist(playlistId) {
+        return executeMethod(spotifyWebApi.getPlaylist.bind(spotifyWebApi), playlistId).then((result) => {
+            let songs = [];
+            result.body.tracks.items.forEach((song) => {
+                songs.push({
+                    id: song.track.id,
+                    name: song.track.name,
+                    artist: song.track.artists[0].name,
+                    artist_id: song.track.artists[0].id,
+                    album: song.track.album.name,
+                    album_id: song.track.album.id,
+                    albumArtUrl: song.track.album.images[0].url
+                });
+            });
+            return Promise.resolve(songs);
         });
     }
 }
