@@ -60,6 +60,20 @@ class SpotifyApi {
         });
     }
 
+    getArtist(artistId) {
+        return executeMethod(spotifyWebApi.getArtist.bind(spotifyWebApi), artistId).then((result) => {
+            let artist = {
+                id: result.body.id,
+                name: result.body.name,
+                popularity: result.body.popularity,
+                artist_id: result.body.artists[0].id,
+                followers: result.body.followers.total,
+                artistArtUrl: result.body.album.images[0].url
+            };
+            return Promise.resolve(artist);
+        });
+    }
+
     getSongsFromAlbum(albumId) {
         return executeMethod(spotifyWebApi.getAlbumTracks.bind(spotifyWebApi), albumId).then((result) => {
             let songs = [];
