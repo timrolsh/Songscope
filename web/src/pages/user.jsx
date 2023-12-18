@@ -3,6 +3,16 @@ import { useEffect, useState } from "react";
 
 import SongTile from "@/components/SongTile";
 
+export const SongMetadata = {
+    id: undefined,
+    name: undefined,
+    artist: undefined,
+    artist_id: undefined,
+    album: undefined,
+    album_id: undefined,
+    albumArtUrl: undefined,
+}
+
 export default () => {
     const [name, setName] = useState("Loading...");
     const [songs, setSongs] = useState([]);
@@ -17,7 +27,7 @@ export default () => {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ "id": "37i9dQZF1DX6R7QUWePReA" })
+            body: JSON.stringify({ "id": "0OwFb8rH79YQ76ln376pyn"})
         })
             .then(response => response.json())
             .then(data => {
@@ -56,9 +66,8 @@ export default () => {
                     {songs.map((song) => (
                         <SongTile
                             key={song.id}
-                            songName={song.name}
-                            artistName={song.artist}
-                            albumArt={song.albumArtUrl}
+                            rating={true}
+                            metadata={song}
                         />
                     ))}
                 </div>

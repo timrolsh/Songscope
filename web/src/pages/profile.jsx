@@ -36,6 +36,26 @@ function ReviewTile() {
 
 export default () => {
     const [name, setName] = useState("Loading...");
+    const [songs, setSongs] = useState(undefined);
+
+    useEffect(() => {
+        fetch("/api/spotify/get-playlist-songs", {
+            method: "POST",
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ "id": "0OwFb8rH79YQ76ln376pyn"})
+        })
+            .then(response => response.json())
+            .then(data => {
+                console.log("data", data)
+                setSongs(data);
+            })
+            .catch(error => {
+                console.error("Error fetching songs:", error);
+            });
+    }, []);
+
     /*
     when the component for this page first mounts, unload the token from the 
     cookie, clear cookie, store token in localstorage, put the name of the
@@ -104,10 +124,7 @@ export default () => {
                     <div>
                         <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
                         <div className="flex flex-row w-full mx-auto place-content-between pt-5">
-                            <SongTile key={1} />
-                            <SongTile key={2} />
-                            <SongTile key={3} />
-                            <SongTile key={4} />
+                            {songs ? songs.slice(0, 4).map((song) => ( <SongTile key={song.id} metadata={song} />)) : (<h1 className="pl-2 text-xl my-auto">Loading...</h1>)}
                         </div>
                     </div>
                     <div className="pt-5">
