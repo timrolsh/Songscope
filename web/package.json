@@ -4,9 +4,9 @@
     "private": true,
     "scripts": {
         "devt": "next dev --turbo",
-        "dev": "node src/server/start_server.js dev",
+        "dev": "bun src/server/start_server.js dev",
         "build": "next build",
-        "prod": "node src/server/start_server.js prod"
+        "prod": "bun src/server/start_server.js prod"
     },
     "dependencies": {
         "clsx": "^2.0.0",
