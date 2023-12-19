@@ -2,7 +2,13 @@
 const nextConfig = {
     reactStrictMode: true,
     images: {
-        domains: ['localhost', 'res.cloudinary.com', 'media.pitchfork.com', 't4.ftcdn.net', 'i.scdn.co'],
+        remotePatterns: [
+            {protocol: "https", hostname: "localhost"},
+            {protocol: "https", hostname: "res.cloudinary.com"},
+            {protocol: "https", hostname: "media.pitchfork.com"},
+            {protocol: "https", hostname: "t4.ftcdn.net"},
+            {protocol: "https", hostname: "i.scdn.co"}
+        ]
     }
 };
 
