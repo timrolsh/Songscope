@@ -8,7 +8,7 @@ import { IoPlayCircleOutline } from "react-icons/io5";
 import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 
-export function Modal({showModal, setShowModal}) {
+export function Modal({showModal, setShowModal, songMetadata}) {
 
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
@@ -21,20 +21,20 @@ export function Modal({showModal, setShowModal}) {
         <div className={clsx("flex flex-col duration-200 place-content-center w-screen h-screen absolute bg-black/40 top-0 left-0 transition-all opacity-0", display && "opacity-100")} onClick={() => setShowModal(!showModal)}>
             {/* This div will serve as the body for the modal. TODO --> Convert to a slotted component for reuse */} 
             <div className="relative mx-auto z-30 border px-8 py-5 border-secondary w-1/2 h-1/2 bg-background/70 backdrop-blur-lg rounded-lg" onClick={(e) => e.stopPropagation()}>
-                <SongInfo />
+                <SongInfo songMetadata={songMetadata}/>
                 <button className="text-red-700 absolute right-2 top-1 text-2xl" onClick={() => setShowModal(!showModal)}><IoMdClose/></button>
             </div>
         </div>
     )
 }
 
-function SongInfo() {
+function SongInfo( { songMetadata }) {
     return (
         <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
             <div className="flex flex-col place-content-between h-full w-2/5"> 
                 <div> 
                     <Image 
-                        src="https://media.pitchfork.com/photos/5eac22c8bae33a8e8fd0b191/1:1/w_450%2Cc_limit/Drake.jpg"
+                        src={songMetadata.albumArtUrl}
                         width={150}
                         height={150}
                         className="border border-accent-neutral/5 shadow-xl rounded-xl select-none">
@@ -47,8 +47,8 @@ function SongInfo() {
                     <IoMdStarHalf className="text-secondary text-3xl" />
                 </div>
                     <div className="flex flex-col -space-y-1 mt-2.5">
-                        <h3 className="font-bold text-lg text-text">Pain 1993</h3>
-                        <h3 className="font-normal italic text-md text-text/50">Drake</h3>
+                        <h3 className="font-bold text-lg text-text">{songMetadata.name}</h3>
+                        <h3 className="font-normal italic text-md text-text/50">{songMetadata.artist}</h3>
                     </div>
                     <div className="flex flex-col space-y-2.5 mt-3">
                         <div>
@@ -149,24 +149,24 @@ function SongInfo() {
     );
 }
 
-export default ({rating = false}) => {
+export default ({rating = false, metadata }) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
-
+    
     return (
         <>
-        {showModal && <Modal showModal={showModal} setShowModal={setShowModal}/>}
+        {showModal && <Modal showModal={showModal} setShowModal={setShowModal} songMetadata={metadata}/>}
             <div className="select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20" onClick={() => setShowModal(!showModal)}>
-            <Image 
-                src="https://media.pitchfork.com/photos/5eac22c8bae33a8e8fd0b191/1:1/w_450%2Cc_limit/Drake.jpg"
-                width={175}
-                height={175}
+            <Image
+                src={metadata.albumArtUrl}
+                width={150}
+                height={150}
                 className="group-hover:border-accent-neutral/10 transition-all mx-auto mt-6 border border-accent-neutral/5 shadow-xl rounded-xl select-none"
             >
             </Image>
             <div className="flex flex-col select-text place-content-start pt-4"> 
-                <h1 className="text-xl font-bold text-center text-text/90 group-hover:text-text">Pain 1993</h1>
-                <span className="text-sm text-center font-light text-text/50 group-hover:text-text/80">Drake</span>
+                <h1 className="text-xl font-bold text-center text-text/90 group-hover:text-text line-clamp-1 px-1">{metadata.name}</h1>
+                <span className="text-sm text-center font-light text-text/50 group-hover:text-text/80">{metadata.artist}</span>
             </div>
             {
                 rating && 

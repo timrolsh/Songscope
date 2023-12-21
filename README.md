@@ -14,7 +14,7 @@ If iOS/Android Apps are ever made, there will be a formatting guide for those as
 
 ## Technologies Used
 
-* **Node.js**: Serves as the backend runtime environment
+* **Bun**: Serves as the backend runtime environment
 * **Next.js**: Utilized for server-side rendering for the React-based web application
 * **React**: Allows for dynamic and interactive web pages with reusable components
 * **Express**: Used to handle HTTP requests and send them to Next.js's request handler

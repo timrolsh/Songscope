@@ -4,9 +4,9 @@
     "private": true,
     "scripts": {
         "devt": "next dev --turbo",
-        "dev": "node src/server/start_server.js dev",
+        "dev": "bun src/server/start_server.js dev",
         "build": "next build",
-        "prod": "node src/server/start_server.js prod"
+        "prod": "bun src/server/start_server.js prod"
     },
     "dependencies": {
         "clsx": "^2.0.0",
@@ -16,7 +16,8 @@
         "next": "14.0.3",
         "react": "^18",
         "react-dom": "^18",
-        "react-icons": "^4.12.0"
+        "react-icons": "^4.12.0",
+        "spotify-web-api-node": "^5.0.2"
     },
     "devDependencies": {
         "autoprefixer": "^10.0.1",
