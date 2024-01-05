@@ -1,5 +1,5 @@
-import ToggleButton from '../../components/ToggleButton';
-import SideBar from '../../components/SideBar';
+import ToggleButton from "../../components/ToggleButton";
+import SideBar from "../../components/SideBar";
 
 export function TextEntry({name}) {
     return (
@@ -24,8 +24,8 @@ export default () => {
     // TODO --> Add prefilled information based on existing user information
     return (
         <div className="flex flex-row h-full">
-            <SideBar variant={"settings"}/>
-            <div className="w-4/5 pl-8 h-screen overflow-auto"> 
+            <SideBar variant={"settings"} />
+            <div className="w-4/5 pl-8 h-screen overflow-auto">
                 <h1 className="text-2xl font-bold pt-6 pb-2">General</h1>
                 <hr className="w-2/5"></hr>
                 <h3 className="text-lg font-semibold py-3">User Information</h3>
