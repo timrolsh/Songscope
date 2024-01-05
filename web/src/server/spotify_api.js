@@ -84,11 +84,11 @@ class SpotifyApi {
         return executeMethod(spotifyWebApi.getPlaylist.bind(spotifyWebApi), playlistId).then(
             (result) => {
                 let songs = [];
-                let albumArtUrl = "/no-album-cover.jpg";
-                if (song.track.album.images.length > 0) {
-                    albumArtUrl = song.track.album.images[0].url;
-                }
                 result.body.tracks.items.forEach((song) => {
+                    let albumArtUrl = "/no-album-cover.jpg";
+                    if (song.track.album.images.length > 0) {
+                        albumArtUrl = song.track.album.images[0].url;
+                    }
                     songs.push({
                         id: song.track.id,
                         name: song.track.name,
