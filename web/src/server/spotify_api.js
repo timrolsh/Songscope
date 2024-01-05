@@ -83,6 +83,7 @@ class SpotifyApi {
     getSongsFromPlaylist(playlistId) {
         return executeMethod(spotifyWebApi.getPlaylist.bind(spotifyWebApi), playlistId).then(
             (result) => {
+                let songs = [];
                 result.body.tracks.items.forEach((song) => {
                     let albumArtUrl = "/no-album-cover.jpg";
                     if (song.track.album.images.length > 0) {
