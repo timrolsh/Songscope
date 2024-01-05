@@ -5,11 +5,11 @@
     "scripts": {
         "devt": "next dev --turbo",
         "dev": "bun src/server/start_server.js dev",
-        "dev-node": "node src/server/start_server.js dev",
         "build": "next build",
         "prod": "bun src/server/start_server.js prod"
     },
     "dependencies": {
+        "body-parser": "^1.20.2",
         "clsx": "^2.0.0",
         "dotenv": "^16.3.1",
         "express": "^4.18.2",

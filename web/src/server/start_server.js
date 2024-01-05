@@ -9,6 +9,8 @@ const nextApp = next({dev: devMode});
 nextApp.prepare().then(() => {
     const server = express();
     server.use(express.json());
+    const bodyParser = require("body-parser");
+    server.use(bodyParser.urlencoded({extended: true}));
     // Establish database connection
     db.query("select NOW();", (error, results, fields) => {
         if (error) {
