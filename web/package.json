@@ -5,6 +5,7 @@
     "scripts": {
         "devt": "next dev --turbo",
         "dev": "bun src/server/start_server.js dev",
+        "dev-node": "node src/server/start_server.js dev",
         "build": "next build",
         "prod": "bun src/server/start_server.js prod"
     },
