@@ -83,8 +83,11 @@ class SpotifyApi {
     getSongsFromPlaylist(playlistId) {
         return executeMethod(spotifyWebApi.getPlaylist.bind(spotifyWebApi), playlistId).then(
             (result) => {
-                let songs = [];
                 result.body.tracks.items.forEach((song) => {
+                    let albumArtUrl = "/no-album-cover.jpg";
+                    if (song.track.album.images.length > 0) {
+                        albumArtUrl = song.track.album.images[0].url;
+                    }
                     songs.push({
                         id: song.track.id,
                         name: song.track.name,
@@ -92,7 +95,7 @@ class SpotifyApi {
                         artist_id: song.track.artists[0].id,
                         album: song.track.album.name,
                         album_id: song.track.album.id,
-                        albumArtUrl: song.track.album.images[0].url
+                        albumArtUrl: albumArtUrl
                     });
                 });
                 return Promise.resolve(songs);
