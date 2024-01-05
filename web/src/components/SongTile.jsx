@@ -35,6 +35,7 @@ function SongInfo( { songMetadata }) {
                 <div> 
                     <Image 
                         src={songMetadata.albumArtUrl}
+                        alt="Album Art"
                         width={150}
                         height={150}
                         className="border border-accent-neutral/5 shadow-xl rounded-xl select-none">
@@ -159,6 +160,7 @@ export default ({rating = false, metadata }) => {
             <div className="select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20" onClick={() => setShowModal(!showModal)}>
             <Image
                 src={metadata.albumArtUrl}
+                alt="Album Art"
                 width={150}
                 height={150}
                 className="group-hover:border-accent-neutral/10 transition-all mx-auto mt-6 border border-accent-neutral/5 shadow-xl rounded-xl select-none"
