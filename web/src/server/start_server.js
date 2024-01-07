@@ -20,20 +20,6 @@ nextApp.prepare().then(() => {
             );
             process.exit(1);
         }
-        // create test user for the database, user table username="test", id=0
-        db.query(
-            "INSERT IGNORE INTO user (username, id) VALUES (?, ?)",
-            ["test", 0],
-            (error, results, fields) => {
-                if (error) {
-                    console.error(
-                        "SONGSCOPE: Unable to start server. Failed to create test user",
-                        error
-                    );
-                    process.exit(1);
-                }
-            }
-        );
         // Handle both get and post requests with Next.js API system
         server.get("*", (request, response) => {
             return nextApp.getRequestHandler()(request, response);
