@@ -1,3 +1,5 @@
+import spotifyApi from "@/server/spotify_api";
+
 import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
 
@@ -14,9 +16,8 @@ export const SongMetadata = {
     albumArtUrl: undefined
 };
 
-export default () => {
+export default ({songs}) => {
     const [name, setName] = useState("Loading...");
-    const [songs, setSongs] = useState([]);
     const [searchedSongs, setSearchedSongs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     /*
@@ -25,21 +26,6 @@ export default () => {
     user on the page
     */
     useEffect(() => {
-        fetch("/api/spotify/get-playlist-songs", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({"id": "0OwFb8rH79YQ76ln376pyn"})
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                setSongs(data);
-            })
-            .catch((error) => {
-                console.error("Error fetching songs:", error);
-            });
-
         // if user is already signed in, get their name from localStorage
         if (localStorage.signedIn && localStorage.signedIn === "true") {
             setName(localStorage.name);
@@ -118,3 +104,14 @@ export default () => {
         </div>
     );
 };
+
+export async function getServerSideProps(context) {
+    try {
+        // hardcoded playlist id for now
+        const songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
+        return {props: {songs: songs}};
+    } catch (error) {
+        console.error("Error fetching songs:", error);
+        return {props: {songs: []}};
+    }
+}
