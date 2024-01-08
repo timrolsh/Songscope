@@ -10,10 +10,9 @@ export default () => {
         script.async = true;
         document.body.appendChild(script);
     }, []);
-    let googleClientID = process.env.GOOGLE_CLIENT_ID_DEV;
-    // switch to prod client url if website is running on the prod url
-    if (rootURL === "https://songscope.org") {
-        googleClientID = process.env.GOOGLE_CLIENT_ID_PROD;
+
+    if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) {
+        console.log("SONGSCOPE: missing GOOGLE_CLIENT_ID and SECRET env variables.");
     }
 
     return (
@@ -21,7 +20,7 @@ export default () => {
             <div
                 className="w-full"
                 id="g_id_onload"
-                data-client_id={googleClientID}
+                data-client_id={process.env.GOOGLE_CLIENT_ID}
                 data-context="signin"
                 data-ux_mode="redirect"
                 data-login_uri={`${rootURL}/api/auth/google-callback`}

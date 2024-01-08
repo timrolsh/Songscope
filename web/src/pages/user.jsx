@@ -6,6 +6,8 @@ import {useEffect, useState} from "react";
 import SongTile from "@/components/SongTile";
 import Fuse from "fuse.js";
 
+let songs = [];
+
 export const SongMetadata = {
     id: undefined,
     name: undefined,
@@ -105,10 +107,12 @@ export default ({songs}) => {
     );
 };
 
-export async function getServerSideProps(context) {
+export async function getServerSideProps() {
     try {
         // hardcoded playlist id for now
-        const songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
+        if (songs.length === 0) {
+            songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
+        }
         return {props: {songs: songs}};
     } catch (error) {
         console.error("Error fetching songs:", error);
