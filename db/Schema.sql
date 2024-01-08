@@ -1,7 +1,7 @@
 -- Use our assigneed schema
 USE capstone_2324_songscope;
 
-# disable foreign key checks so that tables could be droppped
+-- disable foreign key checks so that tables could be droppped
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Drop each table individually if they exist
@@ -15,21 +15,19 @@ DROP TABLE IF EXISTS comment_like cascade;
 DROP TABLE IF EXISTS reply_like cascade;
 DROP TABLE IF EXISTS reply cascade;
 
-# re-enable foreign key checks for normal functionality
+-- re-enable foreign key checks for normal functionality
 SET FOREIGN_KEY_CHECKS = 1;
 
 -- Create the user table
 CREATE TABLE user
 (
-    id              INT  NOT NULL PRIMARY KEY,
+    id              INT  NOT NULL PRIMARY KEY AUTO_INCREMENT,
     username        TEXT NOT NULL,
     spotify_id      TEXT,
     google_id       TEXT,
-    apple_id        TEXT,
-    first_name      TEXT,
+    first_name       TEXT,
     last_name       TEXT,
     email           TEXT,
-    password_hash   TEXT,
     profile_picture BLOB
 );
 
