@@ -1,4 +1,5 @@
 import Image from "next/image";
+import spotifyApi from "@/server/spotify_api";
 import SongTile from "@/components/SongTile";
 import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
@@ -16,79 +17,10 @@ function ReviewTile() {
     );
 }
 
-{
-    /* function PinnedTile() { */
-}
-{
-    /* return ( */
-}
-{
-    /* <div className="h-64 w-52 rounded-xl border border-accent-neutral/10 bg-accent-neutral/5"> */
-}
-{
-    /* <Image  */
-}
-{
-    /* src="https://media.pitchfork.com/photos/5eac22c8bae33a8e8fd0b191/1:1/w_450%2Cc_limit/Drake.jpg" */
-}
-{
-    /* width={150} */
-}
-{
-    /* height={150} */
-}
-{
-    /* className="mx-auto mt-6 border border-accent-neutral/20 rounded-xl" */
-}
-{
-    /* > */
-}
-{
-    /* </Image> */
-}
-{
-    /* <div className="w-full flex flex-col place-content-evenly px-8 pt-2"> */
-}
-{
-    /* <h1 className="text-lg font-bold text-center text-text mt-auto">Pain 1993</h1> */
-}
-{
-    /* <span className="text-lg text-center font-normal text-text mt-auto">Drake</span> */
-}
-{
-    /* </div> */
-}
-{
-    /* </div> */
-}
-{
-    /* ); */
-}
-{
-    /* }; */
-}
+let songs = [];
 
-export default () => {
+export default ({songs}) => {
     const [name, setName] = useState("Loading...");
-    const [songs, setSongs] = useState(undefined);
-
-    useEffect(() => {
-        fetch("/api/spotify/get-playlist-songs", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({"id": "0OwFb8rH79YQ76ln376pyn"})
-        })
-            .then((response) => response.json())
-            .then((data) => {
-                console.log("data", data);
-                setSongs(data);
-            })
-            .catch((error) => {
-                console.error("Error fetching songs:", error);
-            });
-    }, []);
 
     /*
     when the component for this page first mounts, unload the token from the 
@@ -185,3 +117,16 @@ export default () => {
         </div>
     );
 };
+
+export async function getServerSideProps() {
+    try {
+        // hardcoded playlist id for now
+        if (songs.length === 0) {
+            songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
+        }
+        return {props: {songs: songs}};
+    } catch (error) {
+        console.error("Error fetching songs:", error);
+        return {props: {songs: []}};
+    }
+}
