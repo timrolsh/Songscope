@@ -95,7 +95,11 @@ class SpotifyApi {
                         artist_id: song.track.artists[0].id,
                         album: song.track.album.name,
                         album_id: song.track.album.id,
-                        albumArtUrl: albumArtUrl
+                        releaseDate: song.track.album.release_date,
+                        albumArtUrl: albumArtUrl,
+                        popularity: song.track.popularity,
+                        previewUrl: song.track.preview_url,
+                        availableMarkets: song.track.available_markets
                     });
                 });
                 return Promise.resolve(songs);
