@@ -16,7 +16,7 @@
         "fuse.js": "^7.0.0",
         "google-auth-library": "^9.4.1",
         "mysql2": "^3.6.5",
-        "next": "14.0.3",
+        "next": "^14.0.4",
         "react": "^18",
         "react-dom": "^18",
         "react-icons": "^4.12.0",
