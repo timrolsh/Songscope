@@ -5,7 +5,7 @@ import {IoMdStar} from "react-icons/io";
 import {IoMdClose} from "react-icons/io";
 import {IoPlayCircleOutline} from "react-icons/io5";
 
-import {useState, useEffect} from "react";
+import {useState, useRef, useEffect} from "react";
 import clsx from "clsx";
 
 export function Modal({showModal, setShowModal, songMetadata}) {
@@ -42,6 +42,11 @@ export function Modal({showModal, setShowModal, songMetadata}) {
 }
 
 function SongInfo({songMetadata}) {
+    const audioRef = useRef(null);
+
+    const playAudio = () => {
+        audioRef.current.play();
+    };
     return (
         <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
             <div className="flex flex-col place-content-between h-full w-2/5">
@@ -71,7 +76,7 @@ function SongInfo({songMetadata}) {
                             <h3 className="font-bold text-sm text-text/90">
                                 Album:{" "}
                                 <span className="font-normal italic text-sm text-text/50">
-                                    Dark Lane Demo Tapes
+                                    {songMetadata.album}
                                 </span>{" "}
                             </h3>
                         </div>
@@ -79,7 +84,9 @@ function SongInfo({songMetadata}) {
                             <h3 className="font-bold text-sm text-text/90">
                                 Popularity:{" "}
                                 <span className="font-normal italic text-sm text-text/50">
-                                    🔥🔥🔥🔥
+                                    {Array(Math.floor(songMetadata.popularity / 20))
+                                        .fill(0)
+                                        .map((_) => "🔥")}
                                 </span>{" "}
                             </h3>
                         </div>
@@ -87,60 +94,64 @@ function SongInfo({songMetadata}) {
                             <h3 className="font-bold text-sm text-text/90">
                                 Released:{" "}
                                 <span className="font-normal italic text-sm text-text/50">
-                                    December 13, 2023
+                                    {songMetadata.releaseDate}
                                 </span>{" "}
                             </h3>
                         </div>
                     </div>
                 </div>
-
-                <div className="flex flex-row space-x-2 mt-auto mb-2">
-                    <div className="w-40 h-8 relative">
-                        <div className="w-40 h-px left-0 top-[15.81px] absolute border border-rose-700"></div>
-                        <div className="w-4 h-px left-[3px] top-[8.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[7px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[11px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[16px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-8 h-px left-[20px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[24px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[50px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[45px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[40px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[35px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-8 h-px left-[30px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[25px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[52px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[55px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[58px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[61px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[64px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[68px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[87px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[83px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[79px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[76px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[72px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[128px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[133px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[139px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[145px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-8 h-px left-[150px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[156px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[126px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[122px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[119px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[115px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[112px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[107px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[86px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-4 h-px left-[91px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-3 h-px left-[95px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-5 h-px left-[98px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        <div className="w-6 h-px left-[103px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                {songMetadata.previewUrl && (
+                    <div className="flex flex-row space-x-2 mt-auto mb-2">
+                        <div className="w-40 h-8 relative">
+                            <div className="w-40 h-px left-0 top-[15.81px] absolute border border-rose-700"></div>
+                            <div className="w-4 h-px left-[3px] top-[8.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[7px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[11px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[16px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-8 h-px left-[20px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[24px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[50px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[45px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[40px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[35px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-8 h-px left-[30px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[25px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[52px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[55px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[58px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[61px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[64px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[68px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[87px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[83px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[79px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[76px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[72px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[128px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[133px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[139px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[145px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-8 h-px left-[150px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[156px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[126px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[122px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[119px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[115px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[112px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[107px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[86px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-4 h-px left-[91px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-3 h-px left-[95px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-5 h-px left-[98px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                            <div className="w-6 h-px left-[103px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
+                        </div>
+                        <audio ref={audioRef} src={songMetadata.previewUrl} />
+                        <IoPlayCircleOutline
+                            className="text-3xl my-auto text-rose-700 hover:cursor-pointer"
+                            onClick={playAudio}
+                        />
                     </div>
-                    {/* TODO --> Add Tooltip */}
-                    <IoPlayCircleOutline className="text-3xl my-auto text-rose-700 hover:cursor-pointer" />
-                </div>
+                )}
             </div>
             <div className="flex flex-col divide-y divide-secondary/80 pl-8 w-3/5">
                 <div className="h-1/2">
