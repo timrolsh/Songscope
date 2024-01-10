@@ -1,5 +1,4 @@
 import Image from "next/image";
-
 import {IoMdStarHalf} from "react-icons/io";
 import {IoMdStar} from "react-icons/io";
 import {IoMdClose} from "react-icons/io";
@@ -42,6 +41,54 @@ export function Modal({showModal, setShowModal, songMetadata}) {
 }
 
 function SongInfo({songMetadata}) {
+    const [reviewText, setReviewText] = useState("");
+    
+    const [reviews, setReviews] = useState(null);
+
+    useEffect(() => {
+        const interval = setInterval(async () => {
+            const res = await fetch(`/api/db/get-reviews?songid=${songMetadata.id}`);
+            console.log("Received response: ", res)
+            if(res.status !== 200) console.log("Non 200 code received");
+            let data = await res.text()
+
+            try {
+                data = JSON.parse(data);
+                console.log("[INFO] Parsed successfully as JSON: ", data);
+            } catch {
+                console.log("[WARN] Failed to parse as JSON, setting to empty array");
+                data = [];
+            }
+            setReviews(data);
+        }, 5000);
+
+        return () => clearInterval(interval);
+    }, []);
+
+    async function submitToServer(data, endpoint) {
+        const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: {
+            'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(data),
+        });
+
+        return response;
+    }    
+
+    async function submitReview(event) {
+        event.preventDefault();
+        const formData = new FormData(event.currentTarget)
+        // TODO: Fetch the actual current userid
+        formData.append('userid', 3)
+        formData.append('songid', songMetadata.id)
+        const data = Object.fromEntries(formData.entries());
+
+        await submitToServer(data, '/api/db/insert-review');
+        setReviewText("");
+    }
+
     return (
         <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
             <div className="flex flex-col place-content-between h-full w-2/5">
@@ -148,7 +195,7 @@ function SongInfo({songMetadata}) {
                     <div className="overflow-auto pt-2 h-3/4">
                         {[...Array(5)].map((_, idx) => {
                             return (
-                                <div className="flex flex-row space-x-2 py-1 pl-1">
+                                <div className="flex flex-row space-x-2 py-1 pl-1" key={idx}>
                                     <h3 className="font-semibold text-text/90">
                                         &gt; TimRolsh123{" "}
                                         <span className="italic font-normal">says </span>
@@ -161,15 +208,18 @@ function SongInfo({songMetadata}) {
                         })}
                     </div>
                 </div>
-                <div className="h-1/2 text-lg font-bold text-text pt-2">
+                <form className="h-1/2 text-lg font-bold text-text pt-2" onSubmit={submitReview}>
                     <div className="h-3/4">
                         <h3 className="pb-2">Leave a Review!</h3>
                         {/* TODO --> Add a character counter and limit */}
                         <textarea
                             type="text"
-                            name="name"
+                            name="reviewbody"
+                            onChange={(e) => setReviewText(e.target.value)}
+                            value={reviewText}
+                            required
                             className="text-text/90 p-2 font-normal text-sm bg-secondary/20 rounded-md w-full h-3/5 resize-none"
-                        ></textarea>
+                        />
                     </div>
                     <div className="flex flex-row place-content-between">
                         <div className="flex flex-row-reverse pb-1 mb-2 mr-auto">
@@ -179,11 +229,11 @@ function SongInfo({songMetadata}) {
                             <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
                             <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
                         </div>
-                        <button className="ml-auto bg-secondary/70 hover:bg-secondary text-text/90 hover:text-text/90 rounded-md px-3 py-1">
+                        <button className="ml-auto bg-secondary/70 hover:bg-secondary text-text/90 hover:text-text/90 rounded-md px-3 py-1" type="submit">
                             Submit
                         </button>
                     </div>
-                </div>
+                </form>
             </div>
         </div>
     );
