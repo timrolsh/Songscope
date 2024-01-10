@@ -42,26 +42,28 @@ export function Modal({showModal, setShowModal, songMetadata}) {
 
 function SongInfo({songMetadata}) {
     const [reviewText, setReviewText] = useState("");
-    
-    const [reviews, setReviews] = useState(null);
+    // TODO: Beautify the datetime returned and format it in human-readable format
+    const [reviews, setReviews] = useState([]);
+
+    async function getReviews() {
+        const res = await fetch(`/api/db/get-reviews?songid=${songMetadata.id}`);
+        console.log("Received response: ", res)
+        if(res.status !== 200) console.log("Non 200 code received");
+        let data = await res.text()
+
+        try {
+            data = JSON.parse(data);
+            console.log("[INFO] Parsed successfully as JSON: ", data);
+        } catch {
+            console.log("[WARN] Failed to parse as JSON, setting to empty array");
+            data = [];
+        }
+        setReviews(data);
+    }
 
     useEffect(() => {
-        const interval = setInterval(async () => {
-            const res = await fetch(`/api/db/get-reviews?songid=${songMetadata.id}`);
-            console.log("Received response: ", res)
-            if(res.status !== 200) console.log("Non 200 code received");
-            let data = await res.text()
-
-            try {
-                data = JSON.parse(data);
-                console.log("[INFO] Parsed successfully as JSON: ", data);
-            } catch {
-                console.log("[WARN] Failed to parse as JSON, setting to empty array");
-                data = [];
-            }
-            setReviews(data);
-        }, 5000);
-
+        getReviews();
+        const interval = setInterval(getReviews, 5000);
         return () => clearInterval(interval);
     }, []);
 
@@ -86,8 +88,12 @@ function SongInfo({songMetadata}) {
         const data = Object.fromEntries(formData.entries());
 
         await submitToServer(data, '/api/db/insert-review');
+
         setReviewText("");
+        getReviews();
     }
+
+    console.log("reviews: ", reviews)
 
     return (
         <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
@@ -193,19 +199,28 @@ function SongInfo({songMetadata}) {
                 <div className="h-1/2">
                     <h3 className="text-lg font-bold text-text">See what others are saying!</h3>
                     <div className="overflow-auto pt-2 h-3/4">
-                        {[...Array(5)].map((_, idx) => {
+                        {reviews.length ? reviews.map((rvw, idx) => {
                             return (
-                                <div className="flex flex-row space-x-2 py-1 pl-1" key={idx}>
-                                    <h3 className="font-semibold text-text/90">
-                                        &gt; TimRolsh123{" "}
-                                        <span className="italic font-normal">says </span>
-                                        <span className="font-normal text-text/90">
-                                            "This song is great! Better than his other works..."
-                                        </span>
-                                    </h3>
+                                <div className="w-full flex flex-col py-1">
+                                    <div className="flex flex-row space-x-2 pl-1" key={idx}>
+                                        <h3 className="font-semibold text-text/90">
+                                            &gt; {rvw.username}{" "}
+                                            <span className="italic font-normal">says </span>
+                                            <span className="font-normal text-text/90">
+                                                "{rvw.comment_text}"
+                                            </span>
+                                        </h3>
+                                    </div>
+                                    <h4 className="font-light italic text-text/40 pl-1">{rvw.time}</h4>
                                 </div>
                             );
-                        })}
+                        }) : (
+                            <div className="flex flex-row space-x-2 py-1 pl-1">
+                                <h3 className="font-normal italic text-text/60">
+                                    No comments yet! Be the first to leave a review!
+                                </h3>
+                            </div>
+                        )}
                     </div>
                 </div>
                 <form className="h-1/2 text-lg font-bold text-text pt-2" onSubmit={submitReview}>
