@@ -1,6 +1,6 @@
 import GoogleSignInButton from "@/components/GoogleSignInButton";
 
-export default () => {
+export default ({GOOGLE_CLIENT_ID}) => {
     return (
         <div className="h-screen w-screen m-auto flex place-content-center bg-gradient-radial from-primary/5  to-accent-vivid/5">
             <div className="m-auto pb-32">
@@ -14,10 +14,22 @@ export default () => {
                     <hr className="my-4 border-t-[.5px] border-text"></hr>
                     {/* <h4 className="text-3xl text-center text-text pb-5">Sign In With</h4> */}
                     <div className="flex flex-row place-content-center mx-auto">
-                        <GoogleSignInButton />
+                        <GoogleSignInButton GOOGLE_CLIENT_ID={GOOGLE_CLIENT_ID} />
                     </div>
                 </div>
             </div>
         </div>
     );
+};
+
+export const getServerSideProps = () => {
+    if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) {
+        console.log("SONGSCOPE: missing GOOGLE_CLIENT_ID and SECRET env variables.");
+        process.exit();
+    }
+    return {
+        props: {
+            GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID
+        }
+    };
 };
