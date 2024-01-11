@@ -43,8 +43,16 @@ export function Modal({showModal, setShowModal, songMetadata}) {
 function SongInfo({songMetadata}) {
     const audioRef = useRef(null);
 
+    const [audioPlaying, setAudioPlaying] = useState(false);
+
     const playAudio = () => {
-        audioRef.current.play();
+        if(audioPlaying) {
+            audioRef.current.pause();
+        } else {
+            audioRef.current.currentTime= 0;
+            audioRef.current.play();
+        }
+        setAudioPlaying(!audioPlaying);
     };
     const [reviewText, setReviewText] = useState("");
     // TODO: Beautify the datetime returned and format it in human-readable format
@@ -98,8 +106,6 @@ function SongInfo({songMetadata}) {
         getReviews();
     }
 
-    console.log("reviews: ", reviews)
-
     return (
         <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
             <div className="flex flex-col place-content-between h-full w-2/5">
@@ -137,6 +143,7 @@ function SongInfo({songMetadata}) {
                             <h3 className="font-bold text-sm text-text/90">
                                 Popularity:{" "}
                                 <span className="font-normal italic text-sm text-text/50">
+                                    {/* TODO --> Verify this is working properly */}
                                     {Array(Math.floor(songMetadata.popularity / 20))
                                         .fill(0)
                                         .map((_) => "🔥")}
@@ -154,6 +161,8 @@ function SongInfo({songMetadata}) {
                     </div>
                 </div>
                 {songMetadata.previewUrl && (
+                    // TODO --> Replace this with a custom audio player that shifts and allows users to seek through the preview
+                    // Would be cool to have users able to link to certain parts of the song within comments
                     <div className="flex flex-row space-x-2 mt-auto mb-2">
                         <div className="w-40 h-8 relative">
                             <div className="w-40 h-px left-0 top-[15.81px] absolute border border-rose-700"></div>
@@ -198,7 +207,7 @@ function SongInfo({songMetadata}) {
                             <div className="w-5 h-px left-[98px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
                             <div className="w-6 h-px left-[103px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
                         </div>
-                        <audio ref={audioRef} src={songMetadata.previewUrl} />
+                        <audio ref={audioRef} src={songMetadata.previewUrl}/>
                         <IoPlayCircleOutline
                             className="text-3xl my-auto text-rose-700 hover:cursor-pointer"
                             onClick={playAudio}
