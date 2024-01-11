@@ -109,9 +109,9 @@ export default ({songs}) => {
 
 export async function getServerSideProps() {
     try {
-        // hardcoded playlist id for now
         if (songs.length === 0) {
-            songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
+            // Spotify's official Today's Top Hits playlist
+            songs = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
         }
         return {props: {songs: songs}};
     } catch (error) {
