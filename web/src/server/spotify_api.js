@@ -1,5 +1,6 @@
-const SpotifyWebApi = require("spotify-web-api-node");
-require("dotenv").config({path: `${__dirname}/../../../.env`});
+import SpotifyWebApi from "spotify-web-api-node";
+import dotenv from "dotenv";
+dotenv.config({path: `${__dirname}/../../../.env`});
 
 var spotifyWebApi = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
@@ -139,4 +140,4 @@ class SpotifyApi {
 setInterval(getAccessToken, 1000 * 60 * 60);
 const spotifyApi = new SpotifyApi();
 
-module.exports = spotifyApi;
+export default spotifyApi;

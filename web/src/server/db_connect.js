@@ -1,5 +1,6 @@
-const mysql = require("mysql2");
-require("dotenv").config({path: `${__dirname}/../../../.env`});
+import { createPool } from "mysql2";
+import dotenv from "dotenv";
+dotenv.config({path: `${__dirname}/../../../.env`});
 
 // check to make sure all environment variables are set
 if (
@@ -16,11 +17,11 @@ if (
 }
 
 // create the connection to database
-const db = mysql.createPool({
+const db = createPool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
     database: process.env.DB_SCHEMA,
     password: process.env.DB_PASSWORD,
     port: process.env.DB_PORT
 });
-module.exports = db;
+export default db;

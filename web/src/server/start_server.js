@@ -1,6 +1,6 @@
-const express = require("express");
-const next = require("next");
-const db = require("./db_connect");
+import express, {json} from "express";
+import next from "next";
+import db from "./db_connect";
 const port = 3000;
 
 const devMode = process.argv[2] === "dev";
@@ -8,7 +8,7 @@ const nextApp = next({dev: devMode});
 
 nextApp.prepare().then(() => {
     const server = express();
-    server.use(express.json());
+    server.use(json());
     const bodyParser = require("body-parser");
     server.use(bodyParser.urlencoded({extended: true}));
     // Establish database connection
