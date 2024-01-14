@@ -1,6 +1,19 @@
-import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { signIn, useSession } from "next-auth/react";
+import { useRouter } from 'next/router';
 
-export default ({GOOGLE_CLIENT_ID}) => {
+export default () => {
+    const session = useSession();
+    const router = useRouter();
+
+    console.log("sess:", session);
+
+    if(session && session.status === "authenticated") {
+        console.log("user is authenticated... redirecting")
+        // redirect when auth'ed
+        router.replace("/user");        
+        return null;
+    }
+
     return (
         <div className="h-screen w-screen m-auto flex place-content-center bg-gradient-radial from-primary/5  to-accent-vivid/5">
             <div className="m-auto pb-32">
@@ -14,22 +27,10 @@ export default ({GOOGLE_CLIENT_ID}) => {
                     <hr className="my-4 border-t-[.5px] border-text"></hr>
                     {/* <h4 className="text-3xl text-center text-text pb-5">Sign In With</h4> */}
                     <div className="flex flex-row place-content-center mx-auto">
-                        <GoogleSignInButton GOOGLE_CLIENT_ID={GOOGLE_CLIENT_ID} />
+                        <button onClick={signIn}>Sign In</button>
                     </div>
                 </div>
             </div>
         </div>
-    );
-};
-
-export const getServerSideProps = () => {
-    if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) {
-        console.log("SONGSCOPE: missing GOOGLE_CLIENT_ID and SECRET env variables.");
-        process.exit();
-    }
-    return {
-        props: {
-            GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID
-        }
-    };
+    )
 };
