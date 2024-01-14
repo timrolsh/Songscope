@@ -6,7 +6,7 @@ import {useEffect, useState} from "react";
 import SongTile from "@/components/SongTile";
 import Fuse from "fuse.js";
 
-let songs = [];
+let songsCache = [];
 
 export const SongMetadata = {
     id: undefined,
@@ -18,10 +18,39 @@ export const SongMetadata = {
     albumArtUrl: undefined
 };
 
-export default ({songs}) => {
+export default ({songsProp}) => {
     const [name, setName] = useState("Loading...");
     const [searchedSongs, setSearchedSongs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [songs, setSongs] = useState(songsProp);
+    
+
+    const fetchMoreSongs = async (searchString) => {
+        try {
+            setLoading(true);
+            const response = await fetch("/api/spotify/search", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({search_string: searchString})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                setSongs([...songs, ...data]);
+                setSearchedSongs(fuse.search(searchQuery).map((result) => result.item));
+            } else {
+                console.error("Error fetching more songs from Spotify");
+            }
+        } catch (error) {
+            console.error("Error fetching more songs:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     /*
     when the component for this page first mounts, unload the token from the 
     cookie, clear cookie, store token in localstorage, put the name of the
@@ -56,11 +85,17 @@ export default ({songs}) => {
 
     useEffect(() => {
         console.log("searched: ", searchedSongs);
-        if (!songs) setSearchedSongs(undefined);
+        if (!songs) {
+            setSearchedSongs(undefined);
+        }
         if (searchQuery === "") {
             setSearchedSongs(songs);
         } else {
             setSearchedSongs(fuse.search(searchQuery).map((result) => result.item));
+        }
+
+        if (searchQuery !== "" && searchedSongs.length === 0 && !loading) {
+            fetchMoreSongs(searchQuery);
         }
     }, [songs, searchQuery]);
 
@@ -84,7 +119,15 @@ export default ({songs}) => {
                         }}
                     />
                 </div>
-                {searchedSongs.length ? (
+                {loading ? (
+                    <div className="w-full h-full flex flex-col m-auto place-content-center">
+                        <div>
+                            <h3 className="text-accent-neutral text-lg mx-auto text-center">
+                                Loading more songs...
+                            </h3>
+                        </div>
+                    </div>
+                ) : searchedSongs.length ? (
                     <div className="grid grid-cols-4 gap-10 p-12 overflow-auto">
                         {searchedSongs.map((song) => (
                             <SongTile key={song.id} rating={true} metadata={song} />
@@ -109,13 +152,13 @@ export default ({songs}) => {
 
 export async function getServerSideProps() {
     try {
-        if (songs.length === 0) {
+        if (songsCache.length === 0) {
             // Spotify's official Today's Top Hits playlist
-            songs = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
+            songsCache = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
         }
-        return {props: {songs: songs}};
+        return {props: {songsProp: songsCache}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songs: []}};
+        return {props: {songsProp: []}};
     }
 }
