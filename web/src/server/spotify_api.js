@@ -80,31 +80,43 @@ class SpotifyApi {
         );
     }
 
+    makeSongArray(result) {
+        let songs = [];
+        result.body.tracks.items.forEach((song) => {
+            let albumArtUrl = song.track.album.images.length
+                ? song.track.album.images[0].url
+                : "/no-album-cover.jpg";
+            songs.push({
+                id: song.track.id,
+                name: song.track.name,
+                artist: song.track.artists[0].name,
+                artist_id: song.track.artists[0].id,
+                album: song.track.album.name,
+                album_id: song.track.album.id,
+                releaseDate: song.track.album.release_date,
+                albumArtUrl: albumArtUrl,
+                popularity: song.track.popularity,
+                previewUrl: song.track.preview_url,
+                availableMarkets: song.track.available_markets
+            });
+        });
+        return songs;
+    }
+
     getSongsFromPlaylist(playlistId) {
         return executeMethod(spotifyWebApi.getPlaylist.bind(spotifyWebApi), playlistId).then(
             (result) => {
-                let songs = [];
-                result.body.tracks.items.forEach((song) => {
-                    let albumArtUrl = song.track.album.images.length
-                        ? song.track.album.images[0].url
-                        : "/no-album-cover.jpg";
-                    songs.push({
-                        id: song.track.id,
-                        name: song.track.name,
-                        artist: song.track.artists[0].name,
-                        artist_id: song.track.artists[0].id,
-                        album: song.track.album.name,
-                        album_id: song.track.album.id,
-                        releaseDate: song.track.album.release_date,
-                        albumArtUrl: albumArtUrl,
-                        popularity: song.track.popularity,
-                        previewUrl: song.track.preview_url,
-                        availableMarkets: song.track.available_markets
-                    });
-                });
-                return Promise.resolve(songs);
+                return Promise.resolve(this.makeSongArray(result));
             }
         );
+    }
+
+    searchContent(searchString) {
+        return executeMethod(
+            spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
+        ).then((result) => {
+            return Promise.resolve(this.makeSongArray(result));
+        });
     }
 }
 
