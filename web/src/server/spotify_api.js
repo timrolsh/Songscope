@@ -111,8 +111,26 @@ class SpotifyApi {
         return executeMethod(
             spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
         ).then((result) => {
-            console.log("1");
-            return Promise.resolve(this.makeSongArray(result));
+            let songs = [];
+            result.body.tracks.items.forEach((song) => {
+                let albumArtUrl = song.album.images.length
+                    ? song.album.images[0].url
+                    : "/no-album-cover.jpg";
+                songs.push({
+                    id: song.id,
+                    name: song.name,
+                    artist: song.artists[0].name,
+                    artist_id: song.artists[0].id,
+                    album: song.album.name,
+                    album_id: song.album.id,
+                    releaseDate: song.album.release_date,
+                    albumArtUrl: albumArtUrl,
+                    popularity: song.popularity,
+                    previewUrl: song.preview_url,
+                    availableMarkets: song.available_markets
+                });
+            });
+            return Promise.resolve(songs);
         });
     }
 }
