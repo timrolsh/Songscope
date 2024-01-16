@@ -24,7 +24,6 @@ export default ({songsProp}) => {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [songs, setSongs] = useState(songsProp);
-    
 
     const fetchMoreSongs = async (searchString) => {
         try {
@@ -85,9 +84,7 @@ export default ({songsProp}) => {
 
     useEffect(() => {
         console.log("searched: ", searchedSongs);
-        if (!songs) {
-            setSearchedSongs(undefined);
-        }
+        if (!songs) setSearchedSongs(undefined);
         if (searchQuery === "") {
             setSearchedSongs(songs);
         } else {
