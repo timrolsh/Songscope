@@ -8,7 +8,7 @@ body: {
 
 Use the Spotify API to search for a song and return its results
 */
-export default (request, response) => {
+export default async (request, response) => {
     if (request.method !== "POST") {
         response.status(400).send("Invalid request method.");
         return;
@@ -19,7 +19,11 @@ export default (request, response) => {
         return;
     }
 
-    spotifyApi.searchContent(search_string).then((result) => {
+    try {
+        const result = await spotifyApi.searchContent(search_string);
         response.status(200).json(result);
-    });
+    } catch (error) {
+        console.error("SONGSCOPE: Error while searching content: ", error);
+        response.status(500).send("An error occurred while processing your request.");
+    }
 };
