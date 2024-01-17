@@ -19,6 +19,9 @@ export const SongMetadata = {
 };
 
 export default ({songsProp}) => {
+    // Function to check if a song with a given id exists in the array
+    const songExists = (array, id) => array.some((song) => song.id === id);
+
     const [name, setName] = useState("Loading...");
     const [searchedSongs, setSearchedSongs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
@@ -38,7 +41,9 @@ export default ({songsProp}) => {
 
             if (response.ok) {
                 const data = await response.json();
-                setSongs([...songs, ...data]);
+                // add the new songs that aren't already in the list to the object to avoid duplicates
+                setSongs([...songs, ...data.filter((song) => !songExists(songs, song.id))]);
+                // before calling this method, check to avoid duplicates
                 setSearchedSongs(fuse.search(searchQuery).map((result) => result.item));
             } else {
                 console.error("Error fetching more songs from Spotify");
