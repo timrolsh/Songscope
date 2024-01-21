@@ -1,12 +1,10 @@
 import spotifyApi from "@/server/spotify_api";
-
 import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
-
 import SongTile from "@/components/SongTile";
 import Fuse from "fuse.js";
 
-let songs = [];
+let songsCache = [];
 
 export const SongMetadata = {
     id: undefined,
@@ -18,10 +16,44 @@ export const SongMetadata = {
     albumArtUrl: undefined
 };
 
-export default ({songs}) => {
+export default function Home({songsProp}) {
     const [name, setName] = useState("Loading...");
     const [searchedSongs, setSearchedSongs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
+    const [loading, setLoading] = useState(false);
+    const [songs, setSongs] = useState(songsProp);
+
+    const fetchMoreSongs = async () => {
+        if (loading) return; // Do not search if already searching
+        if (!searchQuery) return; // Do not search if query is empty
+
+        setLoading(true);
+        try {
+            const response = await fetch("/api/spotify/search", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({search_string: searchQuery})
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                // add the new songs that aren't already in the list to the object to avoid duplicates
+                const newSongs = data.filter(
+                    (song) => !songs.some((existingSong) => existingSong.id === song.id)
+                );
+                setSongs((currentSongs) => [...currentSongs, ...newSongs]);
+            } else {
+                console.error("Error fetching more songs from Spotify");
+            }
+        } catch (error) {
+            console.error("Error fetching more songs:", error);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     /*
     when the component for this page first mounts, unload the token from the 
     cookie, clear cookie, store token in localstorage, put the name of the
@@ -79,12 +111,40 @@ export default ({songs}) => {
                         type="text"
                         placeholder="Search songs, albums, artists..."
                         value={searchQuery}
-                        onChange={(event) => {
-                            setSearchQuery(event.target.value);
-                        }}
+                        onChange={(event) => setSearchQuery(event.target.value)}
                     />
+                    <button
+                        className="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={fetchMoreSongs}
+                        disabled={loading}
+                    >
+                        Search Spotify
+                    </button>
                 </div>
-                {searchedSongs.length ? (
+                <style jsx>{`
+                    .spinner {
+                        border: 4px solid rgba(255, 255, 255, 0.3); /* Light grey border */
+                        border-top: 4px solid blue; /* Blue border */
+                        border-radius: 50%;
+                        width: 40px;
+                        height: 40px;
+                        animation: spin 2s linear infinite;
+                    }
+
+                    @keyframes spin {
+                        0% {
+                            transform: rotate(0deg);
+                        }
+                        100% {
+                            transform: rotate(360deg);
+                        }
+                    }
+                `}</style>
+                {loading ? (
+                    <div className="flex justify-center items-center h-full">
+                        <div className="border-t-4 border-b-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
+                    </div>
+                ) : searchedSongs.length ? (
                     <div className="grid grid-cols-4 gap-10 p-12 overflow-auto">
                         {searchedSongs.map((song) => (
                             <SongTile key={song.id} rating={true} metadata={song} />
@@ -97,7 +157,7 @@ export default ({songs}) => {
                                 No results found.
                             </h3>
                             <h5 className="text-accent-neutral text-lg mx-auto text-center">
-                                Try refining your search.
+                                Try refining your search or search Spotify.
                             </h5>
                         </div>
                     </div>
@@ -105,17 +165,17 @@ export default ({songs}) => {
             </div>
         </div>
     );
-};
+}
 
 export async function getServerSideProps() {
     try {
-        if (songs.length === 0) {
+        if (songsCache.length === 0) {
             // Spotify's official Today's Top Hits playlist
-            songs = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
+            songsCache = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
         }
-        return {props: {songs: songs}};
+        return {props: {songsProp: songsCache}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songs: []}};
+        return {props: {songsProp: []}};
     }
 }

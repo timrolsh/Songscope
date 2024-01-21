@@ -98,6 +98,32 @@ class SpotifyApi {
             };
         });
     }
+
+    async searchContent(searchString) {
+        const result = await executeMethod(
+            spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
+        );
+        let songs = [];
+        result.body.tracks.items.forEach((song) => {
+            let albumArtUrl = song.album.images.length
+                ? song.album.images[0].url
+                : "/no-album-cover.jpg";
+            songs.push({
+                id: song.id,
+                name: song.name,
+                artist: song.artists[0].name,
+                artist_id: song.artists[0].id,
+                album: song.album.name,
+                album_id: song.album.id,
+                releaseDate: song.album.release_date,
+                albumArtUrl: albumArtUrl,
+                popularity: song.popularity,
+                previewUrl: song.preview_url,
+                availableMarkets: song.available_markets
+            });
+        });
+        return await Promise.resolve(songs);
+    }
 }
 
 // Token refresh setup
