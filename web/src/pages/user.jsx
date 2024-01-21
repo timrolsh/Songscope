@@ -1,8 +1,6 @@
 import spotifyApi from "@/server/spotify_api";
-
 import SideBar from "@/components/SideBar";
 import {useEffect, useState} from "react";
-
 import SongTile from "@/components/SongTile";
 import Fuse from "fuse.js";
 
@@ -18,33 +16,34 @@ export const SongMetadata = {
     albumArtUrl: undefined
 };
 
-export default ({songsProp}) => {
-    // Function to check if a song with a given id exists in the array
-    const songExists = (array, id) => array.some((song) => song.id === id);
-
+export default function Home({songsProp}) {
     const [name, setName] = useState("Loading...");
     const [searchedSongs, setSearchedSongs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [songs, setSongs] = useState(songsProp);
 
-    const fetchMoreSongs = async (searchString) => {
+    const fetchMoreSongs = async () => {
+        if (loading) return; // Do not search if already searching
+        if (!searchQuery) return; // Do not search if query is empty
+
+        setLoading(true);
         try {
-            setLoading(true);
             const response = await fetch("/api/spotify/search", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({search_string: searchString})
+                body: JSON.stringify({search_string: searchQuery})
             });
 
             if (response.ok) {
                 const data = await response.json();
                 // add the new songs that aren't already in the list to the object to avoid duplicates
-                setSongs([...songs, ...data.filter((song) => !songExists(songs, song.id))]);
-                // before calling this method, check to avoid duplicates
-                setSearchedSongs(fuse.search(searchQuery).map((result) => result.item));
+                const newSongs = data.filter(
+                    (song) => !songs.some((existingSong) => existingSong.id === song.id)
+                );
+                setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
                 console.error("Error fetching more songs from Spotify");
             }
@@ -95,10 +94,6 @@ export default ({songsProp}) => {
         } else {
             setSearchedSongs(fuse.search(searchQuery).map((result) => result.item));
         }
-
-        if (searchQuery !== "" && searchedSongs.length === 0 && !loading) {
-            fetchMoreSongs(searchQuery);
-        }
     }, [songs, searchQuery]);
 
     // TODO --> Center this properly so it doesn't look bad
@@ -116,10 +111,15 @@ export default ({songsProp}) => {
                         type="text"
                         placeholder="Search songs, albums, artists..."
                         value={searchQuery}
-                        onChange={(event) => {
-                            setSearchQuery(event.target.value);
-                        }}
+                        onChange={(event) => setSearchQuery(event.target.value)}
                     />
+                    <button
+                        className="ml-4 bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                        onClick={fetchMoreSongs}
+                        disabled={loading}
+                    >
+                        Search Spotify
+                    </button>
                 </div>
                 {loading ? (
                     <div className="w-full h-full flex flex-col m-auto place-content-center">
@@ -142,7 +142,7 @@ export default ({songsProp}) => {
                                 No results found.
                             </h3>
                             <h5 className="text-accent-neutral text-lg mx-auto text-center">
-                                Try refining your search.
+                                Try refining your search or search Spotify.
                             </h5>
                         </div>
                     </div>
@@ -150,7 +150,7 @@ export default ({songsProp}) => {
             </div>
         </div>
     );
-};
+}
 
 export async function getServerSideProps() {
     try {
