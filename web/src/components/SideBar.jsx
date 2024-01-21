@@ -1,6 +1,6 @@
 import Link from "next/link";
 import SidebarEntry from "./SidebarEntry";
-import SignOutButton from "./SignOutButton";
+import { signOut } from "next-auth/react";
 
 import {MdOutlineSecurity} from "react-icons/md";
 import {MdOutlineCompareArrows} from "react-icons/md";
@@ -76,30 +76,8 @@ function renderProfileBody() {
 
 export default ({variant}) => {
     const [name, setName] = useState("Loading...");
-    /*
-    when the component for this page first mounts, unload the token from the 
-    cookie, clear cookie, store token in localstorage, put the name of the
-    user on the page
-    */
-    useEffect(() => {
-        // if user is already signed in, get their name from localStorage
-        if (localStorage.signedIn && localStorage.signedIn === "true") {
-            setName(localStorage.name);
-            return;
-        }
-        // otherwise user is not signed in, pull their token from and write to localStorage
-        const token = document.cookie
-            .split(";")
-            .map((cookie) => cookie.trim()) // Trim whitespace from each cookie string
-            .find((cookie) => cookie.startsWith("token=")) // Find the token cookie
-            .split("=")[1];
-        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        const userInfo = JSON.parse(atob(token.split(".")[1]));
-        setName(userInfo.name);
-        localStorage.token = token;
-        localStorage.name = userInfo.name;
-        localStorage.signedIn = true;
-    }, []);
+    
+    // TODO --> session migration 
 
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
@@ -137,7 +115,12 @@ export default ({variant}) => {
                     <Link className={LinkStyles} href="/profile">
                         Profile
                     </Link>
-                    <SignOutButton />
+                    <button
+                        className="pl-4 py-1 bg-red-700/80 rounded-md drop-shadow-sm text-text hover:font-semibold hover:bg-red-700 transition-all hover:-translate-y-0.5 text-left"
+                        onClick={signOut}
+                    >
+                        Sign Out
+                    </button>
                 </div>
             </div>
         </div>

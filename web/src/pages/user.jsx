@@ -4,6 +4,8 @@ import {useEffect, useState} from "react";
 import SongTile from "@/components/SongTile";
 import Fuse from "fuse.js";
 
+import { getServerSession } from "next-auth/next"
+
 let songsCache = [];
 
 export const SongMetadata = {
@@ -16,8 +18,7 @@ export const SongMetadata = {
     albumArtUrl: undefined
 };
 
-export default function Home({songsProp}) {
-    const [name, setName] = useState("Loading...");
+export default function Home({songsProp, sess}) {
     const [searchedSongs, setSearchedSongs] = useState([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
@@ -55,31 +56,6 @@ export default function Home({songsProp}) {
         }
     };
 
-    /*
-    when the component for this page first mounts, unload the token from the 
-    cookie, clear cookie, store token in localstorage, put the name of the
-    user on the page
-    */
-    useEffect(() => {
-        // if user is already signed in, get their name from localStorage
-        if (localStorage.signedIn && localStorage.signedIn === "true") {
-            setName(localStorage.name);
-            return;
-        }
-        // otherwise user is not signed in, pull their token from and write to localStorage
-        const token = document.cookie
-            .split(";")
-            .map((cookie) => cookie.trim()) // Trim whitespace from each cookie string
-            .find((cookie) => cookie.startsWith("token=")) // Find the token cookie
-            .split("=")[1];
-        document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
-        const userInfo = JSON.parse(atob(token.split(".")[1]));
-        setName(userInfo.name);
-        localStorage.token = token;
-        localStorage.name = userInfo.name;
-        localStorage.signedIn = true;
-    }, []);
-
     const fuse = new Fuse(songs, {
         keys: ["name", "artist", "album"],
         threshold: 0.4,
@@ -88,7 +64,6 @@ export default function Home({songsProp}) {
     });
 
     useEffect(() => {
-        console.log("searched: ", searchedSongs);
         if (!songs) setSearchedSongs(undefined);
         if (searchQuery === "") {
             setSearchedSongs(songs);
@@ -102,7 +77,7 @@ export default function Home({songsProp}) {
         <div className="flex flex-row h-full">
             <SideBar />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
-                <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {name}!</h1>
+                <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {sess.user.name}!</h1>
                 <div className="flex flex-row place-content-between px-12 mr-2">
                     <h2 className="text-xl italic text-accent-neutral/50">
                         Browse Songs, Albums, and Artists
@@ -149,15 +124,27 @@ export default function Home({songsProp}) {
     );
 }
 
-export async function getServerSideProps() {
+export async function getServerSideProps(ctx) {
+    // could optionally pass in AuthOptions... not too sure what it does?
+    const sess = await getServerSession(ctx.req, ctx.res)
+
+    if (!sess) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+    }
+
     try {
         if (songsCache.length === 0) {
             // Spotify's official Today's Top Hits playlist
             songsCache = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
         }
-        return {props: {songsProp: songsCache}};
+        return {props: {songsProp: songsCache, sess}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songsProp: []}};
+        return {props: {songsProp: [], sess}};
     }
 }

@@ -1,6 +1,7 @@
-import GoogleSignInButton from "@/components/GoogleSignInButton";
+import { signIn } from "next-auth/react";
+import { getServerSession } from "next-auth/next"
 
-export default ({GOOGLE_CLIENT_ID}) => {
+export default ({}) => {
     return (
         <div className="h-screen w-screen m-auto flex place-content-center bg-gradient-radial from-primary/5  to-accent-vivid/5">
             <div className="m-auto pb-32">
@@ -12,24 +13,27 @@ export default ({GOOGLE_CLIENT_ID}) => {
                         Music Review Made Easy
                     </h3>
                     <hr className="my-4 border-t-[.5px] border-text"></hr>
-                    {/* <h4 className="text-3xl text-center text-text pb-5">Sign In With</h4> */}
                     <div className="flex flex-row place-content-center mx-auto">
-                        <GoogleSignInButton GOOGLE_CLIENT_ID={GOOGLE_CLIENT_ID} />
+                        <button onClick={signIn}>Sign In</button>
                     </div>
                 </div>
             </div>
         </div>
-    );
+    )
 };
 
-export const getServerSideProps = () => {
-    if (!(process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET)) {
-        console.log("SONGSCOPE: missing GOOGLE_CLIENT_ID and SECRET env variables.");
-        process.exit();
-    }
-    return {
-        props: {
-            GOOGLE_CLIENT_ID: process.env.GOOGLE_CLIENT_ID
+export async function getServerSideProps(ctx) {
+    // could optionally pass in AuthOptions... not too sure what it does?
+    const sess = await getServerSession(ctx.req, ctx.res)
+
+    if (sess) {
+        return {
+            redirect: {
+                destination: '/user',
+                permanent: false,
+            },
         }
-    };
-};
+    }
+
+    return {props: {}};
+}
