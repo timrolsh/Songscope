@@ -1,7 +1,7 @@
--- Use our assigneed schema
+-- Use our assigned schema
 USE capstone_2324_songscope;
 
--- disable foreign key checks so that tables could be droppped
+-- disable foreign key checks so that tables could be dropped
 SET FOREIGN_KEY_CHECKS = 0;
 
 -- Drop each table individually if they exist
