@@ -39,9 +39,10 @@ export default function Home({songsProp}) {
 
             if (response.ok) {
                 const data = await response.json();
-                // add the new songs that aren't already in the list to the object to avoid duplicates
+                // Filter out songs that are already in the list
+                // Return the most popular/newest released song since that will likely be most accurate (in terms of popularity, views, etc))
                 const newSongs = data.filter(
-                    (song) => !songs.some((existingSong) => existingSong.id === song.id)
+                    (song) => !songs.some((existingSong) => existingSong.id === song.id) && !songs.some((existingSong) => (existingSong.name === song.name && existingSong.artist === song.artist))
                 );
                 setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
