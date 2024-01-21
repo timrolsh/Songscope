@@ -121,25 +121,6 @@ export default function Home({songsProp}) {
                         Search Spotify
                     </button>
                 </div>
-                <style jsx>{`
-                    .spinner {
-                        border: 4px solid rgba(255, 255, 255, 0.3); /* Light grey border */
-                        border-top: 4px solid blue; /* Blue border */
-                        border-radius: 50%;
-                        width: 40px;
-                        height: 40px;
-                        animation: spin 2s linear infinite;
-                    }
-
-                    @keyframes spin {
-                        0% {
-                            transform: rotate(0deg);
-                        }
-                        100% {
-                            transform: rotate(360deg);
-                        }
-                    }
-                `}</style>
                 {loading ? (
                     <div className="flex justify-center items-center h-full">
                         <div className="border-t-4 border-b-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
