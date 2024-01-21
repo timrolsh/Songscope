@@ -1,5 +1,5 @@
-import { signIn } from "next-auth/react";
-import { getServerSession } from "next-auth/next"
+import {signIn} from "next-auth/react";
+import {getServerSession} from "next-auth/next";
 
 export default ({}) => {
     return (
@@ -19,20 +19,20 @@ export default ({}) => {
                 </div>
             </div>
         </div>
-    )
+    );
 };
 
 export async function getServerSideProps(ctx) {
     // could optionally pass in AuthOptions... not too sure what it does?
-    const sess = await getServerSession(ctx.req, ctx.res)
+    const sess = await getServerSession(ctx.req, ctx.res);
 
     if (sess) {
         return {
             redirect: {
-                destination: '/user',
-                permanent: false,
-            },
-        }
+                destination: "/user",
+                permanent: false
+            }
+        };
     }
 
     return {props: {}};

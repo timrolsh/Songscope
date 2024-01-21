@@ -1,6 +1,6 @@
 import Link from "next/link";
 import SidebarEntry from "./SidebarEntry";
-import { signOut } from "next-auth/react";
+import {signOut} from "next-auth/react";
 
 import {MdOutlineSecurity} from "react-icons/md";
 import {MdOutlineCompareArrows} from "react-icons/md";
@@ -76,8 +76,8 @@ function renderProfileBody() {
 
 export default ({variant}) => {
     const [name, setName] = useState("Loading...");
-    
-    // TODO --> session migration 
+
+    // TODO --> session migration
 
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">

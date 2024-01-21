@@ -4,7 +4,7 @@ import {useEffect, useState} from "react";
 import SongTile from "@/components/SongTile";
 import Fuse from "fuse.js";
 
-import { getServerSession } from "next-auth/next"
+import {getServerSession} from "next-auth/next";
 
 let songsCache = [];
 
@@ -43,7 +43,13 @@ export default function Home({songsProp, sess}) {
                 // Filter out songs that are already in the list
                 // Return the most popular/newest released song since that will likely be most accurate (in terms of popularity, views, etc))
                 const newSongs = data.filter(
-                    (song) => !songs.some((existingSong) => existingSong.id === song.id) && !songs.some((existingSong) => (existingSong.name === song.name && existingSong.artist === song.artist))
+                    (song) =>
+                        !songs.some((existingSong) => existingSong.id === song.id) &&
+                        !songs.some(
+                            (existingSong) =>
+                                existingSong.name === song.name &&
+                                existingSong.artist === song.artist
+                        )
                 );
                 setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
@@ -126,15 +132,15 @@ export default function Home({songsProp, sess}) {
 
 export async function getServerSideProps(ctx) {
     // could optionally pass in AuthOptions... not too sure what it does?
-    const sess = await getServerSession(ctx.req, ctx.res)
+    const sess = await getServerSession(ctx.req, ctx.res);
 
     if (!sess) {
         return {
             redirect: {
-                destination: '/',
-                permanent: false,
-            },
-        }
+                destination: "/",
+                permanent: false
+            }
+        };
     }
 
     try {
