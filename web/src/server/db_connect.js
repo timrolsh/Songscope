@@ -1,4 +1,4 @@
-import { createPool } from "mysql2";
+import {createPool} from "mysql2";
 import dotenv from "dotenv";
 dotenv.config({path: `${__dirname}/../../../.env`});
 

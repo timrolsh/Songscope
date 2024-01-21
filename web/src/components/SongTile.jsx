@@ -46,10 +46,10 @@ function SongInfo({songMetadata}) {
     const [audioPlaying, setAudioPlaying] = useState(false);
 
     const playAudio = () => {
-        if(audioPlaying) {
+        if (audioPlaying) {
             audioRef.current.pause();
         } else {
-            audioRef.current.currentTime= 0;
+            audioRef.current.currentTime = 0;
             audioRef.current.play();
         }
         setAudioPlaying(!audioPlaying);
@@ -60,9 +60,9 @@ function SongInfo({songMetadata}) {
 
     async function getReviews() {
         const res = await fetch(`/api/db/get-reviews?songid=${songMetadata.id}`);
-        console.log("Received response: ", res)
-        if(res.status !== 200) console.log("Non 200 code received");
-        let data = await res.text()
+        console.log("Received response: ", res);
+        if (res.status !== 200) console.log("Non 200 code received");
+        let data = await res.text();
 
         try {
             data = JSON.parse(data);
@@ -82,25 +82,25 @@ function SongInfo({songMetadata}) {
 
     async function submitToServer(data, endpoint) {
         const response = await fetch(endpoint, {
-            method: 'POST',
+            method: "POST",
             headers: {
-            'Content-Type': 'application/json',
+                "Content-Type": "application/json"
             },
-            body: JSON.stringify(data),
+            body: JSON.stringify(data)
         });
 
         return response;
-    }    
+    }
 
     async function submitReview(event) {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget)
+        const formData = new FormData(event.currentTarget);
         // TODO: Fetch the actual current userid
-        formData.append('userid', 3)
-        formData.append('songid', songMetadata.id)
+        formData.append("userid", 3);
+        formData.append("songid", songMetadata.id);
         const data = Object.fromEntries(formData.entries());
 
-        await submitToServer(data, '/api/db/insert-review');
+        await submitToServer(data, "/api/db/insert-review");
 
         setReviewText("");
         getReviews();
@@ -207,7 +207,7 @@ function SongInfo({songMetadata}) {
                             <div className="w-5 h-px left-[98px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
                             <div className="w-6 h-px left-[103px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
                         </div>
-                        <audio ref={audioRef} src={songMetadata.previewUrl}/>
+                        <audio ref={audioRef} src={songMetadata.previewUrl} />
                         <IoPlayCircleOutline
                             className="text-3xl my-auto text-rose-700 hover:cursor-pointer"
                             onClick={playAudio}
@@ -219,22 +219,26 @@ function SongInfo({songMetadata}) {
                 <div className="h-1/2">
                     <h3 className="text-lg font-bold text-text">See what others are saying!</h3>
                     <div className="overflow-auto pt-2 h-3/4">
-                        {reviews.length ? reviews.map((rvw, idx) => {
-                            return (
-                                <div className="w-full flex flex-col py-1">
-                                    <div className="flex flex-row space-x-2 pl-1" key={idx}>
-                                        <h3 className="font-semibold text-text/90">
-                                            &gt; {rvw.username}{" "}
-                                            <span className="italic font-normal">says </span>
-                                            <span className="font-normal text-text/90">
-                                                "{rvw.comment_text}"
-                                            </span>
-                                        </h3>
+                        {reviews.length ? (
+                            reviews.map((rvw, idx) => {
+                                return (
+                                    <div className="w-full flex flex-col py-1">
+                                        <div className="flex flex-row space-x-2 pl-1" key={idx}>
+                                            <h3 className="font-semibold text-text/90">
+                                                &gt; {rvw.username}{" "}
+                                                <span className="italic font-normal">says </span>
+                                                <span className="font-normal text-text/90">
+                                                    "{rvw.comment_text}"
+                                                </span>
+                                            </h3>
+                                        </div>
+                                        <h4 className="font-light italic text-text/40 pl-1">
+                                            {rvw.time}
+                                        </h4>
                                     </div>
-                                    <h4 className="font-light italic text-text/40 pl-1">{rvw.time}</h4>
-                                </div>
-                            );
-                        }) : (
+                                );
+                            })
+                        ) : (
                             <div className="flex flex-row space-x-2 py-1 pl-1">
                                 <h3 className="font-normal italic text-text/60">
                                     No comments yet! Be the first to leave a review!
@@ -264,7 +268,10 @@ function SongInfo({songMetadata}) {
                             <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
                             <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
                         </div>
-                        <button className="ml-auto bg-secondary/70 hover:bg-secondary text-text/90 hover:text-text/90 rounded-md px-3 py-1" type="submit">
+                        <button
+                            className="ml-auto bg-secondary/70 hover:bg-secondary text-text/90 hover:text-text/90 rounded-md px-3 py-1"
+                            type="submit"
+                        >
                             Submit
                         </button>
                     </div>
