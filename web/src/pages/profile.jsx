@@ -2,7 +2,8 @@ import Image from "next/image";
 import spotifyApi from "@/server/spotify_api";
 import SongTile from "@/components/SongTile";
 import SideBar from "@/components/SideBar";
-import { useState } from "react";
+
+import { getServerSession } from "next-auth/next"
 
 function ReviewTile() {
     return (
@@ -19,10 +20,7 @@ function ReviewTile() {
 
 let songs = [];
 
-export default ({songs}) => {
-    const [name, setName] = useState("Loading...");
-
-    // TODO --> session migration
+export default ({songs, sess}) => {
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"profile"} />
@@ -42,7 +40,7 @@ export default ({songs}) => {
                         </div>
                         <div className="w-1/2 sm:w-4/6 text-lg flex flex-col place-content-between">
                             <div>
-                                <h1 className="font-bold text-2xl mx-auto">{name}</h1>
+                                <h1 className="font-bold text-2xl mx-auto">{sess.user.name}</h1>
                                 <h3>
                                     I love music, and I love sharing my thoughts with the world!
                                     Everyone should know what I think about all the songs, and I
@@ -95,15 +93,27 @@ export default ({songs}) => {
     );
 };
 
-export async function getServerSideProps() {
+export async function getServerSideProps(ctx) {
+    // could optionally pass in AuthOptions... not too sure what it does?
+    const sess = await getServerSession(ctx.req, ctx.res)
+
+    if (!sess) {
+        return {
+            redirect: {
+                destination: '/',
+                permanent: false,
+            },
+        }
+    }
+
     try {
         // hardcoded playlist id for now
         if (songs.length === 0) {
             songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
         }
-        return {props: {songs: songs}};
+        return {props: {songs: songs, sess}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songs: []}};
+        return {props: {songs: [], sess}};
     }
 }
