@@ -8,7 +8,8 @@ import {MdInfoOutline} from "react-icons/md";
 import {HiOutlineCog8Tooth} from "react-icons/hi2";
 import {useState, useEffect} from "react";
 const LinkStyles =
-    "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 transition py-1 hover:-translate-y-0.5";
+    "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
+    transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 const SettingsLinkStyles =
     "rounded-lg hover:bg-accent-neutral/50 transition-all py-2 hover:font-semibold hover:-translate-y-0.5 text-text/90 hover:text-text text-sm font-normal px-2 flex flex-row space-x-2";
 
@@ -106,14 +107,14 @@ export default ({variant}) => {
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4"></hr>
             <div className="w-full h-52 flex flex-col mb-4">
                 <div className="my-auto flex flex-col h-full place-content-evenly">
-                    <Link className={LinkStyles} href="/user">
+                    <Link className={LinkStyles} href="/user" aria-disabled={variant !== "profile" && variant !== "settings"}>
                         Home
                     </Link>
-                    <Link className={LinkStyles} href="/settings/general">
-                        User Settings
-                    </Link>
-                    <Link className={LinkStyles} href="/profile">
+                    <Link className={LinkStyles} href="/profile" aria-disabled={variant==="profile"}>
                         Profile
+                    </Link>
+                    <Link className={LinkStyles} href="/settings/general" aria-disabled={variant === "settings"}>
+                        User Settings
                     </Link>
                     <button
                         className="pl-4 py-1 bg-red-700/80 rounded-md drop-shadow-sm text-text hover:font-semibold hover:bg-red-700 transition-all hover:-translate-y-0.5 text-left"
