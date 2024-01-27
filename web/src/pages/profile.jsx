@@ -4,6 +4,7 @@ import SongTile from "@/components/SongTile";
 import SideBar from "@/components/SideBar";
 
 import {getServerSession} from "next-auth/next";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 function ReviewTile() {
     return (
@@ -94,8 +95,7 @@ export default ({songs, sess}) => {
 };
 
 export async function getServerSideProps(ctx) {
-    // could optionally pass in AuthOptions... not too sure what it does?
-    const sess = await getServerSession(ctx.req, ctx.res);
+    const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (!sess) {
         return {

@@ -1,10 +1,11 @@
-import spotifyApi from "@/server/spotify_api";
-import SideBar from "@/components/SideBar";
+import spotifyApi from "../server/spotify_api";
+import SideBar from "../components/SideBar";
 import {useEffect, useState} from "react";
-import SongTile from "@/components/SongTile";
+import SongTile from "../components/SongTile";
 import Fuse from "fuse.js";
 
 import {getServerSession} from "next-auth/next";
+import { authOptions } from "./api/auth/[...nextauth]";
 
 let songsCache = [];
 
@@ -110,7 +111,7 @@ export default function Home({songsProp, sess}) {
                 ) : searchedSongs.length ? (
                     <div className="grid grid-cols-4 gap-10 p-12 overflow-auto">
                         {searchedSongs.map((song) => (
-                            <SongTile key={song.id} rating={true} metadata={song} />
+                            <SongTile key={song.id} rating={true} metadata={song} user={sess.user}/>
                         ))}
                     </div>
                 ) : (
@@ -131,9 +132,8 @@ export default function Home({songsProp, sess}) {
 }
 
 export async function getServerSideProps(ctx) {
-    // could optionally pass in AuthOptions... not too sure what it does?
-    const sess = await getServerSession(ctx.req, ctx.res);
-
+    const sess = await getServerSession(ctx.req, ctx.res, authOptions);
+    
     if (!sess) {
         return {
             redirect: {
@@ -142,7 +142,7 @@ export async function getServerSideProps(ctx) {
             }
         };
     }
-
+    
     try {
         if (songsCache.length === 0) {
             // Spotify's official Today's Top Hits playlist

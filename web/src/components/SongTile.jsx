@@ -7,14 +7,13 @@ import {IoPlayCircleOutline} from "react-icons/io5";
 import {useState, useRef, useEffect} from "react";
 import clsx from "clsx";
 
-export function Modal({showModal, setShowModal, songMetadata}) {
+export function Modal({showModal, setShowModal, songMetadata, user}) {
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
     const [display, setDisplay] = useState(false);
     useEffect(() => {
         setDisplay(showModal);
     }, [showModal]);
-
     return (
         <div
             className={clsx(
@@ -28,7 +27,7 @@ export function Modal({showModal, setShowModal, songMetadata}) {
                 className="relative mx-auto z-30 border px-8 py-5 border-secondary w-1/2 h-1/2 bg-background/70 backdrop-blur-lg rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <SongInfo songMetadata={songMetadata} />
+                <SongInfo songMetadata={songMetadata} userId={user.id}/>
                 <button
                     className="text-red-700 absolute right-2 top-1 text-2xl"
                     onClick={() => setShowModal(!showModal)}
@@ -40,7 +39,7 @@ export function Modal({showModal, setShowModal, songMetadata}) {
     );
 }
 
-function SongInfo({songMetadata}) {
+function SongInfo({songMetadata, userId}) {
     const audioRef = useRef(null);
 
     const [audioPlaying, setAudioPlaying] = useState(false);
@@ -95,8 +94,7 @@ function SongInfo({songMetadata}) {
     async function submitReview(event) {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
-        // TODO: Fetch the actual current userid
-        formData.append("userid", 3);
+        formData.append("userid", userId);
         formData.append("songid", songMetadata.id);
         const data = Object.fromEntries(formData.entries());
 
@@ -225,7 +223,7 @@ function SongInfo({songMetadata}) {
                                     <div className="w-full flex flex-col py-1">
                                         <div className="flex flex-row space-x-2 pl-1" key={idx}>
                                             <h3 className="font-semibold text-text/90">
-                                                &gt; {rvw.username}{" "}
+                                                &gt; {rvw.name}{" "}
                                                 <span className="italic font-normal">says </span>
                                                 <span className="font-normal text-text/90">
                                                     "{rvw.comment_text}"
@@ -281,14 +279,14 @@ function SongInfo({songMetadata}) {
     );
 }
 
-export default ({rating = false, metadata}) => {
+export default ({rating = false, metadata, user}) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
 
     return (
         <>
             {showModal && (
-                <Modal showModal={showModal} setShowModal={setShowModal} songMetadata={metadata} />
+                <Modal showModal={showModal} setShowModal={setShowModal} songMetadata={metadata} user={user}/>
             )}
             <div
                 className="select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20"
