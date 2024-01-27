@@ -9,6 +9,7 @@
         "prod": "bun src/server/start_server.js prod"
     },
     "dependencies": {
+        "@auth/core": "^0.24.0",
         "body-parser": "^1.20.2",
         "clsx": "^2.0.0",
         "dotenv": "^16.3.1",
@@ -24,8 +25,11 @@
         "spotify-web-api-node": "^5.0.2"
     },
     "devDependencies": {
+        "@types/node": "20.11.8",
+        "@types/react": "18.2.48",
         "autoprefixer": "^10.0.1",
         "postcss": "^8",
-        "tailwindcss": "^3.3.0"
+        "tailwindcss": "^3.3.0",
+        "typescript": "5.3.3"
     }
 }
