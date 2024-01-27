@@ -1,82 +1,76 @@
 -- Use our assigned schema
 USE capstone_2324_songscope;
 
--- disable foreign key checks so that tables could be dropped
-SET FOREIGN_KEY_CHECKS = 0;
-
--- Drop each table individually if they exist
-DROP TABLE IF EXISTS user cascade;
-DROP TABLE IF EXISTS conversation cascade;
-DROP TABLE IF EXISTS conversation_user cascade;
-DROP TABLE IF EXISTS message cascade;
-DROP TABLE IF EXISTS rating cascade;
-DROP TABLE IF EXISTS comment cascade;
-DROP TABLE IF EXISTS comment_like cascade;
-DROP TABLE IF EXISTS reply_like cascade;
-DROP TABLE IF EXISTS reply cascade;
-
--- re-enable foreign key checks for normal functionality
-SET FOREIGN_KEY_CHECKS = 1;
-
--- Create the user table
-CREATE TABLE user
+create table if not exists accounts
 (
-    id              INT  NOT NULL PRIMARY KEY AUTO_INCREMENT,
-    username        TEXT NOT NULL,
-    spotify_id      TEXT,
-    google_id       TEXT,
-    first_name       TEXT,
-    last_name       TEXT,
-    email           TEXT,
-    profile_picture BLOB
+    id                bigint unsigned auto_increment
+        primary key,
+    userId            int          not null,
+    type              varchar(255) not null,
+    provider          varchar(255) not null,
+    providerAccountId varchar(255) not null,
+    refresh_token     text         null,
+    access_token      text         null,
+    expires_at        bigint       null,
+    id_token          text         null,
+    scope             text         null,
+    session_state     text         null,
+    token_type        text         null
 );
 
--- Create the rating table
-CREATE TABLE rating
+create table if not exists sessions
 (
-    spotify_work_id TEXT  NOT NULL,
-    rating          FLOAT NOT NULL,
-    user_id         INT   NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    id           bigint unsigned auto_increment
+        primary key,
+    userId       int          not null,
+    expires      timestamp    not null,
+    sessionToken varchar(255) not null,
+    constraint id
+        unique (id)
 );
 
--- Create the comment table
-CREATE TABLE comment
+create table if not exists users
 (
-    id              INT  NOT NULL PRIMARY KEY,
-    user_id         INT  NOT NULL,
-    spotify_work_id TEXT NOT NULL,
-    comment_text    TEXT NOT NULL,
-    # a user does not have to provide a timestamp for a comment
-    time            TIMESTAMP,
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    id            bigint unsigned auto_increment
+        primary key,
+    name          varchar(255) not null,
+    first_name    text         null,
+    last_name     text         null,
+    email         varchar(255) not null,
+    image         text         null,
+    emailVerified timestamp    null,
+    bio           text         null,
+    constraint id
+        unique (id)
 );
 
--- Create the comment_like table
-CREATE TABLE comment_like
+create table if not exists comment
 (
-    comment_id INT NOT NULL,
-    user_id    INT NOT NULL,
-    FOREIGN KEY (comment_id) REFERENCES comment (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    id              int auto_increment
+        primary key,
+    user_id         bigint unsigned                     not null,
+    spotify_work_id text                                not null,
+    comment_text    text                                not null,
+    time            timestamp default CURRENT_TIMESTAMP not null,
+    constraint comment_users_id_fk
+        foreign key (user_id) references users (id)
 );
 
--- Create the reply table
-CREATE TABLE reply
+create table if not exists rating
 (
-    id         INT  NOT NULL PRIMARY KEY,
-    user_id    INT  NOT NULL,
-    comment_id INT  NOT NULL,
-    reply_text TEXT NOT NULL,
-    FOREIGN KEY (user_id) REFERENCES user (id),
-    FOREIGN KEY (comment_id) REFERENCES comment (id)
+    spotify_work_id text            not null,
+    rating          float           not null,
+    user_id         bigint unsigned not null,
+    constraint user_id
+        unique (user_id),
+    constraint review_user_fk
+        foreign key (user_id) references users (id)
 );
 
--- Create the reply_like table
-CREATE TABLE reply_like
+create table if not exists verification_token
 (
-    reply_id INT NOT NULL,
-    user_id  INT NOT NULL,
-    FOREIGN KEY (reply_id) REFERENCES reply (id),
-    FOREIGN KEY (user_id) REFERENCES user (id)
+    identifier text      not null,
+    expires    timestamp not null,
+    token      text      not null,
+    primary key (identifier(128), token(128))
 );
