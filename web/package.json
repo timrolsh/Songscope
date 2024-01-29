@@ -1,34 +1,34 @@
 {
-  "name": "songscope_web",
-  "version": "0.1.0",
-  "private": true,
-  "scripts": {
-    "devt": "next dev --turbo",
-    "dev": "bun src/server/start_server.js dev",
-    "build": "next build",
-    "prod": "bun src/server/start_server.js prod"
-  },
-  "dependencies": {
-    "@auth/core": "^0.24.0",
-    "body-parser": "^1.20.2",
-    "clsx": "^2.0.0",
-    "dotenv": "^16.3.1",
-    "express": "^4.18.2",
-    "fuse.js": "^7.0.0",
-    "mysql2": "^3.6.5",
-    "next": "^14.0.4",
-    "next-auth": "^4.24.5",
-    "react": "^18",
-    "react-dom": "^18",
-    "react-icons": "^4.12.0",
-    "spotify-web-api-node": "^5.0.2"
-  },
-  "devDependencies": {
-    "@types/node": "20.11.8",
-    "@types/react": "18.2.48",
-    "autoprefixer": "^10.0.1",
-    "postcss": "^8",
-    "tailwindcss": "^3.3.0",
-    "typescript": "5.3.3"
-  }
+    "name": "songscope_web",
+    "version": "0.1.0",
+    "private": true,
+    "scripts": {
+        "devt": "next dev --turbo",
+        "dev": "bun src/server/start_server.js dev",
+        "build": "next build",
+        "prod": "bun src/server/start_server.js prod"
+    },
+    "dependencies": {
+        "@auth/core": "^0.24.0",
+        "body-parser": "^1.20.2",
+        "clsx": "^2.0.0",
+        "dotenv": "^16.3.1",
+        "express": "^4.18.2",
+        "fuse.js": "^7.0.0",
+        "mysql2": "^3.6.5",
+        "next": "^14.0.4",
+        "next-auth": "^4.24.5",
+        "react": "^18",
+        "react-dom": "^18",
+        "react-icons": "^4.12.0",
+        "spotify-web-api-node": "^5.0.2"
+    },
+    "devDependencies": {
+        "@types/node": "20.11.8",
+        "@types/react": "18.2.48",
+        "autoprefixer": "^10.0.1",
+        "postcss": "^8",
+        "tailwindcss": "^3.3.0",
+        "typescript": "5.3.3"
+    }
 }
