@@ -1,5 +1,6 @@
 import {signIn} from "next-auth/react";
 import {getServerSession} from "next-auth/next";
+import {authOptions} from "./api/auth/[...nextauth]";
 
 export default ({}) => {
     return (
@@ -23,8 +24,7 @@ export default ({}) => {
 };
 
 export async function getServerSideProps(ctx) {
-    // could optionally pass in AuthOptions... not too sure what it does?
-    const sess = await getServerSession(ctx.req, ctx.res);
+    const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (sess) {
         return {

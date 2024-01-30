@@ -1,4 +1,4 @@
-import db from "@/server/db_connect";
+import {db} from "../auth/[...nextauth]";
 
 // TODO: Add authentication
 export default async (request, response) => {
@@ -17,7 +17,7 @@ export default async (request, response) => {
 async function fetchSongReviews(songid) {
     // TODO --> Order these reviews by popularity/likes as well
     const res = await db.promise().query(
-        `select u.username, c.comment_text, c.time from comment c, user u
+        `select u.name, c.comment_text, c.time from comment c, users u
         where c.user_id = u.id
         and c.spotify_work_id = ?
         order by c.time desc;`,

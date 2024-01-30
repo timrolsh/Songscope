@@ -1,4 +1,4 @@
-import db from "@/server/db_connect";
+import {db} from "../auth/[...nextauth]";
 
 // TODO: Add authentication
 export default (request, response) => {
@@ -14,7 +14,6 @@ export default (request, response) => {
     }
 };
 
-// TODO --> verify no sql injection threats from changing localstorage values
 function insertReview(songid, userid, reviewtext) {
     console.log(
         "SONGSCOPE: Inserting review, songid:",

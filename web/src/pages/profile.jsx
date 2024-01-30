@@ -1,9 +1,10 @@
 import Image from "next/image";
-import spotifyApi from "@/server/spotify_api";
-import SongTile from "@/components/SongTile";
-import SideBar from "@/components/SideBar";
+import spotifyApi from "../server/spotify_api";
+import SongTile from "../components/SongTile";
+import SideBar from "../components/SideBar";
 
 import {getServerSession} from "next-auth/next";
+import {authOptions} from "./api/auth/[...nextauth]";
 
 function ReviewTile() {
     return (
@@ -73,7 +74,9 @@ export default ({songs, sess}) => {
                             {songs ? (
                                 songs
                                     .slice(0, 4)
-                                    .map((song) => <SongTile key={song.id} metadata={song} />)
+                                    .map((song) => (
+                                        <SongTile key={song.id} metadata={song} user={sess.user} />
+                                    ))
                             ) : (
                                 <h1 className="pl-2 text-xl my-auto">Loading...</h1>
                             )}
@@ -94,8 +97,7 @@ export default ({songs, sess}) => {
 };
 
 export async function getServerSideProps(ctx) {
-    // could optionally pass in AuthOptions... not too sure what it does?
-    const sess = await getServerSession(ctx.req, ctx.res);
+    const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (!sess) {
         return {
