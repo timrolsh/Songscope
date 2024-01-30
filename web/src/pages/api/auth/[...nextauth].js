@@ -1,8 +1,8 @@
 import NextAuth from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
-import MySqlAdapter from "./MySqlAdapter"
+import MySqlAdapter from "./MySqlAdapter";
 
-import { createPool } from "mysql2";
+import {createPool} from "mysql2";
 
 // check to make sure all environment variables are set
 if (
@@ -36,11 +36,11 @@ export const authOptions = {
         })
     ],
     callbacks: {
-        async session({ session, token, user }) {
-          session.user.id = user.id;
-          return session;
-        },
-      },
+        async session({session, token, user}) {
+            session.user.id = user.id;
+            return session;
+        }
+    },
     secret: process.env.NEXTAUTH_SECRET
 };
 export default NextAuth(authOptions);

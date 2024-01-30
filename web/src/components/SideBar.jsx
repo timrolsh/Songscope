@@ -107,13 +107,25 @@ export default ({variant}) => {
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4"></hr>
             <div className="w-full h-52 flex flex-col mb-4">
                 <div className="my-auto flex flex-col h-full place-content-evenly">
-                    <Link className={LinkStyles} href="/user" aria-disabled={variant !== "profile" && variant !== "settings"}>
+                    <Link
+                        className={LinkStyles}
+                        href="/user"
+                        aria-disabled={variant !== "profile" && variant !== "settings"}
+                    >
                         Home
                     </Link>
-                    <Link className={LinkStyles} href="/profile" aria-disabled={variant==="profile"}>
+                    <Link
+                        className={LinkStyles}
+                        href="/profile"
+                        aria-disabled={variant === "profile"}
+                    >
                         Profile
                     </Link>
-                    <Link className={LinkStyles} href="/settings/general" aria-disabled={variant === "settings"}>
+                    <Link
+                        className={LinkStyles}
+                        href="/settings/general"
+                        aria-disabled={variant === "settings"}
+                    >
                         User Settings
                     </Link>
                     <button

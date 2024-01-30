@@ -27,7 +27,7 @@ export function Modal({showModal, setShowModal, songMetadata, user}) {
                 className="relative mx-auto z-30 border px-8 py-5 border-secondary w-1/2 h-1/2 bg-background/70 backdrop-blur-lg rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <SongInfo songMetadata={songMetadata} userId={user.id}/>
+                <SongInfo songMetadata={songMetadata} userId={user.id} />
                 <button
                     className="text-red-700 absolute right-2 top-1 text-2xl"
                     onClick={() => setShowModal(!showModal)}
@@ -286,7 +286,12 @@ export default ({rating = false, metadata, user}) => {
     return (
         <>
             {showModal && (
-                <Modal showModal={showModal} setShowModal={setShowModal} songMetadata={metadata} user={user}/>
+                <Modal
+                    showModal={showModal}
+                    setShowModal={setShowModal}
+                    songMetadata={metadata}
+                    user={user}
+                />
             )}
             <div
                 className="select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20"

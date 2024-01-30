@@ -1,4 +1,4 @@
-import { db } from "../auth/[...nextauth]";
+import {db} from "../auth/[...nextauth]";
 
 // TODO: Add authentication
 export default async (request, response) => {

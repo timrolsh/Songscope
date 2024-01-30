@@ -3,8 +3,8 @@ import spotifyApi from "../server/spotify_api";
 import SongTile from "../components/SongTile";
 import SideBar from "../components/SideBar";
 
-import { getServerSession } from "next-auth/next";
-import { authOptions } from "./api/auth/[...nextauth]";
+import {getServerSession} from "next-auth/next";
+import {authOptions} from "./api/auth/[...nextauth]";
 
 function ReviewTile() {
     return (
@@ -74,7 +74,9 @@ export default ({songs, sess}) => {
                             {songs ? (
                                 songs
                                     .slice(0, 4)
-                                    .map((song) => <SongTile key={song.id} metadata={song} user={sess.user}/>)
+                                    .map((song) => (
+                                        <SongTile key={song.id} metadata={song} user={sess.user} />
+                                    ))
                             ) : (
                                 <h1 className="pl-2 text-xl my-auto">Loading...</h1>
                             )}
