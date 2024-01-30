@@ -1,6 +1,6 @@
 import {useEffect, useState} from "react";
 
-export default ({GOOGLE_CLIENT_ID}) => {
+export default ({GOOGLE_CLIENT_ID}: {GOOGLE_CLIENT_ID: string}) => {
     const [rootURL, setRootURL] = useState("");
     useEffect(() => {
         setRootURL(`${window.location.protocol}//${window.location.host}`);

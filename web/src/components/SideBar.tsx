@@ -75,7 +75,7 @@ function renderProfileBody() {
     );
 }
 
-export default ({variant}) => {
+export default ({variant}: {variant: string}) => {
     const [name, setName] = useState("Loading...");
 
     // TODO --> session migration
@@ -130,7 +130,9 @@ export default ({variant}) => {
                     </Link>
                     <button
                         className="pl-4 py-1 bg-red-700/80 rounded-md drop-shadow-sm text-text hover:font-semibold hover:bg-red-700 transition-all hover:-translate-y-0.5 text-left"
-                        onClick={signOut}
+                        onClick={() => {
+                            signOut();
+                        }}
                     >
                         Sign Out
                     </button>
