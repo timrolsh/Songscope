@@ -5,6 +5,10 @@ const port = 3000;
 const devMode = process.argv[2] === "dev";
 const nextApp = next({dev: devMode});
 
+// load environment variables here
+import dotenv from "dotenv";
+dotenv.config({path: `${__dirname}/../../../.env`});
+
 async function startServer() {
     try {
         await nextApp.prepare();
