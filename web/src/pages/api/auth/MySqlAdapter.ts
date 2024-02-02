@@ -40,9 +40,9 @@ export default function MySqlAdapter(db: Pool): Adapter {
                 const users = rows as RowDataPacket[];
                 if (users.length === 0) throw new Error("User creation failed");
 
-                const user = users[0];
-                console.log("User created: ", user);
-                return user as AdapterUser;
+                const newUser = users[0];
+                console.log("User created: ", newUser);
+                return newUser as AdapterUser;
             } catch (error: any) {
                 console.error("Error creating user:", error.message);
                 throw new Error(error.message);

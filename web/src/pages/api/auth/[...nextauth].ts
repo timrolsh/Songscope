@@ -43,4 +43,5 @@ export const authOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET
 };
+// TODO fix this error appearing in VSCode
 export default NextAuth(authOptions);
