@@ -3,7 +3,7 @@ import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 
-export default ({}) => {
+export default (): JSX.Element => {
     return (
         <div className="h-screen w-screen m-auto flex place-content-center bg-gradient-radial from-primary/5  to-accent-vivid/5">
             <div className="m-auto pb-32">
@@ -31,6 +31,7 @@ export default ({}) => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    // TODO fix this vscode issues
     const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (sess) {

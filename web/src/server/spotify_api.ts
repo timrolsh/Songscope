@@ -1,5 +1,6 @@
 import SpotifyWebApi from "spotify-web-api-node";
 import dotenv from "dotenv";
+import {SongMetadata} from "@/pages/user";
 dotenv.config({path: `${__dirname}/../../../.env`});
 
 var spotifyWebApi = new SpotifyWebApi({
@@ -22,7 +23,7 @@ async function executeMethod(method: any, ...args: any) {
     const boundMethod = method.bind(spotifyWebApi);
     try {
         return await boundMethod(...args);
-    } catch (err) {
+    } catch (err: any) {
         if (err.statusCode === 401) {
             await getAccessToken();
             return boundMethod(...args);
@@ -32,7 +33,7 @@ async function executeMethod(method: any, ...args: any) {
 }
 
 class SpotifyApi {
-    async getAlbum(albumId) {
+    async getAlbum(albumId: string) {
         const result = await executeMethod(spotifyWebApi.getAlbum.bind(spotifyWebApi), albumId);
         return {
             id: result.body.id,
@@ -44,7 +45,7 @@ class SpotifyApi {
         };
     }
 
-    async getSong(songId) {
+    async getSong(songId: string): Promise<SongMetadata> {
         const result = await executeMethod(spotifyWebApi.getTrack.bind(spotifyWebApi), songId);
         return {
             id: result.body.id,
@@ -53,16 +54,20 @@ class SpotifyApi {
             artist_id: result.body.artists[0].id,
             album: result.body.album.name,
             album_id: result.body.album.id,
-            albumArtUrl: result.body.album.images[0].url
+            albumArtUrl: result.body.album.images[0].url,
+            releaseDate: result.body.album.release_date,
+            popularity: result.body.popularity,
+            previewUrl: result.body.preview_url,
+            availableMarkets: result.body.available_markets
         };
     }
 
-    async getSongsFromAlbum(albumId) {
+    async getSongsFromAlbum(albumId: string): Promise<SongMetadata[]> {
         const result = await executeMethod(
             spotifyWebApi.getAlbumTracks.bind(spotifyWebApi),
             albumId
         );
-        return result.body.items.map((song) => ({
+        return result.body.items.map((song: any) => ({
             id: song.id,
             name: song.name,
             artist: song.artists[0].name,
@@ -73,12 +78,12 @@ class SpotifyApi {
         }));
     }
 
-    async getSongsFromPlaylist(playlistId) {
+    async getSongsFromPlaylist(playlistId: string): Promise<SongMetadata[]> {
         const result = await executeMethod(
             spotifyWebApi.getPlaylist.bind(spotifyWebApi),
             playlistId
         );
-        return result.body.tracks.items.map((item) => {
+        return result.body.tracks.items.map((item: any) => {
             const song = item.track;
             let albumArtUrl = song.album.images.length
                 ? song.album.images[0].url
@@ -99,12 +104,12 @@ class SpotifyApi {
         });
     }
 
-    async searchContent(searchString) {
+    async searchContent(searchString: string): Promise<SongMetadata[]> {
         const result = await executeMethod(
             spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
         );
-        let songs = [];
-        result.body.tracks.items.forEach((song) => {
+        let songs: SongMetadata[] = [];
+        result.body.tracks.items.forEach((song: any) => {
             let albumArtUrl = song.album.images.length
                 ? song.album.images[0].url
                 : "/no-album-cover.jpg";
