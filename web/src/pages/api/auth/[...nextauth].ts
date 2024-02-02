@@ -43,5 +43,6 @@ export const authOptions = {
     },
     secret: process.env.NEXTAUTH_SECRET
 };
-// TODO fix this error appearing in VSCode
+
+// @ts-expect-error
 export default NextAuth(authOptions);

@@ -31,7 +31,7 @@ export default (): JSX.Element => {
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    // TODO fix this vscode issues
+    // @ts-expect-error
     const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (sess) {

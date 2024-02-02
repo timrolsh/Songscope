@@ -109,7 +109,7 @@ export default ({songs, session}: {songs: SongMetadata[]; session: Session}) => 
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
-    // TODO fix this vscode issues
+    // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (!session) {

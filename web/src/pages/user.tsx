@@ -25,7 +25,13 @@ export interface SongMetadata {
     availableMarkets: string[];
 }
 
-export default ({songsProp, session}: {songsProp: SongMetadata[]; session: Session}): JSX.Element => {
+export default ({
+    songsProp,
+    session
+}: {
+    songsProp: SongMetadata[];
+    session: Session;
+}): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
@@ -90,7 +96,9 @@ export default ({songsProp, session}: {songsProp: SongMetadata[]; session: Sessi
         <div className="flex flex-row h-full">
             <SideBar variant="" />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
-                <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {session.user?.name ?? ""}!</h1>
+                <h1 className="text-4xl font-bold px-12 pt-4">
+                    Welcome, {session.user?.name ?? ""}!
+                </h1>
                 <div className="flex flex-row place-content-between px-12 mr-2">
                     <h2 className="text-xl italic text-accent-neutral/50">
                         Browse Songs, Albums, and Artists
@@ -143,6 +151,7 @@ export default ({songsProp, session}: {songsProp: SongMetadata[]; session: Sessi
 };
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (!session) {
