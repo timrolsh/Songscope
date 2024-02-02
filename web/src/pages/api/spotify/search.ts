@@ -1,3 +1,4 @@
+import {NextApiRequest, NextApiResponse} from "next";
 import spotifyApi from "../../../server/spotify_api";
 
 /*
@@ -8,7 +9,7 @@ body: {
 
 Use the Spotify API to search for a song and return its results
 */
-export default async (request, response) => {
+export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method !== "POST") {
         response.status(400).send("Invalid request method.");
         return;

@@ -7,7 +7,17 @@ import {IoPlayCircleOutline} from "react-icons/io5";
 import {useState, useRef, useEffect} from "react";
 import clsx from "clsx";
 
-export function Modal({showModal, setShowModal, songMetadata, user}) {
+export function Modal({
+    showModal,
+    setShowModal,
+    songMetadata,
+    user
+}: {
+    showModal: boolean;
+    setShowModal: (value: boolean) => void;
+    songMetadata: any;
+    user: any;
+}) {
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
     const [display, setDisplay] = useState(false);
@@ -39,32 +49,40 @@ export function Modal({showModal, setShowModal, songMetadata, user}) {
     );
 }
 
-function SongInfo({songMetadata, userId}) {
-    const audioRef = useRef(null);
+interface Review {
+    comment_text: string;
+    name: string;
+    time: string;
+}
 
+function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
+    const audioRef = useRef<HTMLAudioElement | null>(null);
     const [audioPlaying, setAudioPlaying] = useState(false);
 
     const playAudio = () => {
         if (audioPlaying) {
-            audioRef.current.pause();
+            audioRef.current?.pause();
         } else {
-            audioRef.current.currentTime = 0;
-            audioRef.current.play();
+            // Check if audioRef.current is not null before accessing its properties
+            if (audioRef.current) {
+                audioRef.current.currentTime = 0;
+                audioRef.current.play();
+            }
         }
         setAudioPlaying(!audioPlaying);
     };
     const [reviewText, setReviewText] = useState("");
     // TODO: Beautify the datetime returned and format it in human-readable format
-    const [reviews, setReviews] = useState([]);
+    const [reviews, setReviews] = useState<Review[]>([]);
 
     async function getReviews() {
         const res = await fetch(`/api/db/get-reviews?songid=${songMetadata.id}`);
         console.log("Received response: ", res);
         if (res.status !== 200) console.log("Non 200 code received");
-        let data = await res.text();
 
+        let data: Review[];
         try {
-            data = JSON.parse(data);
+            data = JSON.parse(await res.text());
             console.log("[INFO] Parsed successfully as JSON: ", data);
         } catch {
             console.log("[WARN] Failed to parse as JSON, setting to empty array");
@@ -79,7 +97,7 @@ function SongInfo({songMetadata, userId}) {
         return () => clearInterval(interval);
     }, []);
 
-    async function submitToServer(data, endpoint) {
+    async function submitToServer(data: any, endpoint: string): Promise<Response> {
         const response = await fetch(endpoint, {
             method: "POST",
             headers: {
@@ -91,12 +109,16 @@ function SongInfo({songMetadata, userId}) {
         return response;
     }
 
-    async function submitReview(event) {
+    async function submitReview(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
         formData.append("userid", userId);
         formData.append("songid", songMetadata.id);
-        const data = Object.fromEntries(formData.entries());
+        const data: Record<string, string> = {};
+
+        for (const [key, value] of formData.entries()) {
+            data[key] = value.toString();
+        }
 
         await submitToServer(data, "/api/db/insert-review");
 
@@ -250,7 +272,6 @@ function SongInfo({songMetadata, userId}) {
                         <h3 className="pb-2">Leave a Review!</h3>
                         {/* TODO --> Add a character counter and limit */}
                         <textarea
-                            type="text"
                             name="reviewbody"
                             onChange={(e) => setReviewText(e.target.value)}
                             value={reviewText}
@@ -279,7 +300,7 @@ function SongInfo({songMetadata, userId}) {
     );
 }
 
-export default ({rating = false, metadata, user}) => {
+export default ({rating = false, metadata, user}: {rating?: boolean; metadata: any; user: any}) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
 

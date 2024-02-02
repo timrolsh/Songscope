@@ -1,7 +1,8 @@
+import {NextApiRequest, NextApiResponse} from "next";
 import {db} from "../auth/[...nextauth]";
 
 // TODO: Add authentication
-export default (request, response) => {
+export default (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "POST") {
         console.log("reqbody:", request.body);
         const {songid, userid, reviewbody} = request.body;
@@ -14,7 +15,7 @@ export default (request, response) => {
     }
 };
 
-function insertReview(songid, userid, reviewtext) {
+function insertReview(songid: string, userid: number, reviewtext: string) {
     console.log(
         "SONGSCOPE: Inserting review, songid:",
         songid,

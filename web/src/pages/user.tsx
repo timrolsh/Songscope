@@ -6,6 +6,7 @@ import Fuse from "fuse.js";
 
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
+import {GetServerSideProps} from "next";
 
 let songsCache = [];
 
@@ -136,7 +137,7 @@ export default function Home({songsProp, sess}) {
     );
 }
 
-export async function getServerSideProps(ctx) {
+export const getServerSideProps: GetServerSideProps = (ctx) => {
     const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (!sess) {
@@ -158,4 +159,4 @@ export async function getServerSideProps(ctx) {
         console.error("Error fetching songs:", error);
         return {props: {songsProp: [], sess}};
     }
-}
+};

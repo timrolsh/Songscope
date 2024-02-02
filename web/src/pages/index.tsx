@@ -1,6 +1,7 @@
 import {signIn} from "next-auth/react";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
+import {GetServerSideProps} from "next";
 
 export default ({}) => {
     return (
@@ -15,7 +16,13 @@ export default ({}) => {
                     </h3>
                     <hr className="my-4 border-t-[.5px] border-text"></hr>
                     <div className="flex flex-row place-content-center mx-auto">
-                        <button onClick={signIn}>Sign In</button>
+                        <button
+                            onClick={() => {
+                                signIn();
+                            }}
+                        >
+                            Sign In
+                        </button>
                     </div>
                 </div>
             </div>
@@ -23,7 +30,7 @@ export default ({}) => {
     );
 };
 
-export async function getServerSideProps(ctx) {
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const sess = await getServerSession(ctx.req, ctx.res, authOptions);
 
     if (sess) {
@@ -36,4 +43,4 @@ export async function getServerSideProps(ctx) {
     }
 
     return {props: {}};
-}
+};

@@ -18,7 +18,7 @@ async function getAccessToken() {
     }
 }
 
-async function executeMethod(method, ...args) {
+async function executeMethod(method: any, ...args: any) {
     const boundMethod = method.bind(spotifyWebApi);
     try {
         return await boundMethod(...args);

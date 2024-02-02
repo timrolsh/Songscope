@@ -1,7 +1,7 @@
 import ToggleButton from "../../components/ToggleButton";
 import SideBar from "../../components/SideBar";
 
-export function TextEntry({name}) {
+export function TextEntry({name}: {name: string}) {
     return (
         <div className="flex flex-row w-3/5">
             <h3 className="w-1/3">{name}:</h3>
@@ -10,7 +10,7 @@ export function TextEntry({name}) {
     );
 }
 
-export function ButtonEntry({name}) {
+export function ButtonEntry({name}: {name: string}) {
     return (
         <div className="flex flex-row h-6 w-3/5">
             <h3 className="w-2/3">{name}:</h3>
