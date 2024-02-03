@@ -31,7 +31,7 @@ export default function MySqlAdapter(db: Pool): Adapter {
                         emailVerified ? new Date(emailVerified) : null,
                         image
                     ]);
-
+                // TODO: Double check this query, not sure if it will work as intended, may be vulnerable? Would be ideal to base this off of userId
                 const [rows] = await db
                     .promise()
                     .execute(`SELECT * FROM users WHERE email = ?`, [email]);
@@ -308,7 +308,7 @@ export default function MySqlAdapter(db: Pool): Adapter {
                 await db.promise().execute(deleteSql, [identifier, token]);
                 return verificationToken; // Return the first (and should be only) row
             } else {
-                throw new Error("Token not found");
+                throw new Error("Token not found"); // No token found
             }
         }
     };
