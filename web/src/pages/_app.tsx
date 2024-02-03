@@ -9,7 +9,7 @@ interface MyAppProps extends AppProps {
     };
 }
 
-export default ({Component, pageProps: {session, ...pageProps}}: MyAppProps) => {
+export default ({Component, pageProps: {session, ...pageProps}}: MyAppProps): JSX.Element => {
     return (
         <SessionProvider session={session}>
             <Component {...pageProps} />

@@ -24,7 +24,7 @@ function ReviewTile() {
 
 let songs: SongMetadata[] = [];
 
-export default ({songs, session}: {songs: SongMetadata[]; session: Session}) => {
+export default ({songs, session}: {songs: SongMetadata[]; session: Session}): JSX.Element => {
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"profile"} />

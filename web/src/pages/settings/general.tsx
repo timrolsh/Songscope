@@ -20,7 +20,7 @@ export function ButtonEntry({name}: {name: string}) {
         </div>
     );
 }
-export default () => {
+export default (): JSX.Element => {
     // TODO --> Add prefilled information based on existing user information
     return (
         <div className="flex flex-row h-full">
