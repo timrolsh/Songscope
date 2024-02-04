@@ -5,6 +5,8 @@ import SideBar from "../components/SideBar";
 
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
+import {GetServerSideProps} from "next";
+import {SongMetadata, UserProps} from "./user";
 
 function ReviewTile() {
     return (
@@ -19,9 +21,9 @@ function ReviewTile() {
     );
 }
 
-let songs = [];
+let songs: SongMetadata[] = [];
 
-export default ({songs, sess}) => {
+export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"profile"} />
@@ -34,6 +36,7 @@ export default ({songs, sess}) => {
                                 width={225}
                                 height={225}
                                 className="border border-accent-neutral/30 rounded-xl"
+                                alt="Profile Picture"
                             ></Image>
                             <div className="flex flex-row space-x-2">
                                 {/* <div className="w-5 h-5 rounded-2xl bg-lime-400 mb-auto"></div> */}
@@ -41,7 +44,11 @@ export default ({songs, sess}) => {
                         </div>
                         <div className="w-1/2 sm:w-4/6 text-lg flex flex-col place-content-between">
                             <div>
-                                <h1 className="font-bold text-2xl mx-auto">{sess.user.name}</h1>
+                                {session.user && (
+                                    <h1 className="font-bold text-2xl mx-auto">
+                                        {session.user.name}
+                                    </h1>
+                                )}
                                 <h3>
                                     I love music, and I love sharing my thoughts with the world!
                                     Everyone should know what I think about all the songs, and I
@@ -71,11 +78,15 @@ export default ({songs, sess}) => {
                     <div>
                         <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
                         <div className="flex flex-row w-full mx-auto place-content-between pt-5">
-                            {songs ? (
-                                songs
+                            {songsProp ? (
+                                songsProp
                                     .slice(0, 4)
                                     .map((song) => (
-                                        <SongTile key={song.id} metadata={song} user={sess.user} />
+                                        <SongTile
+                                            key={song.id}
+                                            metadata={song}
+                                            user={session.user}
+                                        />
                                     ))
                             ) : (
                                 <h1 className="pl-2 text-xl my-auto">Loading...</h1>
@@ -96,10 +107,11 @@ export default ({songs, sess}) => {
     );
 };
 
-export async function getServerSideProps(ctx) {
-    const sess = await getServerSession(ctx.req, ctx.res, authOptions);
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    // @ts-expect-error
+    const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
-    if (!sess) {
+    if (!session) {
         return {
             redirect: {
                 destination: "/",
@@ -113,9 +125,9 @@ export async function getServerSideProps(ctx) {
         if (songs.length === 0) {
             songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
         }
-        return {props: {songs: songs, sess}};
+        return {props: {songsProp: songs, curSession: session}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songs: [], sess}};
+        return {props: {songsProp: [], curSession: session}};
     }
-}
+};

@@ -1,10 +1,12 @@
+import {NextApiRequest, NextApiResponse} from "next";
 import {db} from "../auth/[...nextauth]";
+import {RowDataPacket} from "mysql2";
 
 // TODO: Add authentication
-export default async (request, response) => {
+export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "GET") {
-        const {songid} = request.query;
-        const results = await fetchSongReviews(songid);
+        const song_id = request.query.songid as string;
+        const results = await fetchSongReviews(song_id);
         // TODO --> Swap from JSON stringify to just pure JSON
         response.status(200).send(JSON.stringify(results));
         return;
@@ -14,20 +16,19 @@ export default async (request, response) => {
     }
 };
 
-async function fetchSongReviews(songid) {
+async function fetchSongReviews(songid: string) {
     // TODO --> Order these reviews by popularity/likes as well
-    const res = await db.promise().query(
-        `select u.name, c.comment_text, c.time from comment c, users u
-        where c.user_id = u.id
-        and c.spotify_work_id = ?
-        order by c.time desc;`,
-        [songid]
-    );
-
-    if (res.error) {
-        console.error("SONGSCOPE: Unable to fetch reviews", res.error);
-        return null;
+    try {
+        const [rows] = (await db.promise().query(
+            `select u.name, c.comment_text, c.time from comment c, users u
+            where c.user_id = u.id
+            and c.spotify_work_id = ?
+            order by c.time desc;`,
+            [songid]
+        )) as RowDataPacket[];
+        return rows.length > 0 ? rows : null;
+    } catch (error) {
+        console.error("SONGSCOPE: Unable to fetch reviews", error);
+        throw error; // Rethrow the error to be caught by the caller
     }
-
-    return res[0] == [] ? null : res[0];
 }

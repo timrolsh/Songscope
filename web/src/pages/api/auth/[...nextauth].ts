@@ -24,23 +24,25 @@ export const db = createPool({
     user: process.env.DB_USER,
     database: process.env.DB_SCHEMA,
     password: process.env.DB_PASSWORD,
-    port: process.env.DB_PORT
+    port: parseInt(process.env.DB_PORT) // Convert the port value to a number
 });
 
 export const authOptions = {
     adapter: MySqlAdapter(db),
     providers: [
         GoogleProvider({
-            clientId: process.env.GOOGLE_CLIENT_ID,
-            clientSecret: process.env.GOOGLE_CLIENT_SECRET
+            clientId: process.env.GOOGLE_CLIENT_ID ?? "",
+            clientSecret: process.env.GOOGLE_CLIENT_SECRET ?? ""
         })
     ],
     callbacks: {
-        async session({session, token, user}) {
+        async session({session, token, user}: {session: any; token: any; user: any}) {
             session.user.id = user.id;
             return session;
         }
     },
     secret: process.env.NEXTAUTH_SECRET
 };
+
+// @ts-expect-error
 export default NextAuth(authOptions);

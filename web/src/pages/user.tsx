@@ -6,21 +6,32 @@ import Fuse from "fuse.js";
 
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
+import {GetServerSideProps} from "next";
+import {Session} from "next-auth";
 
-let songsCache = [];
+let songsCache: SongMetadata[] = [];
 
-export const SongMetadata = {
-    id: undefined,
-    name: undefined,
-    artist: undefined,
-    artist_id: undefined,
-    album: undefined,
-    album_id: undefined,
-    albumArtUrl: undefined
-};
+export interface SongMetadata {
+    id: string;
+    name: string;
+    artist: string;
+    artist_id: string;
+    album: string;
+    album_id: string;
+    albumArtUrl: string;
+    releaseDate: string;
+    popularity: string;
+    previewUrl: string;
+    availableMarkets: string[];
+}
 
-export default function Home({songsProp, sess}) {
-    const [searchedSongs, setSearchedSongs] = useState([]);
+export interface UserProps {
+    songsProp: SongMetadata[];
+    curSession: Session;
+}
+
+export default ({songsProp, curSession}: UserProps): JSX.Element => {
+    const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [songs, setSongs] = useState(songsProp);
@@ -44,7 +55,7 @@ export default function Home({songsProp, sess}) {
                 // Filter out songs that are already in the list
                 // Return the most popular/newest released song since that will likely be most accurate (in terms of popularity, views, etc))
                 const newSongs = data.filter(
-                    (song) =>
+                    (song: SongMetadata) =>
                         !songs.some((existingSong) => existingSong.id === song.id) &&
                         !songs.some(
                             (existingSong) =>
@@ -71,7 +82,7 @@ export default function Home({songsProp, sess}) {
     });
 
     useEffect(() => {
-        if (!songs) setSearchedSongs(undefined);
+        if (!songs) setSearchedSongs([]);
         if (searchQuery === "") {
             setSearchedSongs(songs);
         } else {
@@ -82,9 +93,11 @@ export default function Home({songsProp, sess}) {
     // TODO --> Center this properly so it doesn't look bad
     return (
         <div className="flex flex-row h-full">
-            <SideBar />
+            <SideBar variant="" />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
-                <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {sess.user.name}!</h1>
+                <h1 className="text-4xl font-bold px-12 pt-4">
+                    Welcome, {curSession.user?.name ?? ""}!
+                </h1>
                 <div className="flex flex-row place-content-between px-12 mr-2">
                     <h2 className="text-xl italic text-accent-neutral/50">
                         Browse Songs, Albums, and Artists
@@ -115,7 +128,7 @@ export default function Home({songsProp, sess}) {
                                 key={song.id}
                                 rating={true}
                                 metadata={song}
-                                user={sess.user}
+                                user={curSession.user}
                             />
                         ))}
                     </div>
@@ -134,12 +147,13 @@ export default function Home({songsProp, sess}) {
             </div>
         </div>
     );
-}
+};
 
-export async function getServerSideProps(ctx) {
-    const sess = await getServerSession(ctx.req, ctx.res, authOptions);
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    // @ts-expect-error
+    const session = await getServerSession(ctx.req, ctx.res, authOptions);
 
-    if (!sess) {
+    if (!session) {
         return {
             redirect: {
                 destination: "/",
@@ -153,9 +167,9 @@ export async function getServerSideProps(ctx) {
             // Spotify's official Today's Top Hits playlist
             songsCache = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
         }
-        return {props: {songsProp: songsCache, sess}};
+        return {props: {songsProp: songsCache, curSession: session}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songsProp: [], sess}};
+        return {props: {songsProp: [], curSession: session}};
     }
-}
+};
