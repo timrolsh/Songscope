@@ -242,8 +242,8 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
                         {reviews?.length ? (
                             reviews.map((rvw, idx) => {
                                 return (
-                                    <div className="w-full flex flex-col py-1">
-                                        <div className="flex flex-row space-x-2 pl-1" key={idx}>
+                                    <div className="w-full flex flex-col py-1" key={idx}>
+                                        <div className="flex flex-row space-x-2 pl-1">
                                             <h3 className="font-semibold text-text/90">
                                                 &gt; {rvw.name}{" "}
                                                 <span className="italic font-normal">says </span>
