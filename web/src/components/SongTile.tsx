@@ -239,7 +239,7 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
                 <div className="h-1/2">
                     <h3 className="text-lg font-bold text-text">See what others are saying!</h3>
                     <div className="overflow-auto pt-2 h-3/4">
-                        {reviews.length ? (
+                        {reviews?.length ? (
                             reviews.map((rvw, idx) => {
                                 return (
                                     <div className="w-full flex flex-col py-1">
