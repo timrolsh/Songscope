@@ -25,13 +25,12 @@ export interface SongMetadata {
     availableMarkets: string[];
 }
 
-export default ({
-    songsProp,
-    session
-}: {
+export interface UserProps {
     songsProp: SongMetadata[];
-    session: Session;
-}): JSX.Element => {
+    curSession: Session;
+}
+
+export default ({songsProp, curSession}: UserProps): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
@@ -97,7 +96,7 @@ export default ({
             <SideBar variant="" />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <h1 className="text-4xl font-bold px-12 pt-4">
-                    Welcome, {session.user?.name ?? ""}!
+                    Welcome, {curSession.user?.name ?? ""}!
                 </h1>
                 <div className="flex flex-row place-content-between px-12 mr-2">
                     <h2 className="text-xl italic text-accent-neutral/50">
@@ -129,7 +128,7 @@ export default ({
                                 key={song.id}
                                 rating={true}
                                 metadata={song}
-                                user={session.user}
+                                user={curSession.user}
                             />
                         ))}
                     </div>
@@ -168,9 +167,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             // Spotify's official Today's Top Hits playlist
             songsCache = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
         }
-        return {props: {songsProp: songsCache, session}};
+        return {props: {songsProp: songsCache, curSession: session}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songsProp: [], session}};
+        return {props: {songsProp: [], curSession: session}};
     }
 };

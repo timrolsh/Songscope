@@ -6,8 +6,7 @@ import SideBar from "../components/SideBar";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
-import {SongMetadata} from "./user";
-import {Session} from "next-auth";
+import {SongMetadata, UserProps} from "./user";
 
 function ReviewTile() {
     return (
@@ -24,7 +23,7 @@ function ReviewTile() {
 
 let songs: SongMetadata[] = [];
 
-export default ({songs, session}: {songs: SongMetadata[]; session: Session}): JSX.Element => {
+export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"profile"} />
@@ -79,8 +78,8 @@ export default ({songs, session}: {songs: SongMetadata[]; session: Session}): JS
                     <div>
                         <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
                         <div className="flex flex-row w-full mx-auto place-content-between pt-5">
-                            {songs ? (
-                                songs
+                            {songsProp ? (
+                                songsProp
                                     .slice(0, 4)
                                     .map((song) => (
                                         <SongTile
@@ -126,9 +125,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         if (songs.length === 0) {
             songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
         }
-        return {props: {songs: songs, session}};
+        return {props: {songsProp: songs, curSession: session}};
     } catch (error) {
         console.error("Error fetching songs:", error);
-        return {props: {songs: [], session}};
+        return {props: {songsProp: [], curSession: session}};
     }
 };
