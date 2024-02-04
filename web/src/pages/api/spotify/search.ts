@@ -1,5 +1,5 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import spotifyApi from "../../../server/spotify_api";
+import spotifyApi from "./wrapper";
 
 /*
 Given a string that the user will pass in by a post request where the body looks like this:
