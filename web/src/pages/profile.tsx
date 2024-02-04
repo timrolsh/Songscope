@@ -1,5 +1,4 @@
 import Image from "next/image";
-import spotifyApi from "../server/spotify_api";
 import SongTile from "../components/SongTile";
 import SideBar from "../components/SideBar";
 
@@ -7,6 +6,8 @@ import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import {SongMetadata, UserProps} from "./user";
+import { useEffect, useState } from "react";
+import Spinner from "@/components/spinner";
 
 function ReviewTile() {
     return (
@@ -21,9 +22,35 @@ function ReviewTile() {
     );
 }
 
-let songs: SongMetadata[] = [];
+export default ({curSession: session}: UserProps): JSX.Element => {
+    const [songs, setSongs] = useState<SongMetadata[]>([]);
+    const [loading, setLoading] = useState(false);
 
-export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
+    useEffect(() => {
+        const initSongs = async () => {
+            setLoading(true);
+
+            const res = await fetch("/api/spotify/playlist", { 
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({playlist_id: "0OwFb8rH79YQ76ln376pyn"})
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setSongs(songs.concat(data));
+            } else {
+                throw new Error("Error fetching songs from Spotify: " + res.status + " " + res.statusText);
+            }
+
+            setLoading(false);
+        }
+
+        initSongs().catch((error) => { console.error("Error fetching songs:", error) });
+    }, []);
+
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"profile"} />
@@ -32,7 +59,7 @@ export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
                     <div className="flex flex-row space-x-4">
                         <div className="flex flex-col space-y-2 w-1/6">
                             <Image
-                                src="https://media.pitchfork.com/photos/65774786a9bb8a8b8b679df5/1:1/w_320,c_limit/Elzhi%20:%20Oh%20No-%20Heavy%20Vibrato.jpeg"
+                                src={session.user?.image || "/default-profile.jpg"}
                                 width={225}
                                 height={225}
                                 className="border border-accent-neutral/30 rounded-xl"
@@ -78,8 +105,8 @@ export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
                     <div>
                         <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
                         <div className="flex flex-row w-full mx-auto place-content-between pt-5">
-                            {songsProp ? (
-                                songsProp
+                            {(!loading && songs) ? (
+                                songs
                                     .slice(0, 4)
                                     .map((song) => (
                                         <SongTile
@@ -89,7 +116,9 @@ export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
                                         />
                                     ))
                             ) : (
-                                <h1 className="pl-2 text-xl my-auto">Loading...</h1>
+                                <div className="h-80 flex place-content-center mx-auto">
+                                    <Spinner />
+                                </div>
                             )}
                         </div>
                     </div>
@@ -107,6 +136,7 @@ export default ({songsProp, curSession: session}: UserProps): JSX.Element => {
     );
 };
 
+// Mi
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
@@ -120,14 +150,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    try {
-        // hardcoded playlist id for now
-        if (songs.length === 0) {
-            songs = await spotifyApi.getSongsFromPlaylist("0OwFb8rH79YQ76ln376pyn");
-        }
-        return {props: {songsProp: songs, curSession: session}};
-    } catch (error) {
-        console.error("Error fetching songs:", error);
-        return {props: {songsProp: [], curSession: session}};
-    }
+    return {props: {curSession: session}};
 };

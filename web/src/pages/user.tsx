@@ -1,4 +1,3 @@
-import spotifyApi from "../server/spotify_api";
 import SideBar from "../components/SideBar";
 import {useEffect, useState} from "react";
 import SongTile from "../components/SongTile";
@@ -8,6 +7,7 @@ import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import {Session} from "next-auth";
+import Spinner from "@/components/spinner";
 
 let songsCache: SongMetadata[] = [];
 
@@ -25,16 +25,13 @@ export interface SongMetadata {
     availableMarkets: string[];
 }
 
-export interface UserProps {
-    songsProp: SongMetadata[];
-    curSession: Session;
-}
+export interface UserProps { curSession: Session; }
 
-export default ({songsProp, curSession}: UserProps): JSX.Element => {
+export default ({curSession}: UserProps): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
-    const [songs, setSongs] = useState(songsProp);
+    const [songs, setSongs] = useState<SongMetadata[]>([])
 
     const fetchMoreSongs = async () => {
         if (loading) return; // Do not search if already searching
@@ -82,6 +79,31 @@ export default ({songsProp, curSession}: UserProps): JSX.Element => {
     });
 
     useEffect(() => {
+        const initSongs = async () => {
+            setLoading(true);
+            const res = await fetch("/api/spotify/playlist", { 
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({playlist_id: "0OwFb8rH79YQ76ln376pyn"})
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                songsCache = data;
+            } else {
+                throw new Error("Error fetching songs from Spotify: " + res.status + " " + res.statusText);
+            }
+
+            setSongs(songs.concat(songsCache));
+            setLoading(false);
+        }
+
+        initSongs().catch((error) => { console.error("Error fetching songs:", error) });
+    }, []);
+
+    useEffect(() => {
         if (!songs) setSearchedSongs([]);
         if (searchQuery === "") {
             setSearchedSongs(songs);
@@ -95,31 +117,34 @@ export default ({songsProp, curSession}: UserProps): JSX.Element => {
         <div className="flex flex-row h-full">
             <SideBar variant="" />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
-                <h1 className="text-4xl font-bold px-12 pt-4">
-                    Welcome, {curSession.user?.name ?? ""}!
-                </h1>
-                <div className="flex flex-row place-content-between px-12 mr-2">
-                    <h2 className="text-xl italic text-accent-neutral/50">
-                        Browse Songs, Albums, and Artists
-                    </h2>
-                    <input
-                        className="ml-auto w-64 bg-background border-b-2 border-b-secondary/50 focus:outline-none hover:border-b-secondary/80 focus:border-b-secondary transition-all placeholder:italic placeholder:text-accent-neutral/40 text-text/90"
-                        type="text"
-                        placeholder="Search songs, albums, artists..."
-                        value={searchQuery}
-                        onChange={(event) => setSearchQuery(event.target.value)}
-                    />
-                    <button
-                        className="ml-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition"
-                        onClick={fetchMoreSongs}
-                        disabled={loading}
-                    >
-                        Search Spotify
-                    </button>
+                <div className="flex flex-col h-24">
+                    <h1 className="text-4xl font-bold px-12 pt-4">
+                        Welcome, {curSession.user?.name ?? ""}!
+                    </h1>
+                    <div className="flex flex-row place-content-between px-12 mr-2">
+                        <h2 className="text-xl italic text-accent-neutral/50">
+                            Browse Songs, Albums, and Artists
+                        </h2>
+                        <input
+                            className="ml-auto w-64 bg-background border-b-2 border-b-secondary/50 focus:outline-none hover:border-b-secondary/80 focus:border-b-secondary transition-all placeholder:italic placeholder:text-accent-neutral/40 text-text/90"
+                            type="text"
+                            placeholder="Search songs, albums, artists..."
+                            value={searchQuery}
+                            onChange={(event) => setSearchQuery(event.target.value)}
+                        />
+                        <button
+                            className="ml-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition"
+                            onClick={fetchMoreSongs}
+                            disabled={loading}
+                        >
+                            Search Spotify
+                        </button>
+                    </div>
+
                 </div>
                 {loading ? (
-                    <div className="flex justify-center items-center h-full">
-                        <div className="border-t-4 border-b-4 border-blue-500 rounded-full w-12 h-12 animate-spin"></div>
+                    <div className="flex h-5/6 justify-center items-center m-auto">
+                        <Spinner />
                     </div>
                 ) : searchedSongs.length ? (
                     <div className="grid grid-cols-4 gap-10 p-12 overflow-auto">
@@ -162,14 +187,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    try {
-        if (songsCache.length === 0) {
-            // Spotify's official Today's Top Hits playlist
-            songsCache = await spotifyApi.getSongsFromPlaylist("37i9dQZF1DXcBWIGoYBM5M");
-        }
-        return {props: {songsProp: songsCache, curSession: session}};
-    } catch (error) {
-        console.error("Error fetching songs:", error);
-        return {props: {songsProp: [], curSession: session}};
-    }
+    return {props: {curSession: session}};
 };
