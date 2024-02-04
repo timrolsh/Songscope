@@ -133,7 +133,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                             onChange={(event) => setSearchQuery(event.target.value)}
                         />
                         <button
-                            className="ml-4 bg-blue-500 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition"
+                            className="ml-4 bg-secondary/80 hover:bg-secondary text-text/80 hover:text-text py-2 px-4 rounded-md transition"
                             onClick={fetchMoreSongs}
                             disabled={loading}
                         >
