@@ -6,8 +6,8 @@ import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import {SongMetadata, UserProps} from "./user";
-import { useEffect, useState } from "react";
-import Spinner from "@/components/spinner";
+import {useEffect, useState} from "react";
+import Spinner from "@/components/Spinner";
 
 function ReviewTile() {
     return (
@@ -30,7 +30,7 @@ export default ({curSession: session}: UserProps): JSX.Element => {
         const initSongs = async () => {
             setLoading(true);
 
-            const res = await fetch("/api/spotify/playlist", { 
+            const res = await fetch("/api/spotify/playlist", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -42,13 +42,17 @@ export default ({curSession: session}: UserProps): JSX.Element => {
                 const data = await res.json();
                 setSongs(songs.concat(data));
             } else {
-                throw new Error("Error fetching songs from Spotify: " + res.status + " " + res.statusText);
+                throw new Error(
+                    "Error fetching songs from Spotify: " + res.status + " " + res.statusText
+                );
             }
 
             setLoading(false);
-        }
+        };
 
-        initSongs().catch((error) => { console.error("Error fetching songs:", error) });
+        initSongs().catch((error) => {
+            console.error("Error fetching songs:", error);
+        });
     }, []);
 
     return (
@@ -105,7 +109,7 @@ export default ({curSession: session}: UserProps): JSX.Element => {
                     <div>
                         <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
                         <div className="flex flex-row w-full mx-auto place-content-between pt-5">
-                            {(!loading && songs) ? (
+                            {!loading && songs ? (
                                 songs
                                     .slice(0, 4)
                                     .map((song) => (

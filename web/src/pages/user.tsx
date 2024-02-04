@@ -7,7 +7,7 @@ import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import {Session} from "next-auth";
-import Spinner from "@/components/spinner";
+import Spinner from "@/components/Spinner";
 
 let songsCache: SongMetadata[] = [];
 
@@ -25,13 +25,15 @@ export interface SongMetadata {
     availableMarkets: string[];
 }
 
-export interface UserProps { curSession: Session; }
+export interface UserProps {
+    curSession: Session;
+}
 
 export default ({curSession}: UserProps): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
-    const [songs, setSongs] = useState<SongMetadata[]>([])
+    const [songs, setSongs] = useState<SongMetadata[]>([]);
 
     const fetchMoreSongs = async () => {
         if (loading) return; // Do not search if already searching
@@ -81,7 +83,7 @@ export default ({curSession}: UserProps): JSX.Element => {
     useEffect(() => {
         const initSongs = async () => {
             setLoading(true);
-            const res = await fetch("/api/spotify/playlist", { 
+            const res = await fetch("/api/spotify/playlist", {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -93,14 +95,18 @@ export default ({curSession}: UserProps): JSX.Element => {
                 const data = await res.json();
                 songsCache = data;
             } else {
-                throw new Error("Error fetching songs from Spotify: " + res.status + " " + res.statusText);
+                throw new Error(
+                    "Error fetching songs from Spotify: " + res.status + " " + res.statusText
+                );
             }
 
             setSongs(songs.concat(songsCache));
             setLoading(false);
-        }
+        };
 
-        initSongs().catch((error) => { console.error("Error fetching songs:", error) });
+        initSongs().catch((error) => {
+            console.error("Error fetching songs:", error);
+        });
     }, []);
 
     useEffect(() => {
@@ -140,7 +146,6 @@ export default ({curSession}: UserProps): JSX.Element => {
                             Search Spotify
                         </button>
                     </div>
-
                 </div>
                 {loading ? (
                     <div className="flex h-5/6 justify-center items-center m-auto">
