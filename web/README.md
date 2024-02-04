@@ -4,8 +4,6 @@ Built with Next
 
 ## Commands
 
-* Launch Development Server: ``bun dev``
-* Launch Development Turbo Server: ``bun devt``
-  * skips database connection check for now
-* Build for Production: ``bun run build``
-* Launch Production Server: ``bun prod``
+* Launch Development Server: ``bun/npm run dev``
+* Build for Production: ``bun/npm run build``
+* Launch Production Server: ``bun/npm run prod``
