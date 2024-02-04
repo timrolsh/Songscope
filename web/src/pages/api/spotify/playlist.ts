@@ -2,26 +2,23 @@ import {NextApiRequest, NextApiResponse} from "next";
 import spotifyApi from "./wrapper";
 
 /*
-Given a string that the user will pass in by a post request where the body looks like this:
 body: {
-    search_string: "search string"
+    playlist_id: "search string"
 }
-
-Use the Spotify API to search for a song and return its results
 */
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method !== "POST") {
         response.status(400).send("Invalid request method.");
         return;
     }
-    const search_string = request.body.search_string;
-    if (search_string === undefined) {
-        response.status(400).send("No search string provided.");
+    const playlist_id = request.body.playlist_id;
+    if (playlist_id === undefined) {
+        response.status(400).send("No playlist ID provided.");
         return;
     }
 
     try {
-        const result = await spotifyApi.searchContent(search_string);
+        const result = await spotifyApi.getSongsFromPlaylist(playlist_id);
         response.status(200).json(result);
     } catch (error) {
         console.error("SONGSCOPE: Error while searching content: ", error);
