@@ -2,9 +2,15 @@ import Image from "next/image";
 import {IoMdStarHalf} from "react-icons/io";
 import {IoMdStar} from "react-icons/io";
 import {IoMdClose} from "react-icons/io";
-import {IoPlayCircleOutline} from "react-icons/io5";
+import {IoPlayCircleOutline, IoPauseCircleOutline} from "react-icons/io5";
 
-import {useState, useRef, useEffect} from "react";
+import {useWavesurfer} from "@wavesurfer/react";
+
+import {theme} from "../../tailwind.config";
+
+const tailwindColors = theme.extend.colors;
+
+import {useState, useRef, useEffect, useCallback} from "react";
 import clsx from "clsx";
 
 export function Modal({
@@ -56,21 +62,25 @@ interface Review {
 }
 
 function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
-    const audioRef = useRef<HTMLAudioElement | null>(null);
-    const [audioPlaying, setAudioPlaying] = useState(false);
+    const containerRef = useRef<any>();
 
-    const playAudio = () => {
-        if (audioPlaying) {
-            audioRef.current?.pause();
-        } else {
-            // Check if audioRef.current is not null before accessing its properties
-            if (audioRef.current) {
-                audioRef.current.currentTime = 0;
-                audioRef.current.play();
-            }
-        }
-        setAudioPlaying(!audioPlaying);
+    const {wavesurfer, isReady, isPlaying, currentTime} = useWavesurfer({
+        container: containerRef,
+        url: songMetadata.previewUrl,
+        waveColor: tailwindColors.secondary,
+        progressColor: tailwindColors.primary,
+        dragToSeek: true,
+        height: "auto",
+        barWidth: 1.5,
+        barGap: 1,
+        barRadius: 5,
+        cursorColor: tailwindColors.accent.neutral
+    });
+
+    const onPlayPause = () => {
+        wavesurfer && wavesurfer.playPause();
     };
+
     const [reviewText, setReviewText] = useState("");
     // TODO: Beautify the datetime returned and format it in human-readable format
     const [reviews, setReviews] = useState<Review[]>([]);
@@ -128,7 +138,7 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
 
     return (
         <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
-            <div className="flex flex-col place-content-between h-full w-2/5">
+            <div className="flex flex-col place-content-between h-full w-2/5 overflow-scroll">
                 <div>
                     <Image
                         src={songMetadata.albumArtUrl}
@@ -181,57 +191,24 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
                     </div>
                 </div>
                 {songMetadata.previewUrl && (
-                    // TODO --> Replace this with a custom audio player that shifts and allows users to seek through the preview
                     // Would be cool to have users able to link to certain parts of the song within comments
-                    <div className="flex flex-row space-x-2 mt-auto mb-2">
-                        <div className="w-40 h-8 relative">
-                            <div className="w-40 h-px left-0 top-[15.81px] absolute border border-rose-700"></div>
-                            <div className="w-4 h-px left-[3px] top-[8.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[7px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[11px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[16px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-8 h-px left-[20px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[24px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[50px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[45px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[40px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[35px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-8 h-px left-[30px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[25px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[52px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[55px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[58px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[61px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[64px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[68px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[87px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[83px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[79px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[76px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[72px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[128px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[133px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[139px] top-[9.90px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[145px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-8 h-px left-[150px] top-0 absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[156px] top-[5.94px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[126px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[122px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[119px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[115px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[112px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[107px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[86px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-4 h-px left-[91px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-3 h-px left-[95px] top-[11.88px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-5 h-px left-[98px] top-[8.91px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                            <div className="w-6 h-px left-[103px] top-[3.96px] absolute origin-top-left rotate-90 border border-rose-700"></div>
-                        </div>
-                        <audio ref={audioRef} src={songMetadata.previewUrl} />
-                        <IoPlayCircleOutline
-                            className="text-3xl my-auto text-rose-700 hover:cursor-pointer"
-                            onClick={playAudio}
-                        />
+                    <div className="flex flex-row space-x-2 mt-auto mb-2 pt-2">
+                        {/* Look into adding in timestamps later... */}
+                        {/* <div> */}
+                        <div className="w-40 h-8 relative" ref={containerRef} />
+                        {/* <p className="absolute bottom-1 text-sm italic text-accent-neutral/70">{currentTime.toFixed(0)} : {wavesurfer?.getDuration().toFixed(0)}</p> */}
+                        {/* </div> */}
+                        {isPlaying ? (
+                            <IoPauseCircleOutline
+                                className="text-3xl my-auto text-rose-700 hover:cursor-pointer"
+                                onClick={onPlayPause}
+                            />
+                        ) : (
+                            <IoPlayCircleOutline
+                                className="text-3xl my-auto text-rose-700 hover:cursor-pointer"
+                                onClick={onPlayPause}
+                            />
+                        )}
                     </div>
                 )}
             </div>

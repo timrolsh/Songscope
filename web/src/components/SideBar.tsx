@@ -86,8 +86,8 @@ export default ({variant}: {variant: string}) => {
                 {variant == "profile"
                     ? "User Profile"
                     : variant == "settings"
-                    ? "Settings"
-                    : "Dashboard"}
+                      ? "Settings"
+                      : "Dashboard"}
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
             {variant != "settings" && (
@@ -95,15 +95,15 @@ export default ({variant}: {variant: string}) => {
                     {variant == "profile"
                         ? "Favorite Songs"
                         : variant == "settings"
-                        ? "Config"
-                        : "Top Songs"}
+                          ? "Config"
+                          : "Top Songs"}
                 </h3>
             )}
             {variant == "profile"
                 ? renderProfileBody()
                 : variant == "settings"
-                ? renderSettingsBody()
-                : renderDashboardBody()}
+                  ? renderSettingsBody()
+                  : renderDashboardBody()}
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4"></hr>
             <div className="w-full h-52 flex flex-col mb-4">
                 <div className="my-auto flex flex-col h-full place-content-evenly">
