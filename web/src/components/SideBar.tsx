@@ -13,25 +13,44 @@ const LinkStyles =
 const SettingsLinkStyles =
     "rounded-lg hover:bg-accent-neutral/50 transition-all py-2 hover:font-semibold hover:-translate-y-0.5 text-text/90 hover:text-text text-sm font-normal px-2 flex flex-row space-x-2";
 
-// TODO --> Migrate this to slot architecture for better reusability
+interface Song {
+    id: string;
+    title: string;
+    artist: string;
+}
 
+// TODO --> Migrate this to slot architecture for better reusability
 function renderDashboardBody() {
+    const [hotSongs, setHotSongs] = useState([]);
+    const [topSongs, setTopSongs] = useState([]);
+
+    useEffect(() => {
+        async function fetchSongs() {
+            const hotResponse = await fetch("/api/db/get-hot-reviewed");
+            const hotSongsData = await hotResponse.json();
+            setHotSongs(hotSongsData);
+
+            const topResponse = await fetch("/api/db/get-top-reviewed");
+            const topSongsData = await topResponse.json();
+            setTopSongs(topSongsData);
+        }
+
+        fetchSongs();
+    }, []);
+
     return (
         <>
             <div className="flex flex-col">
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
+                {topSongs.map((song: Song) => (
+                    <SidebarEntry key={song.id} song={song} />
+                ))}
             </div>
             <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
             <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
             <div className="flex flex-col">
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
+                {hotSongs.map((song: Song) => (
+                    <SidebarEntry key={song.id} song={song} />
+                ))}
             </div>
         </>
     );
@@ -66,10 +85,10 @@ function renderProfileBody() {
     return (
         <>
             <div className="flex flex-col">
+                {/* <SidebarEntry />
                 <SidebarEntry />
                 <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
+                <SidebarEntry /> */}
             </div>
         </>
     );
