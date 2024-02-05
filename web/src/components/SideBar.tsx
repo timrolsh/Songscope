@@ -129,7 +129,7 @@ export default ({variant}: {variant: string}) => {
                       : "Dashboard"}
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
-            {variant != "settings" && (
+            {/* {variant != "settings" && (
                 <h3 className="text-xl font-semibold pb-1 text-text/90">
                     {variant == "profile"
                         ? "Favorite Songs"
@@ -137,7 +137,7 @@ export default ({variant}: {variant: string}) => {
                           ? "Config"
                           : "Top Songs"}
                 </h3>
-            )}
+            )} */}
             {variant == "profile"
                 ? renderProfileBody()
                 : variant == "settings"
