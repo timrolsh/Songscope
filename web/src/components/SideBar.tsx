@@ -25,11 +25,11 @@ interface Song {
 function renderDashboardBody() {
     const [hotSongs, setHotSongs] = useState([]);
     const [topSongs, setTopSongs] = useState([]);
-    const [loading, setLoading] = useState(true); // Add a loading state
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
         async function fetchSongs() {
-            setLoading(true); // Start loading
+            setLoading(true);
             try {
                 const hotResponse = await fetch("/api/db/get-hot-reviewed");
                 const hotSongsData = await hotResponse.json();
@@ -41,36 +41,40 @@ function renderDashboardBody() {
             } catch (error) {
                 console.error("Failed to fetch songs:", error);
             }
-            setLoading(false); // Stop loading after data is fetched
+            setLoading(false);
         }
 
         fetchSongs();
     }, []);
 
-    // Show spinner while loading
     if (loading) {
-        return <Spinner />; // Adjust this based on your Spinner component's implementation
+        return <Spinner />;
     }
 
-    // Render songs if not loading
     return (
         <>
-            <div className="flex flex-col">
-                {topSongs.map((song: Song) => (
-                    <SidebarEntry key={song.id} song={song} />
-                ))}
-            </div>
-            <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
-            <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
-            <div className="flex flex-col">
-                {hotSongs.map((song: Song) => (
-                    <SidebarEntry key={song.id} song={song} />
-                ))}
-            </div>
+            {topSongs.length > 0 && (
+                <div className="flex flex-col">
+                    <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
+                    {topSongs.map((song: Song) => (
+                        <SidebarEntry key={song.id} song={song} />
+                    ))}
+                </div>
+            )}
+            {hotSongs.length > 0 && (
+                <>
+                    <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
+                    <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
+                    <div className="flex flex-col">
+                        {hotSongs.map((song: Song) => (
+                            <SidebarEntry key={song.id} song={song} />
+                        ))}
+                    </div>
+                </>
+            )}
         </>
     );
 }
-
 
 function renderSettingsBody() {
     return (
