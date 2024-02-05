@@ -7,6 +7,8 @@ import {MdOutlineCompareArrows} from "react-icons/md";
 import {MdInfoOutline} from "react-icons/md";
 import {HiOutlineCog8Tooth} from "react-icons/hi2";
 import {useState, useEffect} from "react";
+import Spinner from "@/components/Spinner";
+
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
@@ -23,21 +25,34 @@ interface Song {
 function renderDashboardBody() {
     const [hotSongs, setHotSongs] = useState([]);
     const [topSongs, setTopSongs] = useState([]);
+    const [loading, setLoading] = useState(true); // Add a loading state
 
     useEffect(() => {
         async function fetchSongs() {
-            const hotResponse = await fetch("/api/db/get-hot-reviewed");
-            const hotSongsData = await hotResponse.json();
-            setHotSongs(hotSongsData);
+            setLoading(true); // Start loading
+            try {
+                const hotResponse = await fetch("/api/db/get-hot-reviewed");
+                const hotSongsData = await hotResponse.json();
+                setHotSongs(hotSongsData);
 
-            const topResponse = await fetch("/api/db/get-top-reviewed");
-            const topSongsData = await topResponse.json();
-            setTopSongs(topSongsData);
+                const topResponse = await fetch("/api/db/get-top-reviewed");
+                const topSongsData = await topResponse.json();
+                setTopSongs(topSongsData);
+            } catch (error) {
+                console.error("Failed to fetch songs:", error);
+            }
+            setLoading(false); // Stop loading after data is fetched
         }
 
         fetchSongs();
     }, []);
 
+    // Show spinner while loading
+    if (loading) {
+        return <Spinner />; // Adjust this based on your Spinner component's implementation
+    }
+
+    // Render songs if not loading
     return (
         <>
             <div className="flex flex-col">
@@ -55,6 +70,7 @@ function renderDashboardBody() {
         </>
     );
 }
+
 
 function renderSettingsBody() {
     return (
