@@ -7,32 +7,71 @@ import {MdOutlineCompareArrows} from "react-icons/md";
 import {MdInfoOutline} from "react-icons/md";
 import {HiOutlineCog8Tooth} from "react-icons/hi2";
 import {useState, useEffect} from "react";
+import Spinner from "@/components/Spinner";
+
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 const SettingsLinkStyles =
     "rounded-lg hover:bg-accent-neutral/50 transition-all py-2 hover:font-semibold hover:-translate-y-0.5 text-text/90 hover:text-text text-sm font-normal px-2 flex flex-row space-x-2";
 
-// TODO --> Migrate this to slot architecture for better reusability
+interface Song {
+    id: string;
+    title: string;
+    artist: string;
+}
 
+// TODO --> Migrate this to slot architecture for better reusability
 function renderDashboardBody() {
+    const [hotSongs, setHotSongs] = useState([]);
+    const [topSongs, setTopSongs] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchSongs() {
+            setLoading(true);
+            try {
+                const hotResponse = await fetch("/api/db/get-hot-reviewed");
+                const hotSongsData = await hotResponse.json();
+                setHotSongs(hotSongsData);
+
+                const topResponse = await fetch("/api/db/get-top-reviewed");
+                const topSongsData = await topResponse.json();
+                setTopSongs(topSongsData);
+            } catch (error) {
+                console.error("Failed to fetch songs:", error);
+            }
+            setLoading(false);
+        }
+
+        fetchSongs();
+    }, []);
+
+    if (loading) {
+        return <Spinner />;
+    }
+
     return (
         <>
-            <div className="flex flex-col">
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-            </div>
-            <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
-            <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
-            <div className="flex flex-col">
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-            </div>
+            {topSongs.length > 0 && (
+                <div className="flex flex-col">
+                    <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
+                    {topSongs.map((song: Song) => (
+                        <SidebarEntry key={song.id} song={song} />
+                    ))}
+                </div>
+            )}
+            {hotSongs.length > 0 && (
+                <>
+                    <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
+                    <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
+                    <div className="flex flex-col">
+                        {hotSongs.map((song: Song) => (
+                            <SidebarEntry key={song.id} song={song} />
+                        ))}
+                    </div>
+                </>
+            )}
         </>
     );
 }
@@ -66,10 +105,10 @@ function renderProfileBody() {
     return (
         <>
             <div className="flex flex-col">
+                {/* <SidebarEntry />
                 <SidebarEntry />
                 <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
+                <SidebarEntry /> */}
             </div>
         </>
     );
