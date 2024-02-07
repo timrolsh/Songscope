@@ -1,6 +1,6 @@
 import SpotifyWebApi from "spotify-web-api-node";
 import dotenv from "dotenv";
-import {SongMetadata} from "@/pages/user";
+import {SongMetadata} from "@/types";
 dotenv.config({path: `${__dirname}/../../../.env`});
 
 var spotifyWebApi = new SpotifyWebApi({
@@ -45,6 +45,7 @@ class SpotifyApi {
         };
     }
 
+    // TODO, add in market
     async getSong(songId: string): Promise<SongMetadata> {
         const result = await executeMethod(spotifyWebApi.getTrack.bind(spotifyWebApi), songId);
         return {
@@ -60,6 +61,29 @@ class SpotifyApi {
             previewUrl: result.body.preview_url,
             availableMarkets: result.body.available_markets
         };
+    }
+
+    async getMultipleSongs(songIds: string[]): Promise<SongMetadata[]> {
+        console.log("SONGSCOPE: Getting multiple songs", songIds);
+        const result = await executeMethod(spotifyWebApi.getTracks.bind(spotifyWebApi), songIds);
+        return result.body.tracks.map((song: any) => {
+            let albumArtUrl = song.album.images.length
+                ? song.album.images[0].url
+                : "/no-album-cover.jpg";
+            return {
+                id: song.id,
+                name: song.name,
+                artist: song.artists[0].name,
+                artist_id: song.artists[0].id,
+                album: song.album.name,
+                album_id: song.album.id,
+                releaseDate: song.album.release_date,
+                albumArtUrl: albumArtUrl,
+                popularity: song.popularity,
+                previewUrl: song.preview_url,
+                availableMarkets: song.available_markets
+            };
+        });
     }
 
     async getSongsFromAlbum(albumId: string): Promise<SongMetadata[]> {

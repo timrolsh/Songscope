@@ -10,6 +10,7 @@ interface SongReviewRow extends RowDataPacket {
     artist: string;
 }
 
+// TODO --> Fix this interface type and migrate to types.ts
 interface SongMetadata {
     id: string;
     title: string;
