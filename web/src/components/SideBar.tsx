@@ -1,25 +1,18 @@
 import Link from "next/link";
 import SidebarEntry from "./SidebarEntry";
 import {signOut} from "next-auth/react";
-
+import {Song} from "@/types";
 import {MdOutlineSecurity} from "react-icons/md";
 import {MdOutlineCompareArrows} from "react-icons/md";
 import {MdInfoOutline} from "react-icons/md";
 import {HiOutlineCog8Tooth} from "react-icons/hi2";
-import {useState, useEffect} from "react";
 import Spinner from "@/components/Spinner";
-
+import {useEffect, useState} from "react";
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 const SettingsLinkStyles =
     "rounded-lg hover:bg-accent-neutral/50 transition-all py-2 hover:font-semibold hover:-translate-y-0.5 text-text/90 hover:text-text text-sm font-normal px-2 flex flex-row space-x-2";
-
-interface Song {
-    id: string;
-    title: string;
-    artist: string;
-}
 
 // TODO --> Migrate this to slot architecture for better reusability
 function renderDashboardBody() {
@@ -56,16 +49,18 @@ function renderDashboardBody() {
             {topSongs.length > 0 && (
                 <div className="flex flex-col">
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
-                    {topSongs.map((song: Song) => (
-                        <SidebarEntry key={song.id} song={song} />
-                    ))}
+                    <div className="flex flex-col overflow-y-scroll">
+                        {topSongs.map((song: Song) => (
+                            <SidebarEntry key={song.id} song={song} />
+                        ))}
+                    </div>
                 </div>
             )}
             {hotSongs.length > 0 && (
                 <>
                     <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
-                    <div className="flex flex-col">
+                    <div className="flex flex-col overflow-y-scroll">
                         {hotSongs.map((song: Song) => (
                             <SidebarEntry key={song.id} song={song} />
                         ))}
@@ -114,11 +109,7 @@ function renderProfileBody() {
     );
 }
 
-export default ({variant}: {variant: string}) => {
-    const [name, setName] = useState("Loading...");
-
-    // TODO --> session migration
-
+export default ({variant, user}: {variant: string; user: any}) => {
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
             <h1 className="text-text text-2xl font-semibold pt-4 pb-2">
@@ -153,13 +144,15 @@ export default ({variant}: {variant: string}) => {
                     >
                         Home
                     </Link>
-                    <Link
-                        className={LinkStyles}
-                        href="/profile"
-                        aria-disabled={variant === "profile"}
-                    >
-                        Profile
-                    </Link>
+                    {user && (
+                        <Link
+                            className={LinkStyles}
+                            href={"/profile/" + user.id}
+                            aria-disabled={variant === "profile"}
+                        >
+                            Profile
+                        </Link>
+                    )}
                     <Link
                         className={LinkStyles}
                         href="/settings/general"

@@ -12,6 +12,8 @@ const tailwindColors = theme.extend.colors;
 
 import {useState, useRef, useEffect, useCallback} from "react";
 import clsx from "clsx";
+import {SongMetadata, Review} from "@/types";
+import {User} from "@/types";
 
 export function Modal({
     showModal,
@@ -21,9 +23,10 @@ export function Modal({
 }: {
     showModal: boolean;
     setShowModal: (value: boolean) => void;
-    songMetadata: any;
-    user: any;
+    songMetadata: SongMetadata;
+    user: User;
 }) {
+    console.log("Modal user: ", user);
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
     const [display, setDisplay] = useState(false);
@@ -55,12 +58,6 @@ export function Modal({
     );
 }
 
-interface Review {
-    comment_text: string;
-    name: string;
-    time: string;
-}
-
 function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
     const containerRef = useRef<any>();
 
@@ -87,7 +84,6 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
 
     async function getReviews() {
         const res = await fetch(`/api/db/get-reviews?songid=${songMetadata.id}`);
-        console.log("Received response: ", res);
         if (res.status !== 200) console.log("Non 200 code received");
 
         let data: Review[];
@@ -122,6 +118,7 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
     async function submitReview(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault();
         const formData = new FormData(event.currentTarget);
+        console.log("Appending userid: ", userId);
         formData.append("userid", userId);
         formData.append("songid", songMetadata.id);
         const data: Record<string, string> = {};
@@ -277,7 +274,15 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
     );
 }
 
-export default ({rating = false, metadata, user}: {rating?: boolean; metadata: any; user: any}) => {
+export default ({
+    rating = false,
+    metadata,
+    user
+}: {
+    rating?: boolean;
+    metadata: any;
+    user: User;
+}) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
 

@@ -1,10 +1,32 @@
-import { SongMetadata } from "./pages/user";
+export interface SongMetadata {
+    id: string;
+    name: string;
+    artist: string;
+    artist_id: string;
+    album: string;
+    album_id: string;
+    albumArtUrl: string;
+    releaseDate: string;
+    popularity: string;
+    previewUrl: string;
+    availableMarkets: string[];
+}
 
-export interface Profile {
-    user: User;
-    pinnedSongs: string[]; // array of songids
-    favoritedSongs: string[]; // array of songids
-    
+export interface Song {
+    id: string;
+    title: string;
+    artist: string;
+}
+
+export interface Review {
+    comment_text: string;
+    name: string;
+    time: string;
+}
+
+export interface UserProfileSongs {
+    pinnedSongs: SongMetadata[];
+    favoritedSongs: SongMetadata[];
 }
 
 export interface User {
