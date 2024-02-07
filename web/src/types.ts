@@ -19,6 +19,7 @@ export interface Song {
 }
 
 export interface Review {
+    id: string;
     comment_text: string;
     name: string;
     time: string;

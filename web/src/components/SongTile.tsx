@@ -219,7 +219,7 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
                                     <div className="w-full flex flex-col py-1" key={idx}>
                                         <div className="flex flex-row space-x-2 pl-1">
                                             <h3 className="font-semibold text-text/90">
-                                                &gt; {rvw.name}{" "}
+                                                &gt; <a className="hover:text-text font-bold" href={"/profile/" + rvw.id}>{rvw.name}</a>{" "}
                                                 <span className="italic font-normal">says </span>
                                                 <span className="font-normal text-text/90">
                                                     "{rvw.comment_text}"
@@ -277,7 +277,7 @@ function SongInfo({songMetadata, userId}: {songMetadata: any; userId: any}) {
 export default ({
     rating = false,
     metadata,
-    user
+    user,
 }: {
     rating?: boolean;
     metadata: any;
@@ -297,7 +297,7 @@ export default ({
                 />
             )}
             <div
-                className="select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20"
+                className="mx-auto select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20"
                 onClick={() => setShowModal(!showModal)}
             >
                 <Image
