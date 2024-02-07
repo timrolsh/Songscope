@@ -142,19 +142,26 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                 </div>
                             </div>
                             <hr className="w-7/8 mr-auto border-t-2 my-6 border-secondary"></hr>
-                            <div>
+                            <div className="my-auto">
                                 <h2 className="text-2xl pl-2 font-bold">Pinned Songs</h2>
                                 <div className="flex flex-row w-full mx-auto place-content-between pt-5">
                                     {!pinnedFavoritesLoading && pinnedSongs ? (
-                                        pinnedSongs
-                                            .slice(0, 4)
-                                            .map((song) => (
-                                                <SongTile
-                                                    key={song.id}
-                                                    metadata={song}
-                                                    user={curSession.user as User}
-                                                />
-                                            ))
+                                        pinnedSongs.length ? (
+                                            pinnedSongs
+                                                .map((song) => (
+                                                    <SongTile
+                                                        key={song.id}
+                                                        metadata={song}
+                                                        user={curSession.user as User}
+                                                    />
+                                                ))
+                                        ) : (
+                                            <div className="w-full flex place-content-center h-80">
+                                                <h3 className="text-text/50 italic m-auto">
+                                                    No pinned songs yet!
+                                                </h3>
+                                            </div>
+                                        )
                                     ) : (
                                         <div className="h-80 flex place-content-center mx-auto">
                                             <Spinner />
