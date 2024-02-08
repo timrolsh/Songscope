@@ -9,6 +9,7 @@ import { IoPauseCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
 import Link from "next/link";
 
 import {theme} from "../../tailwind.config";
+import { CommentTimestamp } from "@/dates";
 const tailwindColors = theme.extend.colors;
 
 export default function({songMetadata, userId, dataEmitter }: {songMetadata: SongMetadata; userId: string, dataEmitter?: Function}) {
@@ -283,7 +284,7 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
                                             </h3>
                                         </div>
                                         <h4 className="font-light italic text-text/40 pl-1">
-                                            {rvw.time}
+                                            {CommentTimestamp(rvw.time)}
                                         </h4>
                                     </div>
                                 );

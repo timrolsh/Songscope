@@ -108,7 +108,8 @@ function renderProfileBody(songs?: SongMetadata[]) {
 
     return (
         <>
-            <div className="flex flex-col">
+            <h3 className="text-text/90 text-xl font-semibold pb-2">Favorite Songs</h3>
+            <div className="flex flex-col overflow-scroll">
                 {
                     songs.map((song) => {
                         return <SidebarEntry key={song.id} song={song} />;

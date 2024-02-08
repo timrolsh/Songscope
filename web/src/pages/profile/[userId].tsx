@@ -11,6 +11,7 @@ import {User, UserProfileSongs} from "@/types";
 import {Session} from "@auth/core/types";
 import {useEffect, useState} from "react";
 import ReviewTile from "@/components/ReviewTile";
+import { AccountJoinTimestamp } from "@/dates";
 
 interface ProfileProps {
     curSession: Session;
@@ -119,14 +120,13 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                         <h1 className="font-bold text-2xl mx-auto">
                                             {userProfile.name}
                                         </h1>
-                                        <h3>
-                                            I love music, and I love sharing my thoughts with the
-                                            world! Everyone should know what I think about all the
-                                            songs, and I have the best music taste ever!
+                                        {/* TODO --> Improve placeholder */}
+                                        <h3 className="text-text/90">
+                                            {userProfile.bio || "No bio yet!"}
                                         </h3>
                                     </div>
                                     <h3 className="text-text/50 italic font-light sm:pb-1">
-                                        Scoping out songs since: Nov 2, 2023
+                                        Scoping out songs since: {AccountJoinTimestamp(userProfile.join_date)}
                                     </h3>
                                 </div>
                                 <div className="border-l-2 border-l-accent-neutral/20 pl-6 w-2/6 sm:w-1/6">
