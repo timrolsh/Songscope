@@ -59,34 +59,34 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
         });
     }, []);
 
-    useEffect(() => {
-        const fetchFavoritesPinned = async () => {
-            setPinnedFavoritesLoading(true);
-            const res = await fetch("/api/db/fetch-profile-songs", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({profile_id: userId})
-            });
-
-            if (res.ok) {
-                const data: UserProfileSongs = await res.json();
-                setPinnedSongs(data.pinnedSongs);
-                setFavoriteSongs(data.favoritedSongs);
-            } else {
-                // TODO --> Redirect to error page... log error
-                throw new Error(
-                    "Error fetching favorite/pinned songs: " + res.status + " " + res.statusText
-                );
-            }
-
-            setPinnedFavoritesLoading(false);
-        };
-
-        fetchFavoritesPinned().catch((error) => {
-            console.error("Error fetching songs:", error);
+    async function fetchFavoritesPinned() {
+        const res = await fetch("/api/db/fetch-profile-songs", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({profile_id: userId})
         });
+
+        if (res.ok) {
+            const data: UserProfileSongs = await res.json();
+            setPinnedSongs(data.pinnedSongs);
+            setFavoriteSongs(data.favoritedSongs);
+        } else {
+            // TODO --> Redirect to error page... log error
+            throw new Error(
+                "Error fetching favorite/pinned songs: " + res.status + " " + res.statusText
+            );
+        }
+
+        setPinnedFavoritesLoading(false);
+    }
+
+    // TODO --> Try and get this to work instantaneously on pin change...
+    useEffect(() => {
+        fetchFavoritesPinned();
+        const interval = setInterval(fetchFavoritesPinned, 2000);
+        return () => clearInterval(interval);
     }, []);
 
     return (

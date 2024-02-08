@@ -120,15 +120,6 @@ export default ({variant, user}: {variant: string; user: any}) => {
                       : "Dashboard"}
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
-            {/* {variant != "settings" && (
-                <h3 className="text-xl font-semibold pb-1 text-text/90">
-                    {variant == "profile"
-                        ? "Favorite Songs"
-                        : variant == "settings"
-                          ? "Config"
-                          : "Top Songs"}
-                </h3>
-            )} */}
             {variant == "profile"
                 ? renderProfileBody()
                 : variant == "settings"
@@ -148,7 +139,7 @@ export default ({variant, user}: {variant: string; user: any}) => {
                         <Link
                             className={LinkStyles}
                             href={"/profile/" + user.id}
-                            aria-disabled={variant === "profile"}
+                            aria-disabled={variant === "profile"} // Make this non-disabled if you are on someone else's profile that isn't your own
                         >
                             Profile
                         </Link>
