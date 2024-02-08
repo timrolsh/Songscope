@@ -1,22 +1,8 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {db} from "../auth/[...nextauth]";
 import spotifyApi from "../spotify/wrapper";
-import {RowDataPacket} from "mysql2";
 
-interface SongReviewRow extends RowDataPacket {
-    id: string;
-    num_reviews: number;
-    title: string;
-    artist: string;
-}
-
-// TODO --> Fix this interface type and migrate to types.ts
-interface SongMetadata {
-    id: string;
-    title: string;
-    artist: string;
-    num_reviews: number;
-}
+import { SongReviewRow, EnrichedSongMetadata } from "./get-top-reviewed";
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
     if (request.method === "GET") {
@@ -33,7 +19,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
     }
 }
 
-async function fetchHotSongs(limit: number): Promise<SongMetadata[] | null> {
+async function fetchHotSongs(limit: number): Promise<EnrichedSongMetadata[] | null> {
     const daysAgo = 7; // Number of days to consider a song as hot
     const recentDate = new Date();
     recentDate.setDate(recentDate.getDate() - daysAgo);
@@ -53,9 +39,7 @@ async function fetchHotSongs(limit: number): Promise<SongMetadata[] | null> {
             rows.map(async (row) => {
                 const metadata = await spotifyApi.getSong(row.spotify_work_id);
                 return {
-                    id: metadata.id,
-                    title: metadata.name,
-                    artist: metadata.artist,
+                    ...metadata,
                     num_reviews: row.num_reviews
                 };
             })

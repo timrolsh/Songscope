@@ -1,13 +1,14 @@
 import Link from "next/link";
 import SidebarEntry from "./SidebarEntry";
 import {signOut} from "next-auth/react";
-import {Song} from "@/types";
+import {SongMetadata} from "@/types";
 import {MdOutlineSecurity} from "react-icons/md";
 import {MdOutlineCompareArrows} from "react-icons/md";
 import {MdInfoOutline} from "react-icons/md";
 import {HiOutlineCog8Tooth} from "react-icons/hi2";
 import Spinner from "@/components/Spinner";
 import {useEffect, useState} from "react";
+import { EnrichedSongMetadata } from "@/pages/api/db/get-top-reviewed";
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
@@ -16,8 +17,8 @@ const SettingsLinkStyles =
 
 // TODO --> Migrate this to slot architecture for better reusability
 function renderDashboardBody() {
-    const [hotSongs, setHotSongs] = useState([]);
-    const [topSongs, setTopSongs] = useState([]);
+    const [hotSongs, setHotSongs] = useState<EnrichedSongMetadata[]>([]);
+    const [topSongs, setTopSongs] = useState<EnrichedSongMetadata[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
@@ -50,7 +51,7 @@ function renderDashboardBody() {
                 <div className="flex flex-col">
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
                     <div className="flex flex-col overflow-y-scroll">
-                        {topSongs.map((song: Song) => (
+                        {topSongs.map((song: SongMetadata) => (
                             <SidebarEntry key={song.id} song={song} />
                         ))}
                     </div>
@@ -61,7 +62,7 @@ function renderDashboardBody() {
                     <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
                     <div className="flex flex-col overflow-y-scroll">
-                        {hotSongs.map((song: Song) => (
+                        {hotSongs.map((song: SongMetadata) => (
                             <SidebarEntry key={song.id} song={song} />
                         ))}
                     </div>
@@ -96,20 +97,29 @@ function renderSettingsBody() {
     );
 }
 
-function renderProfileBody() {
+function renderProfileBody(songs?: SongMetadata[]) {
+    if(!songs || songs.length === 0) {
+        return (
+            <div className="text-text/70 italic text-md font-semibold pt-2">
+                No favorite songs yet!
+            </div>
+        )
+    }
+
     return (
         <>
             <div className="flex flex-col">
-                {/* <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry />
-                <SidebarEntry /> */}
+                {
+                    songs.map((song) => {
+                        return <SidebarEntry key={song.id} song={song} />;
+                    })
+                }
             </div>
         </>
     );
 }
 
-export default ({variant, user}: {variant: string; user: any}) => {
+export default ({variant, user, favoriteSongs}: {variant: string; user: any; favoriteSongs?: SongMetadata[];}) => {
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
             <h1 className="text-text text-2xl font-semibold pt-4 pb-2">
@@ -121,7 +131,7 @@ export default ({variant, user}: {variant: string; user: any}) => {
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
             {variant == "profile"
-                ? renderProfileBody()
+                ? renderProfileBody(favoriteSongs)
                 : variant == "settings"
                   ? renderSettingsBody()
                   : renderDashboardBody()}

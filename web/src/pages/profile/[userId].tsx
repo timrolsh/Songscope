@@ -96,7 +96,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
 
     return (
         <div className="flex flex-row h-full">
-            <SideBar variant={"profile"} user={curSession.user} />
+            <SideBar variant={"profile"} user={curSession.user} favoriteSongs={favoriteSongs}/>
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <div className="pt-8 px-8">
                     {!userProfileLoading && userProfile ? (
