@@ -26,6 +26,12 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
     const [pinnedSongs, setPinnedSongs] = useState<SongMetadata[]>();
     const [favoriteSongs, setFavoriteSongs] = useState<SongMetadata[]>();
 
+    const [pinfavChange, setPinfavChange] = useState<boolean>(false);
+
+    function dataEmitter() {
+        setPinfavChange(!pinfavChange);
+    }
+
     // TODO --> Deal with this...
     const [reviewsLoading, setReviewsLoading] = useState<boolean>(true);
     const [reviews, setReviews] = useState<any>();
@@ -59,35 +65,34 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
         });
     }, []);
 
-    async function fetchFavoritesPinned() {
-        const res = await fetch("/api/db/fetch-profile-songs", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({profile_id: userId})
-        });
-
-        if (res.ok) {
-            const data: UserProfileSongs = await res.json();
-            setPinnedSongs(data.pinnedSongs);
-            setFavoriteSongs(data.favoritedSongs);
-        } else {
-            // TODO --> Redirect to error page... log error
-            throw new Error(
-                "Error fetching favorite/pinned songs: " + res.status + " " + res.statusText
-            );
+    useEffect(() => {
+        const fetchFavoritesPinned = async () => {
+            const res = await fetch("/api/db/fetch-profile-songs", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({profile_id: userId})
+            });
+    
+            if (res.ok) {
+                const data: UserProfileSongs = await res.json();
+                setPinnedSongs(data.pinnedSongs);
+                setFavoriteSongs(data.favoritedSongs);
+            } else {
+                // TODO --> Redirect to error page... log error
+                throw new Error(
+                    "Error fetching favorite/pinned songs: " + res.status + " " + res.statusText
+                );
+            }
+    
+            setPinnedFavoritesLoading(false);
         }
 
-        setPinnedFavoritesLoading(false);
-    }
-
-    // TODO --> Try and get this to work instantaneously on pin change...
-    useEffect(() => {
-        fetchFavoritesPinned();
-        const interval = setInterval(fetchFavoritesPinned, 2000);
-        return () => clearInterval(interval);
-    }, []);
+        fetchFavoritesPinned().catch((error) => {
+            console.error("Error fetching favorite/pinned songs:", error);
+        });
+    }, [pinfavChange]);
 
     return (
         <div className="flex flex-row h-full">
@@ -153,6 +158,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                                         key={song.id}
                                                         metadata={song}
                                                         user={curSession.user as User}
+                                                        dataEmitter={dataEmitter}
                                                     />
                                                 ))
                                         ) : (

@@ -11,7 +11,7 @@ import Link from "next/link";
 import {theme} from "../../tailwind.config";
 const tailwindColors = theme.extend.colors;
 
-export default function({songMetadata, userId}: {songMetadata: SongMetadata; userId: string}) {
+export default function({songMetadata, userId, dataEmitter }: {songMetadata: SongMetadata; userId: string, dataEmitter?: Function}) {
     const [pinned, setPinned] = useState(false);
     const [favorite, setFavorite] = useState(false);
     const [pinfavFetched, setPinfavFetched] = useState(false);
@@ -61,7 +61,10 @@ export default function({songMetadata, userId}: {songMetadata: SongMetadata; use
 
         res.then((res) => {
             if (res.status !== 200) console.log("Non 200 code received");
-            if(res.ok) setPinned(!pinned);
+            if(res.ok) {
+                setPinned(!pinned);
+                if (dataEmitter) dataEmitter();
+            }
             else {
                 console.error("Error toggling pin/fav (db): ", res.status, res.statusText)
             }
@@ -81,7 +84,10 @@ export default function({songMetadata, userId}: {songMetadata: SongMetadata; use
 
         res.then((res) => {
             if (res.status !== 200) console.log("Non 200 code received");
-            if(res.ok) setFavorite(!favorite);
+            if(res.ok) {
+                setFavorite(!favorite);
+                if (dataEmitter) dataEmitter();
+            }
             else {
                 console.error("Error toggling pin/fav (db): ", res.status, res.statusText)
             }

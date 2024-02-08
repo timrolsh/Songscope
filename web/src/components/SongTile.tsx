@@ -9,10 +9,12 @@ export default ({
     rating = false,
     metadata,
     user,
+    dataEmitter
 }: {
     rating?: boolean;
     metadata: any;
     user: User;
+    dataEmitter?: Function;
 }) => {
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
@@ -25,6 +27,7 @@ export default ({
                     setShowModal={setShowModal}
                     songMetadata={metadata}
                     user={user}
+                    dataEmitter={dataEmitter}
                 />
             )}
             <div
