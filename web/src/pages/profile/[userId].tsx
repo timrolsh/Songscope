@@ -5,7 +5,7 @@ import SideBar from "../../components/SideBar";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./../api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
-import {SongMetadata} from "@/types";
+import {ProfileStatistics, SongMetadata} from "@/types";
 import Spinner from "@/components/Spinner";
 import {User, UserProfileSongs} from "@/types";
 import {Session} from "@auth/core/types";
@@ -22,14 +22,20 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
     // Migrate this to use React Suspense eventually... couldn't get it working
     const [pinnedFavoritesLoading, setPinnedFavoritesLoading] = useState<boolean>(true);
     const [userProfileLoading, setUserProfileLoading] = useState<boolean>(true);
+    const [sideStatsLoading, setSideStatsLoading] = useState<boolean>(true);
 
     const [userProfile, setUserProfile] = useState<User>();
     const [pinnedSongs, setPinnedSongs] = useState<SongMetadata[]>();
     const [favoriteSongs, setFavoriteSongs] = useState<SongMetadata[]>();
 
     const [pinfavChange, setPinfavChange] = useState<boolean>(false);
+    const [sideStatsUpdate, setSideStatsUpdate] = useState<boolean>(false);
+
+    const [sideStatistics, setSideStatistics] = useState<ProfileStatistics>();
 
     function dataEmitter() {
+        // TODO --> This is a bit of a hacky way to force a re-render of the component... sidestats update could use more polishing
+        setSideStatsUpdate(!sideStatsUpdate);
         setPinfavChange(!pinfavChange);
     }
 
@@ -80,13 +86,13 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                 const data: UserProfileSongs = await res.json();
                 setPinnedSongs(data.pinnedSongs);
                 setFavoriteSongs(data.favoritedSongs);
+                fetchProfileStatistics();
             } else {
                 // TODO --> Redirect to error page... log error
                 throw new Error(
                     "Error fetching favorite/pinned songs: " + res.status + " " + res.statusText
                 );
             }
-    
             setPinnedFavoritesLoading(false);
         }
 
@@ -94,6 +100,33 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
             console.error("Error fetching favorite/pinned songs:", error);
         });
     }, [pinfavChange]);
+
+    const fetchProfileStatistics = async () => {
+        const res = await fetch("/api/db/get-user-statistics", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({user_id: userId})
+        });
+
+        if (res.ok) {
+            const data = await res.json();
+            setSideStatistics(data);
+            setSideStatsLoading(false);
+        } else {
+            // TODO --> Redirect to error page... log error
+            throw new Error(
+                "Error fetching user statistics: " + res.status + " " + res.statusText
+            );
+        }
+    };
+
+    useEffect(() => {
+        fetchProfileStatistics().catch((error) => {
+            console.error("Error fetching user statistics:", error);
+        });
+    }, [sideStatsUpdate]);
 
     return (
         <div className="flex flex-row h-full">
@@ -136,11 +169,24 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                     <div className="flex flex-col space-y-2">
                                         <div className="flex flex-row space-x-4">
                                             <div className="flex flex-col italic space-y-2">
-                                                <h3>Lifetime Stars: 1432</h3>
+                                                {
+                                                    !sideStatsLoading && sideStatistics ? (
+                                                        <>
+                                                            <h3>Total Comments: {sideStatistics.total_comments}</h3>
+                                                            <h3>Total Favorites: {sideStatistics.total_favorites}</h3>
+                                                            {/* TODO --> Figure out some nicer fallback for no rating... */}
+                                                            <h3>Average Rating: {(typeof sideStatistics.avg_rating !== 'undefined') ? sideStatistics.avg_rating.toFixed(2) : "N/A"}</h3>
+                                                        </>
+                                                    ) : (
+                                                        <Spinner />
+                                                    )
+                                                }
+                                                
+                                                {/* <h3>Lifetime Stars: 1432</h3>
                                                 <h3>Total Replies: 102</h3>
                                                 <h3>Liked Songs: 3250</h3>
                                                 <h3>Followers: 105</h3>
-                                                <h3>Following: 203</h3>
+                                                <h3>Following: 203</h3> */}
                                             </div>
                                         </div>
                                     </div>

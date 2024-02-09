@@ -168,6 +168,8 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
 
         setReviewText("");
         getReviews();
+
+        if (dataEmitter) dataEmitter();
     }
 
     return (

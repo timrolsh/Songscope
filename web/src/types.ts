@@ -39,3 +39,11 @@ export interface User {
     join_date: string;
     role: string | undefined; // as of right now, this is undefined (no admins)
 }
+
+export interface ProfileStatistics {
+    total_comments: number;
+    total_favorites: number;
+    avg_rating?: number;
+    totalFollowers?: number;
+    totalFollowing?: number;
+}
