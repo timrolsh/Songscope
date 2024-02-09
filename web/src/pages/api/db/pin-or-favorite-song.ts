@@ -15,11 +15,11 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 
         try {
             const results = await pinOrFavorite(user_id, song_id, pin_state, fav_state);
-        } catch(e: any) {
+        } catch (e: any) {
             response.status(500).send("Unable to pin/favorite song: ".concat(e.message));
             return;
         }
-        
+
         // TODO --> Swap from JSON stringify to just pure JSON
         response.status(200).send("Toggled Pinned/Favorited Song");
         return;
@@ -29,18 +29,28 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 };
 
-async function pinOrFavorite(user_id: string, song_id: string, pin_state: boolean, fav_state: boolean) {
+async function pinOrFavorite(
+    user_id: string,
+    song_id: string,
+    pin_state: boolean,
+    fav_state: boolean
+) {
     try {
         // TODO --> Again, likely can be optimized. Big query.
         return db.execute(
-                `
+            `
                 INSERT INTO user_song (user_id, spotify_work_id, favorite, pinned, rating)
                 VALUES (?, ?, ?, ?, ?)
                 ON DUPLICATE KEY UPDATE favorite=?, pinned=?, rating=?;
                 `,
-                [user_id,song_id,fav_state,pin_state,null,fav_state,pin_state,null], 
-                (error, results, fields) => {
-                console.log("SONGSCOPE: Updated pin/favorite state for user/song: " + user_id + "/" + song_id);
+            [user_id, song_id, fav_state, pin_state, null, fav_state, pin_state, null],
+            (error, results, fields) => {
+                console.log(
+                    "SONGSCOPE: Updated pin/favorite state for user/song: " +
+                        user_id +
+                        "/" +
+                        song_id
+                );
                 if (error) {
                     console.error("SONGSCOPE: Unable to pin/favorite song", error);
                     return false;

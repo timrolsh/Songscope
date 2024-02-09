@@ -2,7 +2,7 @@ import {NextApiRequest, NextApiResponse} from "next";
 import {db} from "../auth/[...nextauth]";
 import spotifyApi from "../spotify/wrapper";
 
-import { SongReviewRow, EnrichedSongMetadata } from "./get-top-reviewed";
+import {SongReviewRow, EnrichedSongMetadata} from "./get-top-reviewed";
 
 export default async function handler(request: NextApiRequest, response: NextApiResponse) {
     if (request.method === "GET") {

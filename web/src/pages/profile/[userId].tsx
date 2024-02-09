@@ -11,7 +11,7 @@ import {User, UserProfileSongs} from "@/types";
 import {Session} from "@auth/core/types";
 import {useEffect, useState} from "react";
 import ReviewTile from "@/components/ReviewTile";
-import { AccountJoinTimestamp } from "@/dates";
+import {AccountJoinTimestamp} from "@/dates";
 
 interface ProfileProps {
     curSession: Session;
@@ -81,7 +81,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                 },
                 body: JSON.stringify({profile_id: userId})
             });
-    
+
             if (res.ok) {
                 const data: UserProfileSongs = await res.json();
                 setPinnedSongs(data.pinnedSongs);
@@ -94,7 +94,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                 );
             }
             setPinnedFavoritesLoading(false);
-        }
+        };
 
         fetchFavoritesPinned().catch((error) => {
             console.error("Error fetching favorite/pinned songs:", error);
@@ -116,9 +116,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
             setSideStatsLoading(false);
         } else {
             // TODO --> Redirect to error page... log error
-            throw new Error(
-                "Error fetching user statistics: " + res.status + " " + res.statusText
-            );
+            throw new Error("Error fetching user statistics: " + res.status + " " + res.statusText);
         }
     };
 
@@ -130,7 +128,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
 
     return (
         <div className="flex flex-row h-full">
-            <SideBar variant={"profile"} user={curSession.user} favoriteSongs={favoriteSongs}/>
+            <SideBar variant={"profile"} user={curSession.user} favoriteSongs={favoriteSongs} />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <div className="pt-8 px-8">
                     {!userProfileLoading && userProfile ? (
@@ -159,7 +157,8 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                         </h3>
                                     </div>
                                     <h3 className="text-text/50 italic font-light sm:pb-1">
-                                        Scoping out songs since: {AccountJoinTimestamp(userProfile.join_date)}
+                                        Scoping out songs since:{" "}
+                                        {AccountJoinTimestamp(userProfile.join_date)}
                                     </h3>
                                 </div>
                                 <div className="border-l-2 border-l-accent-neutral/20 pl-6 w-2/6 sm:w-1/6">
@@ -169,19 +168,31 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                     <div className="flex flex-col space-y-2">
                                         <div className="flex flex-row space-x-4">
                                             <div className="flex flex-col italic space-y-2">
-                                                {
-                                                    !sideStatsLoading && sideStatistics ? (
-                                                        <>
-                                                            <h3>Total Comments: {sideStatistics.total_comments}</h3>
-                                                            <h3>Total Favorites: {sideStatistics.total_favorites}</h3>
-                                                            {/* TODO --> Figure out some nicer fallback for no rating... */}
-                                                            <h3>Average Rating: {(typeof sideStatistics.avg_rating !== 'undefined') ? sideStatistics.avg_rating.toFixed(2) : "N/A"}</h3>
-                                                        </>
-                                                    ) : (
-                                                        <Spinner />
-                                                    )
-                                                }
-                                                
+                                                {!sideStatsLoading && sideStatistics ? (
+                                                    <>
+                                                        <h3>
+                                                            Total Comments:{" "}
+                                                            {sideStatistics.total_comments}
+                                                        </h3>
+                                                        <h3>
+                                                            Total Favorites:{" "}
+                                                            {sideStatistics.total_favorites}
+                                                        </h3>
+                                                        {/* TODO --> Figure out some nicer fallback for no rating... */}
+                                                        <h3>
+                                                            Average Rating:{" "}
+                                                            {typeof sideStatistics.avg_rating !==
+                                                            "undefined"
+                                                                ? sideStatistics.avg_rating.toFixed(
+                                                                      2
+                                                                  )
+                                                                : "N/A"}
+                                                        </h3>
+                                                    </>
+                                                ) : (
+                                                    <Spinner />
+                                                )}
+
                                                 {/* <h3>Lifetime Stars: 1432</h3>
                                                 <h3>Total Replies: 102</h3>
                                                 <h3>Liked Songs: 3250</h3>
@@ -198,15 +209,14 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                 <div className="flex flex-row w-full mx-auto place-content-between pt-5">
                                     {!pinnedFavoritesLoading && pinnedSongs ? (
                                         pinnedSongs.length ? (
-                                            pinnedSongs
-                                                .map((song) => (
-                                                    <SongTile
-                                                        key={song.id}
-                                                        metadata={song}
-                                                        user={curSession.user as User}
-                                                        dataEmitter={dataEmitter}
-                                                    />
-                                                ))
+                                            pinnedSongs.map((song) => (
+                                                <SongTile
+                                                    key={song.id}
+                                                    metadata={song}
+                                                    user={curSession.user as User}
+                                                    dataEmitter={dataEmitter}
+                                                />
+                                            ))
                                         ) : (
                                             <div className="w-full flex place-content-center h-80">
                                                 <h3 className="text-text/50 italic m-auto">

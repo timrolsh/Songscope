@@ -21,12 +21,14 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 async function getProfileStatistics(user_id: string): Promise<ProfileStatistics> {
     try {
         const [statistics] = (
-            await db.promise().query(`
+            await db.promise().query(
+                `
             SELECT 
                 (SELECT COUNT(*) FROM comment WHERE user_id = ?) AS total_comments,
                 (SELECT COUNT(favorite) FROM user_song WHERE favorite = 1 AND user_id = ?) AS total_favorites,
                 (SELECT AVG(rating) FROM user_song WHERE user_id = ?) AS avg_rating`,
-            [user_id, user_id, user_id])
+                [user_id, user_id, user_id]
+            )
         )[0] as RowDataPacket[];
 
         let stats: ProfileStatistics = {

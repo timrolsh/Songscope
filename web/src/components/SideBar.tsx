@@ -8,7 +8,7 @@ import {MdInfoOutline} from "react-icons/md";
 import {HiOutlineCog8Tooth} from "react-icons/hi2";
 import Spinner from "@/components/Spinner";
 import {useEffect, useState} from "react";
-import { EnrichedSongMetadata } from "@/pages/api/db/get-top-reviewed";
+import {EnrichedSongMetadata} from "@/pages/api/db/get-top-reviewed";
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
@@ -98,29 +98,35 @@ function renderSettingsBody() {
 }
 
 function renderProfileBody(songs?: SongMetadata[]) {
-    if(!songs || songs.length === 0) {
+    if (!songs || songs.length === 0) {
         return (
             <div className="text-text/70 italic text-md font-semibold pt-2">
                 No favorite songs yet!
             </div>
-        )
+        );
     }
 
     return (
         <>
             <h3 className="text-text/90 text-xl font-semibold pb-2">Favorite Songs</h3>
             <div className="flex flex-col overflow-scroll">
-                {
-                    songs.map((song) => {
-                        return <SidebarEntry key={song.id} song={song} />;
-                    })
-                }
+                {songs.map((song) => {
+                    return <SidebarEntry key={song.id} song={song} />;
+                })}
             </div>
         </>
     );
 }
 
-export default ({variant, user, favoriteSongs}: {variant: string; user: any; favoriteSongs?: SongMetadata[];}) => {
+export default ({
+    variant,
+    user,
+    favoriteSongs
+}: {
+    variant: string;
+    user: any;
+    favoriteSongs?: SongMetadata[];
+}) => {
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
             <h1 className="text-text text-2xl font-semibold pt-4 pb-2">

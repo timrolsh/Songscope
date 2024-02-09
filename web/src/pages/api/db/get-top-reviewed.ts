@@ -2,7 +2,7 @@ import {db} from "../auth/[...nextauth]";
 import {RowDataPacket} from "mysql2";
 import spotifyApi from "../spotify/wrapper";
 import {NextApiRequest, NextApiResponse} from "next";
-import { SongMetadata } from "@/types";
+import {SongMetadata} from "@/types";
 
 export interface SongReviewRow extends RowDataPacket {
     id: string;

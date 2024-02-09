@@ -1,38 +1,44 @@
-import { Review, SongMetadata } from "@/types";
-import { useWavesurfer } from "@wavesurfer/react";
-import { useEffect, useRef, useState } from "react";
+import {Review, SongMetadata} from "@/types";
+import {useWavesurfer} from "@wavesurfer/react";
+import {useEffect, useRef, useState} from "react";
 
 import Image from "next/image";
-import { BsHeart, BsHeartFill, BsPinAngle, BsPinAngleFill } from "react-icons/bs";
-import { IoMdStar, IoMdStarHalf } from "react-icons/io";
-import { IoPauseCircleOutline, IoPlayCircleOutline } from "react-icons/io5";
+import {BsHeart, BsHeartFill, BsPinAngle, BsPinAngleFill} from "react-icons/bs";
+import {IoMdStar, IoMdStarHalf} from "react-icons/io";
+import {IoPauseCircleOutline, IoPlayCircleOutline} from "react-icons/io5";
 import Link from "next/link";
 
 import {theme} from "../../tailwind.config";
-import { CommentTimestamp } from "@/dates";
+import {CommentTimestamp} from "@/dates";
 const tailwindColors = theme.extend.colors;
 
-export default function({songMetadata, userId, dataEmitter }: {songMetadata: SongMetadata; userId: string, dataEmitter?: Function}) {
+export default function ({
+    songMetadata,
+    userId,
+    dataEmitter
+}: {
+    songMetadata: SongMetadata;
+    userId: string;
+    dataEmitter?: Function;
+}) {
     const [pinned, setPinned] = useState(false);
     const [favorite, setFavorite] = useState(false);
     const [pinfavFetched, setPinfavFetched] = useState(false);
 
     useEffect(() => {
         async function fetchPinFav() {
-            const res = await fetch(`/api/db/get-favorite-pin`,
-                {
-                    method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
-                    body: JSON.stringify({user_id: userId, song_id: songMetadata.id})
-                }
-            );
-            
+            const res = await fetch(`/api/db/get-favorite-pin`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({user_id: userId, song_id: songMetadata.id})
+            });
+
             if (res.status !== 200) console.log("Non 200 code received");
 
             let data: Record<string, boolean>;
-            
+
             if (res.ok) {
                 const data = await res.json();
                 console.log("[INFO] Parsed successfully as JSON: ", data);
@@ -40,16 +46,14 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
                 setFavorite(data.favorite);
                 setPinfavFetched(true);
             } else {
-                throw new Error(
-                    "Error fetching pin/fav: " + res.status + " " + res.statusText
-                );
+                throw new Error("Error fetching pin/fav: " + res.status + " " + res.statusText);
             }
         }
 
         fetchPinFav().catch((error) => {
             console.error("Error fetching pin/fav:", error);
         });
-    }, [])
+    }, []);
 
     function togglePin() {
         const res = fetch(`/api/db/pin-or-favorite-song`, {
@@ -57,21 +61,25 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({user_id: userId, song_id: songMetadata.id, pin_state: !pinned, fav_state: favorite})
+            body: JSON.stringify({
+                user_id: userId,
+                song_id: songMetadata.id,
+                pin_state: !pinned,
+                fav_state: favorite
+            })
         });
 
         res.then((res) => {
             if (res.status !== 200) console.log("Non 200 code received");
-            if(res.ok) {
+            if (res.ok) {
                 setPinned(!pinned);
                 if (dataEmitter) dataEmitter();
-            }
-            else {
-                console.error("Error toggling pin/fav (db): ", res.status, res.statusText)
+            } else {
+                console.error("Error toggling pin/fav (db): ", res.status, res.statusText);
             }
         }).catch((e) => {
-            console.error("Error toggling pin/fav (fetch): ", e)
-        })
+            console.error("Error toggling pin/fav (fetch): ", e);
+        });
     }
 
     function toggleFavorite() {
@@ -80,21 +88,25 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
             headers: {
                 "Content-Type": "application/json"
             },
-            body: JSON.stringify({user_id: userId, song_id: songMetadata.id, pin_state: pinned, fav_state: !favorite})
+            body: JSON.stringify({
+                user_id: userId,
+                song_id: songMetadata.id,
+                pin_state: pinned,
+                fav_state: !favorite
+            })
         });
 
         res.then((res) => {
             if (res.status !== 200) console.log("Non 200 code received");
-            if(res.ok) {
+            if (res.ok) {
                 setFavorite(!favorite);
                 if (dataEmitter) dataEmitter();
-            }
-            else {
-                console.error("Error toggling pin/fav (db): ", res.status, res.statusText)
+            } else {
+                console.error("Error toggling pin/fav (db): ", res.status, res.statusText);
             }
         }).catch((e) => {
-            console.error("Error toggling pin/fav (fetch): ", e)
-        })
+            console.error("Error toggling pin/fav (fetch): ", e);
+        });
     }
 
     const containerRef = useRef<any>();
@@ -184,24 +196,20 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
                             height={150}
                             className="border border-accent-neutral/5 shadow-xl rounded-xl select-none"
                         ></Image>
-                        {
-                            pinfavFetched  && (
-                                <div className="flex flex-col space-y-4">
-                                    {
-                                        pinned ? 
-                                            ( <BsPinAngleFill onClick={togglePin} /> )
-                                            :
-                                            ( <BsPinAngle onClick={togglePin}/> )
-                                    }
-                                    {
-                                        favorite ? 
-                                            ( <BsHeartFill onClick={toggleFavorite} /> )
-                                            :
-                                            ( <BsHeart onClick={toggleFavorite}/> )
-                                    }
-                                </div>
-                            )
-                        }
+                        {pinfavFetched && (
+                            <div className="flex flex-col space-y-4">
+                                {pinned ? (
+                                    <BsPinAngleFill onClick={togglePin} />
+                                ) : (
+                                    <BsPinAngle onClick={togglePin} />
+                                )}
+                                {favorite ? (
+                                    <BsHeartFill onClick={toggleFavorite} />
+                                ) : (
+                                    <BsHeart onClick={toggleFavorite} />
+                                )}
+                            </div>
+                        )}
                     </div>
                     <div className="flex flex-row space-x-0 mx-auto my-1">
                         <IoMdStar className="text-secondary text-3xl" />
@@ -278,7 +286,13 @@ export default function({songMetadata, userId, dataEmitter }: {songMetadata: Son
                                     <div className="w-full flex flex-col py-1" key={idx}>
                                         <div className="flex flex-row space-x-2 pl-1">
                                             <h3 className="font-semibold text-text/90">
-                                                &gt; <Link className="hover:text-text font-bold" href={"/profile/" + rvw.id}>{rvw.name}</Link>{" "}
+                                                &gt;{" "}
+                                                <Link
+                                                    className="hover:text-text font-bold"
+                                                    href={"/profile/" + rvw.id}
+                                                >
+                                                    {rvw.name}
+                                                </Link>{" "}
                                                 <span className="italic font-normal">says </span>
                                                 <span className="font-normal text-text/90">
                                                     "{rvw.comment_text}"

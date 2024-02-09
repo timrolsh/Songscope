@@ -21,11 +21,13 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 async function getUsers(user_id: string): Promise<User> {
     try {
         const [userData] = (
-            await db.promise().query(`
+            await db.promise().query(
+                `
             select u.id, u.name, u.email, u.image, u.bio, u.join_date
                 from users u
-                where id=?;`, 
-            [user_id])
+                where id=?;`,
+                [user_id]
+            )
         )[0] as RowDataPacket[];
 
         let user: User = {

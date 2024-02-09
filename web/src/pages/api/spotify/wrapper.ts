@@ -1,7 +1,5 @@
 import SpotifyWebApi from "spotify-web-api-node";
-import dotenv from "dotenv";
 import {SongMetadata} from "@/types";
-dotenv.config({path: `${__dirname}/../../../.env`});
 
 var spotifyWebApi = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
