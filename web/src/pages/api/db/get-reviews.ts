@@ -20,7 +20,7 @@ async function fetchSongReviews(songid: string) {
     // TODO --> Order these reviews by popularity/likes as well
     try {
         const [rows] = (await db.promise().query(
-            `select u.id, u.name, c.comment_text, c.time from comment c, users u
+            `select u.id user_id, u.name, c.id comment_id, c.comment_text, c.time from comment c, users u
             where c.user_id = u.id
             and c.spotify_work_id = ?
             order by c.time desc;`,

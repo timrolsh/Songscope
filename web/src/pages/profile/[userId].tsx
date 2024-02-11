@@ -70,7 +70,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
         fetchBasicProfile().catch((error) => {
             console.error("Error fetching user profile:", error);
         });
-    }, []);
+    }, [userId]);
 
     useEffect(() => {
         const fetchFavoritesPinned = async () => {
@@ -99,7 +99,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
         fetchFavoritesPinned().catch((error) => {
             console.error("Error fetching favorite/pinned songs:", error);
         });
-    }, [pinfavChange]);
+    }, [userId, pinfavChange]);
 
     const fetchProfileStatistics = async () => {
         const res = await fetch("/api/db/get-user-statistics", {
@@ -124,7 +124,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
         fetchProfileStatistics().catch((error) => {
             console.error("Error fetching user statistics:", error);
         });
-    }, [sideStatsUpdate]);
+    }, [userId, sideStatsUpdate]);
 
     return (
         <div className="flex flex-row h-full">
