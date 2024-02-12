@@ -2,27 +2,23 @@ import {db} from "../auth/[...nextauth]";
 import {RowDataPacket} from "mysql2";
 import spotifyApi from "../spotify/wrapper";
 import {NextApiRequest, NextApiResponse} from "next";
+import {SongMetadata} from "@/types";
 
-interface SongReviewRow extends RowDataPacket {
+export interface SongReviewRow extends RowDataPacket {
     id: string;
     num_reviews: number;
     title: string;
     artist: string;
 }
 
-interface SongMetadata {
-    id: string;
-    title: string;
-    artist: string;
+export interface EnrichedSongMetadata extends SongMetadata {
     num_reviews: number;
 }
 
-async function enrichSongData(spotify_work_id: string): Promise<SongMetadata> {
+async function enrichSongData(spotify_work_id: string): Promise<EnrichedSongMetadata> {
     const metadata = await spotifyApi.getSong(spotify_work_id);
     return {
-        id: metadata.id,
-        title: metadata.name,
-        artist: metadata.artist,
+        ...metadata,
         num_reviews: 0
     };
 }
@@ -57,9 +53,7 @@ async function fetchTopSongs(limit: number): Promise<SongMetadata[] | null> {
             rows.map(async (row) => {
                 const metadata = await enrichSongData(row.spotify_work_id);
                 return {
-                    id: metadata.id,
-                    title: metadata.title,
-                    artist: metadata.artist,
+                    ...metadata,
                     num_reviews: row.num_reviews
                 };
             })

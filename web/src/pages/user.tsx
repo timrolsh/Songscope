@@ -6,24 +6,11 @@ import Fuse from "fuse.js";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
-import {Session} from "next-auth";
+import {Session} from "@auth/core/types";
 import Spinner from "@/components/Spinner";
+import {SongMetadata, User} from "@/types";
 
 let songsCache: SongMetadata[] = [];
-
-export interface SongMetadata {
-    id: string;
-    name: string;
-    artist: string;
-    artist_id: string;
-    album: string;
-    album_id: string;
-    albumArtUrl: string;
-    releaseDate: string;
-    popularity: string;
-    previewUrl: string;
-    availableMarkets: string[];
-}
 
 export interface UserProps {
     curSession: Session;
@@ -121,7 +108,7 @@ export default ({curSession}: UserProps): JSX.Element => {
     // TODO --> Center this properly so it doesn't look bad
     return (
         <div className="flex flex-row h-full">
-            <SideBar variant="" />
+            <SideBar variant="" user={curSession.user ?? undefined} />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <div className="flex flex-col h-24">
                     <h1 className="text-4xl font-bold px-12 pt-4">
@@ -158,7 +145,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                                 key={song.id}
                                 rating={true}
                                 metadata={song}
-                                user={curSession.user}
+                                user={curSession.user as User}
                             />
                         ))}
                     </div>

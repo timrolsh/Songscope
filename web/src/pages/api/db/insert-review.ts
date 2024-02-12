@@ -1,12 +1,25 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {db} from "../auth/[...nextauth]";
+import {authOptions, db} from "../auth/[...nextauth]";
+import {getServerSession} from "next-auth/next";
+import {User} from "@/types";
 
 // TODO: Add authentication
-export default (request: NextApiRequest, response: NextApiResponse) => {
+export default async (request: NextApiRequest, response: NextApiResponse) => {
+    // @ts-expect-error
+    const session = await getServerSession(request, response, authOptions);
+    if (!session) {
+        response.status(401).send("Unauthorized");
+        return;
+    }
+
+    // @ts-expect-error
+    const user: User = session.user;
+
     if (request.method === "POST") {
         console.log("reqbody:", request.body);
-        const {songid, userid, reviewbody} = request.body;
-        insertReview(songid, userid, reviewbody);
+        const {songid, reviewbody} = request.body;
+
+        await insertReview(songid, user.id, reviewbody);
         response.status(200).send("Inserted review");
         return;
     } else {
@@ -15,7 +28,7 @@ export default (request: NextApiRequest, response: NextApiResponse) => {
     }
 };
 
-function insertReview(songid: string, userid: number, reviewtext: string) {
+async function insertReview(songid: string, userid: string, reviewtext: string) {
     console.log(
         "SONGSCOPE: Inserting review, songid:",
         songid,

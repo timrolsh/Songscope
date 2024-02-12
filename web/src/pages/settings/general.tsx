@@ -1,5 +1,9 @@
 import ToggleButton from "../../components/ToggleButton";
 import SideBar from "../../components/SideBar";
+import {authOptions} from "./../api/auth/[...nextauth]";
+import {getServerSession} from "next-auth/next";
+import {GetServerSideProps} from "next";
+import {UserProps} from "../user";
 
 export function TextEntry({name}: {name: string}) {
     return (
@@ -20,11 +24,12 @@ export function ButtonEntry({name}: {name: string}) {
         </div>
     );
 }
-export default (): JSX.Element => {
+export default ({curSession}: UserProps): JSX.Element => {
     // TODO --> Add prefilled information based on existing user information
+
     return (
         <div className="flex flex-row h-full">
-            <SideBar variant={"settings"} />
+            <SideBar variant={"settings"} user={curSession.user} />
             <div className="w-4/5 pl-8 h-screen overflow-auto">
                 <h1 className="text-2xl font-bold pt-6 pb-2">General</h1>
                 <hr className="w-2/5"></hr>
@@ -42,4 +47,20 @@ export default (): JSX.Element => {
             </div>
         </div>
     );
+};
+
+export const getServerSideProps: GetServerSideProps = async (ctx) => {
+    // @ts-expect-error
+    const session = await getServerSession(ctx.req, ctx.res, authOptions);
+
+    if (!session) {
+        return {
+            redirect: {
+                destination: "/",
+                permanent: false
+            }
+        };
+    }
+
+    return {props: {curSession: session}};
 };
