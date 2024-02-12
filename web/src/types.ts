@@ -19,7 +19,8 @@ export interface Song {
 }
 
 export interface Review {
-    id: string;
+    comment_id: string;
+    user_id: string;
     comment_text: string;
     name: string;
     time: string;
@@ -37,7 +38,8 @@ export interface User {
     image: string;
     bio: string;
     join_date: string;
-    role: string | undefined; // as of right now, this is undefined (no admins)
+    role?: string; // as of right now, this is undefined (no artists, etc.)
+    isAdmin: boolean;
 }
 
 export interface ProfileStatistics {

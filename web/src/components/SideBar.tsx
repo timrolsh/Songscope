@@ -155,7 +155,10 @@ export default ({
                     {user && (
                         <Link
                             className={LinkStyles}
-                            href={"/profile/" + user.id}
+                            href={{
+                                pathname: "/profile/[id]",
+                                query: {id: user.id}
+                            }}
                             aria-disabled={variant === "profile"} // Make this non-disabled if you are on someone else's profile that isn't your own
                         >
                             Profile

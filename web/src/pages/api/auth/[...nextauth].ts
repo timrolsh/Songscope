@@ -44,6 +44,7 @@ export const authOptions = {
             session.user.bio = user.bio;
             session.user.join_date = JSON.stringify(user.join_date);
             session.user.role = user.role ?? "user";
+            session.user.isAdmin = Boolean(user.isAdmin);
             return session;
         }
     },
