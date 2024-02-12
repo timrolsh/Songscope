@@ -38,7 +38,7 @@ async function getUsers(user_id: string): Promise<User> {
             bio: userData.bio,
             join_date: userData.join_date,
             role: "", // TODO --> update this when admin accounts exist
-            isAdmin: Boolean(userData.isAdmin),
+            isAdmin: Boolean(userData.isAdmin)
         };
         return user;
     } catch (error) {

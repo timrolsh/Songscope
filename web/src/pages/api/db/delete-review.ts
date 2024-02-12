@@ -1,7 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
-import { Session, User } from "next-auth";
+import {Session, User} from "next-auth";
 
 // TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
@@ -16,7 +16,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         console.log("reqbody:", request.body);
         const {comment_id, comment_user_id} = request.body;
 
-        if(comment_user_id !== session.user.id && !session.user.isAdmin) {
+        if (comment_user_id !== session.user.id && !session.user.isAdmin) {
             response.status(401).send("Unauthorized");
             return;
         }
@@ -31,12 +31,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function deleteReview(comment_id: string, comment_user_id: string) {
-    console.log(
-        "SONGSCOPE: Deleting review, comment_id:",
-        comment_id,
-        "user_id:",
-        comment_user_id,
-    );
+    console.log("SONGSCOPE: Deleting review, comment_id:", comment_id, "user_id:", comment_user_id);
     db.execute(
         `
         DELETE FROM comment

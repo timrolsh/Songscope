@@ -10,10 +10,9 @@ import Link from "next/link";
 
 import {theme} from "../../tailwind.config";
 import {CommentTimestamp} from "@/dates";
-import { getSession } from "next-auth/react";
 import clsx from "clsx";
-import { User } from "../types";
-import { MdOutlineDeleteOutline } from "react-icons/md";
+import {User} from "../types";
+import {MdOutlineDeleteOutline} from "react-icons/md";
 const tailwindColors = theme.extend.colors;
 
 export default function ({
@@ -190,12 +189,15 @@ export default function ({
     }
 
     async function deleteReview(comment_id: string, comment_user_id: string) {
-        if(!user) { console.error("No user session found"); return; }
-        if(comment_user_id !== userId && !user.isAdmin) {
+        if (!user) {
+            console.error("No user session found");
+            return;
+        }
+        if (comment_user_id !== userId && !user.isAdmin) {
             console.error("Unauthorized to delete review");
             return;
         }
-        
+
         const response = await fetch("/api/db/delete-review", {
             method: "DELETE",
             headers: {
@@ -313,7 +315,14 @@ export default function ({
                         {reviews?.length ? (
                             reviews.map((rvw, idx) => {
                                 return (
-                                    <div className={clsx((user.isAdmin || rvw.user_id === user.id) && "hover:bg-accent-neutral/10 rounded-sm", "w-full flex flex-col py-1 group" )} key={idx}>
+                                    <div
+                                        className={clsx(
+                                            (user.isAdmin || rvw.user_id === user.id) &&
+                                                "hover:bg-accent-neutral/10 rounded-sm",
+                                            "w-full flex flex-col py-1 group"
+                                        )}
+                                        key={idx}
+                                    >
                                         <div className="flex flex-row space-x-2 pl-1">
                                             <h3 className="font-semibold text-text/90 w-11/12">
                                                 &gt;{" "}
@@ -331,9 +340,16 @@ export default function ({
                                         </div>
                                         <h4 className="font-light italic text-text/40 px-2 flex flex-row place-content-between">
                                             {CommentTimestamp(rvw.time)}
-                                            {
-                                                (user.isAdmin || rvw.user_id === user.id) && <button className="text-red-500 hover:text-red-700 hover:cursor-pointer invisible group-hover:visible" onClick={() => deleteReview(rvw.comment_id, rvw.user_id)}><MdOutlineDeleteOutline /></button>
-                                            }
+                                            {(user.isAdmin || rvw.user_id === user.id) && (
+                                                <button
+                                                    className="text-red-500 hover:text-red-700 hover:cursor-pointer invisible group-hover:visible"
+                                                    onClick={() =>
+                                                        deleteReview(rvw.comment_id, rvw.user_id)
+                                                    }
+                                                >
+                                                    <MdOutlineDeleteOutline />
+                                                </button>
+                                            )}
                                         </h4>
                                     </div>
                                 );
