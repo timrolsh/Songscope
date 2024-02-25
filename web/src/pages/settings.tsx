@@ -43,7 +43,7 @@ export default ({curSession}: UserProps): JSX.Element => {
         }
         try {
             const response = await fetch("/api/db/delete-user", {
-                method: "POST",
+                method: "DELETE",
                 headers: {
                     "Content-Type": "application/json"
                 },
