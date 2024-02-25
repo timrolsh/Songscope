@@ -40,6 +40,8 @@ create table if not exists users
     image         text         null,
     emailVerified timestamp    null,
     bio           text         null,
+    show_favorite_songs boolean not null default 1,
+    show_reviews boolean not null default 1,
     constraint id
         unique (id)
 );
