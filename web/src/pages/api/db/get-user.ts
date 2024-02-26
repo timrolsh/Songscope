@@ -23,7 +23,7 @@ async function getUsers(user_id: string): Promise<User> {
         const [userData] = (
             await db.promise().query(
                 `
-            select u.id, u.name, u.email, u.image, u.bio, u.join_date, u.isAdmin
+            select u.id, u.name, u.email, u.image, u.bio, u.join_date, u.show_favorite_songs, u.show_reviews, u.isAdmin
                 from users u
                 where id=?;`,
                 [user_id]
@@ -38,6 +38,8 @@ async function getUsers(user_id: string): Promise<User> {
             bio: userData.bio,
             join_date: userData.join_date,
             role: "", // TODO --> update this when admin accounts exist
+            show_favorite_songs: Boolean(userData.show_favorite_songs),
+            show_reviews: Boolean(userData.show_reviews),
             isAdmin: Boolean(userData.isAdmin)
         };
         return user;

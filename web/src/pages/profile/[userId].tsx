@@ -26,6 +26,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
 
     const [userProfile, setUserProfile] = useState<User>();
     const [pinnedSongs, setPinnedSongs] = useState<SongMetadata[]>();
+    const [showFavoriteSongs, setShowFavoriteSongs] = useState<boolean>(false);
     const [favoriteSongs, setFavoriteSongs] = useState<SongMetadata[]>();
 
     const [pinfavChange, setPinfavChange] = useState<boolean>(false);
@@ -42,6 +43,8 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
     // TODO --> Deal with this...
     const [reviewsLoading, setReviewsLoading] = useState<boolean>(true);
     const [reviews, setReviews] = useState<any>();
+
+    const isOwnProfile = curSession?.user?.id == userId;
 
     useEffect(() => {
         const fetchBasicProfile = async () => {
@@ -86,6 +89,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                 const data: UserProfileSongs = await res.json();
                 setPinnedSongs(data.pinnedSongs);
                 setFavoriteSongs(data.favoritedSongs);
+                setShowFavoriteSongs(data.showFavoriteSongs);
                 fetchProfileStatistics();
             } else {
                 // TODO --> Redirect to error page... log error
@@ -128,7 +132,13 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
 
     return (
         <div className="flex flex-row h-full">
-            <SideBar variant={"profile"} user={curSession.user} favoriteSongs={favoriteSongs} />
+            <SideBar
+                variant={"profile"}
+                user={curSession.user}
+                favoriteSongs={favoriteSongs}
+                showFavoriteSongs={showFavoriteSongs}
+                isOwnProfile={isOwnProfile}
+            />
             <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                 <div className="pt-8 px-8">
                     {!userProfileLoading && userProfile ? (
@@ -231,15 +241,28 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                     )}
                                 </div>
                             </div>
-                            {/* TODO --> Impl */}
-                            <div className="pt-5">
-                                <h2 className="text-2xl pl-2 font-bold">Top Reviews</h2>
-                                <div className="flex flex-row w-full mx-auto place-content-evenly pt-5">
-                                    <ReviewTile />
-                                    <ReviewTile />
-                                    <ReviewTile />
+                            {isOwnProfile || userProfile.show_reviews ? (
+                                <div className="pt-5">
+                                    <h2 className="text-2xl pl-2 font-bold">
+                                        Top Reviews
+                                        <p className="text-text/70 text-md font-light pt-2">
+                                            <a href="/settings">
+                                                {" "}
+                                                {isOwnProfile &&
+                                                    !userProfile.show_reviews &&
+                                                    "This section is only visible to you"}
+                                            </a>
+                                        </p>
+                                    </h2>
+                                    <div className="flex flex-row w-full mx-auto place-content-evenly pt-5">
+                                        <ReviewTile />
+                                        <ReviewTile />
+                                        <ReviewTile />
+                                    </div>
                                 </div>
-                            </div>
+                            ) : (
+                                <></>
+                            )}
                         </>
                     ) : (
                         <Spinner />
