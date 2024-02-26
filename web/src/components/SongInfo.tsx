@@ -151,6 +151,27 @@ export default function ({
         setReviews(data);
     }
 
+    async function leaveRating(rating: number) {
+        const response = await fetch("/api/db/leave-rating", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                songId: songMetadata.id,
+                userId: userId,
+                rating: rating
+            })
+        });
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        return data;
+    }
+
     useEffect(() => {
         getReviews();
         const interval = setInterval(getReviews, 3000);
@@ -375,13 +396,29 @@ export default function ({
                             className="text-text/90 p-2 font-normal text-sm bg-secondary/20 rounded-md w-full h-3/5 resize-none"
                         />
                     </div>
+
                     <div className="flex flex-row place-content-between">
                         <div className="flex flex-row-reverse pb-1 mb-2 mr-auto">
-                            <IoMdStar className="peer hover:text-primary text-accent-neutral/20 text-3xl" />
-                            <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
-                            <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
-                            <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
-                            <IoMdStar className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl" />
+                            <IoMdStar
+                                onClick={() => leaveRating(1)}
+                                className="peer hover:text-primary text-accent-neutral/20 text-3xl"
+                            />
+                            <IoMdStar
+                                onClick={() => leaveRating(2)}
+                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
+                            />
+                            <IoMdStar
+                                onClick={() => leaveRating(3)}
+                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
+                            />
+                            <IoMdStar
+                                onClick={() => leaveRating(4)}
+                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
+                            />
+                            <IoMdStar
+                                onClick={() => leaveRating(5)}
+                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
+                            />
                         </div>
                         <button
                             className="ml-auto bg-secondary/70 hover:bg-secondary text-text/90 hover:text-text/90 rounded-md px-3 py-1"
