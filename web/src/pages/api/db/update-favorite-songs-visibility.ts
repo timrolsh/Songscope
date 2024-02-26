@@ -35,7 +35,12 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function updateFavoriteSongsVisibility(user_id: string, showFavoriteSongs: boolean) {
-    console.log("SONGSCOPE: updating favorite songs visibility: user_id ", user_id, ", visible: ", showFavoriteSongs);
+    console.log(
+        "SONGSCOPE: updating favorite songs visibility: user_id ",
+        user_id,
+        ", visible: ",
+        showFavoriteSongs
+    );
     return new Promise<boolean>((resolve, reject) => {
         db.execute(
             `

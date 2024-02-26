@@ -1,4 +1,10 @@
-export default function ToggleButton({ onChange, apiRoute }: { onChange: (isChecked: boolean, value: string) => void, apiRoute: string }) {
+export default function ToggleButton({
+    onChange,
+    apiRoute
+}: {
+    onChange: (isChecked: boolean, value: string) => void;
+    apiRoute: string;
+}) {
     return (
         <label className="relative inline-flex items-center mb-5 cursor-pointer">
             <input

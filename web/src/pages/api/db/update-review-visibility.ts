@@ -35,7 +35,12 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function updateReviewVisibility(user_id: string, showReviews: boolean) {
-    console.log("SONGSCOPE: updating reviews visibility: user_id ", user_id, ", visible: ", showReviews);
+    console.log(
+        "SONGSCOPE: updating reviews visibility: user_id ",
+        user_id,
+        ", visible: ",
+        showReviews
+    );
     return new Promise<boolean>((resolve, reject) => {
         db.execute(
             `

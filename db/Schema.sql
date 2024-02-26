@@ -31,17 +31,17 @@ create table if not exists sessions
 
 create table if not exists users
 (
-    id            bigint unsigned auto_increment
+    id                  bigint unsigned auto_increment
         primary key,
-    name          varchar(255) not null,
-    first_name    text         null,
-    last_name     text         null,
-    email         varchar(255) not null,
-    image         text         null,
-    emailVerified timestamp    null,
-    bio           text         null,
-    show_favorite_songs boolean not null default 1,
-    show_reviews boolean not null default 1,
+    name                varchar(255) not null,
+    first_name          text         null,
+    last_name           text         null,
+    email               varchar(255) not null,
+    image               text         null,
+    emailVerified       timestamp    null,
+    bio                 text         null,
+    show_favorite_songs boolean      not null default 1,
+    show_reviews        boolean      not null default 1,
     constraint id
         unique (id)
 );

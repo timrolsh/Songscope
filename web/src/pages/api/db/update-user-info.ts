@@ -2,7 +2,7 @@ import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {User} from "@/types";
-import { RowDataPacket } from "mysql2";
+import {RowDataPacket} from "mysql2";
 
 // TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
@@ -13,7 +13,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 
-    // @ts-expect-error
     const user: User = session.user;
     if (request.method === "POST") {
         console.log("reqbody:", request.body);
@@ -60,14 +59,7 @@ async function checkName(name: string): Promise<boolean> {
 }
 
 async function updateUserInfo(userid: string, name: string, bio: string) {
-    console.log(
-        "SONGSCOPE: changing user info, userid:",
-        userid,
-        "name:",
-        name,
-        "bio:",
-        bio
-    );
+    console.log("SONGSCOPE: changing user info, userid:", userid, "name:", name, "bio:", bio);
     db.execute(
         `
         UPDATE users
