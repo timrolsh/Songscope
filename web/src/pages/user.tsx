@@ -185,5 +185,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
+    // Ensure join_date is null if it's undefined
+    if (session.user && session.user.join_date === undefined) {
+        session.user.join_date = null; // Or apply any other default value/formatting
+    }
+
     return {props: {curSession: session}};
 };
