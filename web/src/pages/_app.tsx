@@ -2,6 +2,7 @@ import {AppProps} from "next/app";
 import {SessionProvider} from "next-auth/react";
 import "../styles/globals.css";
 import {AdapterSession} from "next-auth/adapters";
+import Head from "next/head";
 
 interface MyAppProps extends AppProps {
     pageProps: {
@@ -11,8 +12,13 @@ interface MyAppProps extends AppProps {
 
 export default ({Component, pageProps: {session, ...pageProps}}: MyAppProps): JSX.Element => {
     return (
-        <SessionProvider session={session}>
-            <Component {...pageProps} />
-        </SessionProvider>
+        <>
+            <Head>
+                <title>Songscope</title>
+            </Head>
+            <SessionProvider session={session}>
+                <Component {...pageProps} />
+            </SessionProvider>
+        </>
     );
 };

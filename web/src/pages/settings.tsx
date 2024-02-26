@@ -6,6 +6,7 @@ import {GetServerSideProps} from "next";
 import {UserProps} from "./user";
 import {MdAccountCircle, MdInfoOutline, MdOutlineSecurity} from "react-icons/md";
 import {useState} from "react";
+import Head from "next/head";
 
 export function TextEntry({
     name,
@@ -121,57 +122,62 @@ export default ({curSession}: UserProps): JSX.Element => {
     };
 
     return (
-        <div className="flex flex-row h-full">
-            <SideBar variant={"settings"} user={curSession.user} />
-            <div className="w-4/5 pl-8 h-screen overflow-auto">
-                <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                    {" "}
-                    <MdAccountCircle className="my-auto text-xl mr-3" />
-                    User Information
-                </h2>
-                <div className="space-y-4">
-                    <TextEntry
-                        name={"Display Name"}
-                        value={displayName}
-                        onChange={setDisplayName}
-                    />
-                    <TextEntry name={"Bio"} value={bio} onChange={setBio} />
-                    <button
-                        className="bg-secondary/80 hover:bg-secondary text-text/80 hover:text-text py-2 px-4 rounded-md transition"
-                        onClick={updateUserInfo}
-                    >
-                        Update
-                    </button>
-                </div>
-                <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                    {" "}
-                    <MdOutlineSecurity className="my-auto text-xl mr-3" />
-                    Privacy
-                </h2>
-                <div className="space-y-4">
-                    <ButtonEntry
-                        name={"Show Favorite Songs"}
-                        onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
-                        apiRoute={"api/db/update-favorite-songs-visibility"}
-                    />
-                    <ButtonEntry
-                        name={"Show Reviews on Profile"}
-                        onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
-                        apiRoute={"api/db/update-review-visibility"}
-                    />
-                </div>
-                <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                    {" "}
-                    <MdInfoOutline className="my-auto text-xl mr-3" />
-                    Account
-                </h2>
-                <div className="space-y-4">
-                    <button className="text-red-500" onClick={deleteUser}>
-                        Delete Account
-                    </button>
+        <>
+            <Head>
+                <title>Songscope - Settings</title>
+            </Head>
+            <div className="flex flex-row h-full">
+                <SideBar variant={"settings"} user={curSession.user} />
+                <div className="w-4/5 pl-8 h-screen overflow-auto">
+                    <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
+                        {" "}
+                        <MdAccountCircle className="my-auto text-xl mr-3" />
+                        User Information
+                    </h2>
+                    <div className="space-y-4">
+                        <TextEntry
+                            name={"Display Name"}
+                            value={displayName}
+                            onChange={setDisplayName}
+                        />
+                        <TextEntry name={"Bio"} value={bio} onChange={setBio} />
+                        <button
+                            className="bg-secondary/80 hover:bg-secondary text-text/80 hover:text-text py-2 px-4 rounded-md transition"
+                            onClick={updateUserInfo}
+                        >
+                            Update
+                        </button>
+                    </div>
+                    <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
+                        {" "}
+                        <MdOutlineSecurity className="my-auto text-xl mr-3" />
+                        Privacy
+                    </h2>
+                    <div className="space-y-4">
+                        <ButtonEntry
+                            name={"Show Favorite Songs"}
+                            onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
+                            apiRoute={"api/db/update-favorite-songs-visibility"}
+                        />
+                        <ButtonEntry
+                            name={"Show Reviews on Profile"}
+                            onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
+                            apiRoute={"api/db/update-review-visibility"}
+                        />
+                    </div>
+                    <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
+                        {" "}
+                        <MdInfoOutline className="my-auto text-xl mr-3" />
+                        Account
+                    </h2>
+                    <div className="space-y-4">
+                        <button className="text-red-500" onClick={deleteUser}>
+                            Delete Account
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
+        </>
     );
 };
 
