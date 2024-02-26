@@ -19,21 +19,34 @@ export function TextEntry({
     return (
         <div className="flex flex-row w-3/5">
             <h3 className="w-1/3">{name}:</h3>
-            <input className="w-2/3 border-b-2 border-accent-neutral/20 bg-transparent" value={value} onChange={(e) => onChange(e.target.value)}></input>
+            <input
+                className="w-2/3 border-b-2 border-accent-neutral/20 bg-transparent"
+                value={value}
+                onChange={(e) => onChange(e.target.value)}
+            ></input>
         </div>
     );
 }
 
-export function ButtonEntry({name}: {name: string}) {
+export function ButtonEntry({
+    name,
+    onChange,
+    apiRoute
+}: {
+    name: string;
+    onChange: (isChecked: boolean, value: string) => void;
+    apiRoute: string;
+}) {
     return (
         <div className="flex flex-row h-6 w-3/5">
             <h3 className="w-2/3">{name}:</h3>
             <div className="ml-auto">
-                <ToggleButton />
+                <ToggleButton onChange={onChange} apiRoute={apiRoute} />
             </div>
         </div>
     );
 }
+
 export default ({curSession}: UserProps): JSX.Element => {
     const [displayName, setDisplayName] = useState("");
     const [bio, setBio] = useState("");
@@ -59,6 +72,7 @@ export default ({curSession}: UserProps): JSX.Element => {
             console.error("Error deleting user:", error);
         }
     };
+
     const updateUserInfo = async () => {
         console.log("displayName:", displayName, "bio:", bio);
         try {
@@ -67,7 +81,11 @@ export default ({curSession}: UserProps): JSX.Element => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id, displayName: displayName, bio: bio})
+                body: JSON.stringify({
+                    user_id: curSession.user?.id,
+                    displayName: displayName,
+                    bio: bio
+                })
             });
 
             if (response.ok) {
@@ -80,6 +98,28 @@ export default ({curSession}: UserProps): JSX.Element => {
             console.error("Error updating user info:", error);
         }
     };
+
+    const updatePrivacySetting = async (apiRoute: string, value: boolean) => {
+        try {
+            const response = await fetch(apiRoute, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({user_id: curSession.user?.id, value: value})
+            });
+
+            if (response.ok) {
+                // TODO: Add a better success message
+                alert("Privacy settings updated");
+            } else {
+                console.error("Error updating privacy settings");
+            }
+        } catch (error) {
+            console.error("Error updating privacy settings:", error);
+        }
+    };
+
     return (
         <div className="flex flex-row h-full">
             <SideBar variant={"settings"} user={curSession.user} />
@@ -109,8 +149,16 @@ export default ({curSession}: UserProps): JSX.Element => {
                     Privacy
                 </h2>
                 <div className="space-y-4">
-                    <ButtonEntry name={"Show Favorite Songs"} />
-                    <ButtonEntry name={"Show Reviews on Profile"} />
+                    <ButtonEntry
+                        name={"Show Favorite Songs"}
+                        onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
+                        apiRoute={"api/db/update-favorite-songs-visibility"}
+                    />
+                    <ButtonEntry
+                        name={"Show Reviews on Profile"}
+                        onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
+                        apiRoute={"api/db/update-review-visibility"}
+                    />
                 </div>
                 <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
                     {" "}
