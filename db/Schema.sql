@@ -33,15 +33,17 @@ create table if not exists users
 (
     id                  bigint unsigned auto_increment
         primary key,
-    name                varchar(255) not null,
-    first_name          text         null,
-    last_name           text         null,
-    email               varchar(255) not null,
-    image               text         null,
-    emailVerified       timestamp    null,
-    bio                 text         null,
-    show_favorite_songs boolean      not null default 1,
-    show_reviews        boolean      not null default 1,
+    name                varchar(255)                         not null,
+    first_name          text                                 null,
+    last_name           text                                 null,
+    email               varchar(255)                         not null,
+    image               text                                 null,
+    emailVerified       timestamp                            null,
+    bio                 text                                 null,
+    show_favorite_songs tinyint(1) default 1                 not null,
+    show_reviews        tinyint(1) default 1                 not null,
+    join_date           timestamp  default CURRENT_TIMESTAMP not null,
+    isAdmin             tinyint(1) default 0                 not null,
     constraint id
         unique (id)
 );
@@ -69,6 +71,18 @@ create table if not exists rating
         foreign key (user_id) references users (id)
 );
 
+create table if not exists user_song
+(
+    user_id         bigint unsigned      not null,
+    spotify_work_id varchar(255)         not null,
+    rating          int        default 0 null,
+    favorite        tinyint(1) default 0 not null,
+    pinned          tinyint(1) default 0 not null,
+    primary key (user_id, spotify_work_id),
+    constraint user_song_users_id_fk
+        foreign key (user_id) references users (id)
+);
+
 create table if not exists verification_token
 (
     identifier text      not null,
@@ -76,3 +90,4 @@ create table if not exists verification_token
     token      text      not null,
     primary key (identifier(128), token(128))
 );
+

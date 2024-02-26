@@ -44,10 +44,13 @@ async function leaveRating(songId: string, userId: number, rating: number) {
         "rating:",
         rating
     );
+    // TODO --> Do this for the actual request being sent
+    rating = 6 - rating; // Invert rating to match the database schema
     return new Promise<void>((resolve, reject) => {
         // Check if a rating by the user for the song already exists
+
         db.query(
-            `SELECT * FROM rating WHERE spotify_work_id = ? AND user_id = ?`,
+            `SELECT rating FROM user_song WHERE spotify_work_id = ? AND user_id = ?`,
             [songId, userId],
             (error, results) => {
                 if (error) {
@@ -55,7 +58,7 @@ async function leaveRating(songId: string, userId: number, rating: number) {
                 } else if ((results as RowDataPacket).length > 0) {
                     // Update existing rating
                     db.query(
-                        `UPDATE rating SET rating = ? WHERE spotify_work_id = ? AND user_id = ?`,
+                        `UPDATE user_song SET rating = ? WHERE spotify_work_id = ? AND user_id = ?`,
                         [rating, songId, userId],
                         (updateError) => {
                             if (updateError) {
@@ -68,8 +71,8 @@ async function leaveRating(songId: string, userId: number, rating: number) {
                 } else {
                     // Insert new rating
                     db.query(
-                        `INSERT INTO rating (spotify_work_id, rating, user_id) VALUES (?, ?, ?)`,
-                        [songId, rating, userId],
+                        `INSERT INTO user_song (spotify_work_id, user_id, rating) VALUES (?, ?, ?)`,
+                        [songId, userId, rating],
                         (insertError) => {
                             if (insertError) {
                                 reject(insertError);

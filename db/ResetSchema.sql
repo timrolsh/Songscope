@@ -14,6 +14,7 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS accounts cascade;
 DROP TABLE IF EXISTS sessions cascade;
 DROP TABLE IF EXISTS users cascade;
+DROP TABLE IF EXISTS user_song cascade;
 DROP TABLE IF EXISTS comment cascade;
 DROP TABLE IF EXISTS rating cascade;
 DROP TABLE IF EXISTS comment cascade;

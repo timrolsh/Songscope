@@ -74,6 +74,7 @@ export default ({curSession}: UserProps): JSX.Element => {
         }
     };
 
+    // TODO: If they do not specify a name/bio, then don't set it to something empty...
     const updateUserInfo = async () => {
         console.log("displayName:", displayName, "bio:", bio);
         try {

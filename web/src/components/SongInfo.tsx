@@ -151,6 +151,8 @@ export default function ({
         setReviews(data);
     }
 
+    // TODO --> Make this display a confirmation/only submit this with a full review...
+    // Display this on the frontend as well
     async function leaveRating(rating: number) {
         const response = await fetch("/api/db/leave-rating", {
             method: "POST",
