@@ -28,7 +28,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 async function fetchProfile(profile_id: string) {
     try {
         // TODO --> Again, likely can be optimized. Big query.
-        const [favoriteData, pinData] = (await Promise.all([
+        const [favoriteData, pinData, showFavorites] = (await Promise.all([
             db.promise().query(
                 `
                 select spotify_work_id, rating
@@ -44,6 +44,14 @@ async function fetchProfile(profile_id: string) {
                     from user_song
                     where user_id=?
                     and pinned=1;
+                `,
+                [profile_id]
+            ),
+            db.promise().query(
+                `
+                select show_favorite_songs
+                    from users
+                    where id=?;
                 `,
                 [profile_id]
             )
@@ -64,6 +72,7 @@ async function fetchProfile(profile_id: string) {
 
         let profile: UserProfileSongs = {
             favoritedSongs: favoriteSongs,
+            showFavoriteSongs: Boolean(showFavorites[0][0].show_favorite_songs),
             pinnedSongs: pins
         };
 

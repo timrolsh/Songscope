@@ -22,7 +22,6 @@ function renderDashboardBody() {
             try {
                 const hotResponse = await fetch("/api/db/get-hot-reviewed");
                 const hotSongsData = await hotResponse.json();
-                console.log(hotResponse)
                 setHotSongs(hotSongsData);
 
                 const topResponse = await fetch("/api/db/get-top-reviewed");
@@ -68,7 +67,14 @@ function renderDashboardBody() {
     );
 }
 
-function renderProfileBody(songs?: SongMetadata[]) {
+function renderProfileBody(
+    songs?: SongMetadata[],
+    showFavoriteSongs?: boolean,
+    isOwnProfile?: boolean
+) {
+    if (!isOwnProfile && !showFavoriteSongs) {
+        return <></>;
+    }
     if (!songs || songs.length === 0) {
         return (
             <div className="text-text/70 italic text-md font-semibold pt-2">
@@ -80,6 +86,11 @@ function renderProfileBody(songs?: SongMetadata[]) {
     return (
         <>
             <h3 className="text-text/90 text-xl font-semibold pb-2">Favorite Songs</h3>
+            {isOwnProfile && !showFavoriteSongs && (
+                <div className="text-text/70 text-md font-light pt-2">
+                    <a href="/settings">This section is only visible to you</a>
+                </div>
+            )}
             <div className="flex flex-col overflow-scroll">
                 {songs.map((song) => {
                     return <SidebarEntry key={song.id} song={song} />;
@@ -92,11 +103,15 @@ function renderProfileBody(songs?: SongMetadata[]) {
 export default ({
     variant,
     user,
-    favoriteSongs
+    favoriteSongs,
+    showFavoriteSongs,
+    isOwnProfile
 }: {
     variant: string;
     user: any;
     favoriteSongs?: SongMetadata[];
+    showFavoriteSongs?: boolean;
+    isOwnProfile?: boolean;
 }) => {
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
@@ -108,11 +123,13 @@ export default ({
                       : "Dashboard"}
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
-            {variant == "profile"
-                ? renderProfileBody(favoriteSongs)
-                : variant == "settings"
-                  ? <></>
-                  : renderDashboardBody()}
+            {variant == "profile" ? (
+                renderProfileBody(favoriteSongs, showFavoriteSongs, isOwnProfile)
+            ) : variant == "settings" ? (
+                <></>
+            ) : (
+                renderDashboardBody()
+            )}
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4"></hr>
             <div className="w-full h-52 flex flex-col mb-4">
                 <div className="my-auto flex flex-col h-full place-content-evenly">

@@ -29,6 +29,7 @@ export interface Review {
 export interface UserProfileSongs {
     pinnedSongs: SongMetadata[];
     favoritedSongs: SongMetadata[];
+    showFavoriteSongs: boolean;
 }
 
 export interface User {
@@ -39,6 +40,8 @@ export interface User {
     bio: string;
     join_date: string;
     role?: string; // as of right now, this is undefined (no artists, etc.)
+    show_favorite_songs: boolean;
+    show_reviews: boolean;
     isAdmin: boolean;
 }
 
