@@ -5,7 +5,7 @@ import {getServerSession} from "next-auth/next";
 import {GetServerSideProps} from "next";
 import {UserProps} from "./user";
 import {MdAccountCircle, MdInfoOutline, MdOutlineSecurity} from "react-icons/md";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 import Head from "next/head";
 
 export function TextEntry({
@@ -32,17 +32,19 @@ export function TextEntry({
 export function ButtonEntry({
     name,
     onChange,
-    apiRoute
+    apiRoute,
+    checked
 }: {
     name: string;
     onChange: (isChecked: boolean, value: string) => void;
     apiRoute: string;
+    checked: boolean;
 }) {
     return (
         <div className="flex flex-row h-6 w-3/5">
             <h3 className="w-2/3">{name}:</h3>
             <div className="ml-auto">
-                <ToggleButton onChange={onChange} apiRoute={apiRoute} />
+                <ToggleButton onChange={onChange} apiRoute={apiRoute} checked={checked} />
             </div>
         </div>
     );
@@ -51,6 +53,33 @@ export function ButtonEntry({
 export default ({curSession}: UserProps): JSX.Element => {
     const [displayName, setDisplayName] = useState("");
     const [bio, setBio] = useState("");
+    const [showFavoriteSongs, setShowFavoriteSongs] = useState(false);
+    const [showReviews, setShowReviews] = useState(false);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const res = await fetch("/api/db/get-user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({user_id: curSession.user?.id})
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                setDisplayName(data.name);
+                setBio(data.bio);
+                setShowFavoriteSongs(data.show_favorite_songs);
+                setShowReviews(data.show_reviews);
+            } else {
+                // Handle error case
+                console.error("Error fetching user data");
+            }
+        };
+
+        fetchUserData();
+    }, [curSession.user?.id]);
     const deleteUser = async () => {
         if (!confirm("Are you sure you want to continue?")) {
             return;
@@ -131,7 +160,6 @@ export default ({curSession}: UserProps): JSX.Element => {
                 <SideBar variant={"settings"} user={curSession.user} />
                 <div className="w-4/5 pl-8 h-screen overflow-auto">
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                        {" "}
                         <MdAccountCircle className="my-auto text-xl mr-3" />
                         User Information
                     </h2>
@@ -150,7 +178,6 @@ export default ({curSession}: UserProps): JSX.Element => {
                         </button>
                     </div>
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                        {" "}
                         <MdOutlineSecurity className="my-auto text-xl mr-3" />
                         Privacy
                     </h2>
@@ -159,15 +186,16 @@ export default ({curSession}: UserProps): JSX.Element => {
                             name={"Show Favorite Songs"}
                             onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
                             apiRoute={"api/db/update-favorite-songs-visibility"}
+                            checked={showFavoriteSongs}
                         />
                         <ButtonEntry
                             name={"Show Reviews on Profile"}
                             onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
                             apiRoute={"api/db/update-review-visibility"}
+                            checked={showReviews}
                         />
                     </div>
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                        {" "}
                         <MdInfoOutline className="my-auto text-xl mr-3" />
                         Account
                     </h2>
