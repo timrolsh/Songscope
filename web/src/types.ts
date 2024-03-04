@@ -10,6 +10,7 @@ export interface SongMetadata {
     popularity: string;
     previewUrl: string;
     availableMarkets: string[];
+    rating?: number | null;
 }
 
 export interface Song {

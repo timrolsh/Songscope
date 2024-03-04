@@ -227,6 +227,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                                 pinnedSongs.map((song) => (
                                                     <SongTile
                                                         key={song.id}
+                                                        rating={song.rating}
                                                         metadata={song}
                                                         user={curSession.user as User}
                                                         dataEmitter={dataEmitter}

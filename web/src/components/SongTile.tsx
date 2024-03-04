@@ -6,12 +6,12 @@ import {User} from "@/types";
 import Modal from "./Modal";
 
 export default ({
-    rating = false,
+    rating = null,
     metadata,
     user,
     dataEmitter
 }: {
-    rating?: boolean;
+    rating?: number | null;
     metadata: any;
     user: User;
     dataEmitter?: Function;
@@ -51,11 +51,19 @@ export default ({
                 </div>
                 {rating && (
                     <div className="mx-auto place-content-center flex flex-row space-x-0.5 py-2 ">
-                        <IoMdStar className="text-secondary text-2xl" />
-                        <IoMdStar className="text-secondary text-2xl" />
-                        <IoMdStar className="text-secondary text-2xl" />
-                        <IoMdStar className="text-secondary text-2xl" />
-                        <IoMdStarHalf className="text-secondary text-2xl" />
+                        {rating && (
+                            <div className="mx-auto place-content-center flex flex-row space-x-0.5 py-2">
+                                {Array.from({length: Math.floor(rating)}, (_, index) => (
+                                    <IoMdStar key={index} className="text-secondary text-2xl" />
+                                ))}
+                                {rating % 1 !== 0 && (
+                                    <IoMdStarHalf className="text-secondary text-2xl" />
+                                )}
+                                {Math.ceil(rating) - rating > 0.5 && (
+                                    <IoMdStarHalf className="text-secondary text-2xl" />
+                                )}
+                            </div>
+                        )}
                     </div>
                 )}
             </div>

@@ -28,6 +28,37 @@ export default function ({
     const [pinned, setPinned] = useState(false);
     const [favorite, setFavorite] = useState(false);
     const [pinfavFetched, setPinfavFetched] = useState(false);
+    const [rating, setRating] = useState(0);
+    const [initialRating, setInitialRating] = useState(0);
+
+    useEffect(() => {
+        async function fetchRating() {
+            const res = await fetch(`/api/db/get-rating`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({songid: songMetadata.id, userid: userId})
+            });
+
+            if (res.status !== 200) console.log("Non 200 code received");
+
+            let data: number;
+
+            if (res.ok) {
+                data = await res.json();
+                console.log("[INFO] Parsed successfully as JSON: ", data);
+                setRating(data);
+                setInitialRating(data);
+            } else {
+                throw new Error("Error fetching rating: " + res.status + " " + res.statusText);
+            }
+        }
+
+        fetchRating().catch((error) => {
+            console.error("Error fetching rating:", error);
+        });
+    }, []);
 
     useEffect(() => {
         async function fetchPinFav() {
@@ -113,6 +144,10 @@ export default function ({
         });
     }
 
+    function leaveRating(newRating: number) {
+        setRating(newRating);
+    }
+
     const containerRef = useRef<any>();
 
     const {wavesurfer, isReady, isPlaying, currentTime} = useWavesurfer({
@@ -151,29 +186,6 @@ export default function ({
         setReviews(data);
     }
 
-    // TODO --> Make this display a confirmation/only submit this with a full review...
-    // Display this on the frontend as well
-    async function leaveRating(rating: number) {
-        const response = await fetch("/api/db/leave-rating", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                songId: songMetadata.id,
-                userId: userId,
-                rating: rating
-            })
-        });
-
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        return data;
-    }
-
     useEffect(() => {
         getReviews();
         const interval = setInterval(getReviews, 3000);
@@ -194,16 +206,36 @@ export default function ({
 
     async function submitReview(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault();
-        const formData = new FormData(event.currentTarget);
-        formData.append("userid", userId);
-        formData.append("songid", songMetadata.id);
-        const data: Record<string, string> = {};
+        if (reviewText) {
+            const formData = new FormData(event.currentTarget);
+            formData.append("userid", userId);
+            formData.append("songid", songMetadata.id);
+            const data: Record<string, string> = {};
 
-        for (const [key, value] of formData.entries()) {
-            data[key] = value.toString();
+            for (const [key, value] of formData.entries()) {
+                data[key] = value.toString();
+            }
+
+            await submitToServer(data, "/api/db/insert-review");
         }
 
-        await submitToServer(data, "/api/db/insert-review");
+        if (rating !== initialRating) {
+            const response = await fetch("/api/db/leave-rating", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    songId: songMetadata.id,
+                    userId: userId,
+                    rating: rating
+                })
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        }
 
         setReviewText("");
         getReviews();
@@ -266,13 +298,19 @@ export default function ({
                             </div>
                         )}
                     </div>
-                    <div className="flex flex-row space-x-0 mx-auto my-1">
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStarHalf className="text-secondary text-3xl" />
-                    </div>
+                    {songMetadata.rating && (
+                        <div className="flex flex-row space-x-0 mx-auto my-1">
+                            {Array.from({length: Math.floor(songMetadata.rating)}, (_, index) => (
+                                <IoMdStar key={index} className="text-secondary text-3xl" />
+                            ))}
+                            {songMetadata.rating % 1 !== 0 && (
+                                <IoMdStarHalf className="text-secondary text-3xl" />
+                            )}
+                            {Math.ceil(songMetadata.rating) - songMetadata.rating > 0.5 && (
+                                <IoMdStarHalf className="text-secondary text-3xl" />
+                            )}
+                        </div>
+                    )}
                     <div className="flex flex-col -space-y-1 mt-2.5">
                         <h3 className="font-bold text-lg text-text">{songMetadata.name}</h3>
                         <h3 className="font-normal italic text-md text-text/50">
@@ -394,33 +432,26 @@ export default function ({
                             name="reviewbody"
                             onChange={(e) => setReviewText(e.target.value)}
                             value={reviewText}
-                            required
                             className="text-text/90 p-2 font-normal text-sm bg-secondary/20 rounded-md w-full h-3/5 resize-none"
                         />
                     </div>
 
                     <div className="flex flex-row place-content-between">
                         <div className="flex flex-row-reverse pb-1 mb-2 mr-auto">
-                            <IoMdStar
-                                onClick={() => leaveRating(1)}
-                                className="peer hover:text-primary text-accent-neutral/20 text-3xl"
-                            />
-                            <IoMdStar
-                                onClick={() => leaveRating(2)}
-                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
-                            />
-                            <IoMdStar
-                                onClick={() => leaveRating(3)}
-                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
-                            />
-                            <IoMdStar
-                                onClick={() => leaveRating(4)}
-                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
-                            />
-                            <IoMdStar
-                                onClick={() => leaveRating(5)}
-                                className="peer peer-hover:text-primary hover:text-primary text-accent-neutral/20 text-3xl"
-                            />
+                            {[...Array(5)].reverse().map((_, index) => {
+                                const ratingValue = 5 - index;
+                                return (
+                                    <IoMdStar
+                                        key={ratingValue}
+                                        onClick={() => leaveRating(ratingValue)}
+                                        className={`cursor-pointer ${
+                                            ratingValue <= rating
+                                                ? "text-primary"
+                                                : "text-accent-neutral/20"
+                                        } text-3xl`}
+                                    />
+                                );
+                            })}
                         </div>
                         <button
                             className="ml-auto bg-secondary/70 hover:bg-secondary text-text/90 hover:text-text/90 rounded-md px-3 py-1"

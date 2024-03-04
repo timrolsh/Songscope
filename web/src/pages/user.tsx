@@ -148,7 +148,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                             {searchedSongs.map((song) => (
                                 <SongTile
                                     key={song.id}
-                                    rating={true}
+                                    rating={song.rating}
                                     metadata={song}
                                     user={curSession.user as User}
                                 />

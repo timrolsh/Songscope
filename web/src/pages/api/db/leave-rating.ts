@@ -44,8 +44,6 @@ async function leaveRating(songId: string, userId: number, rating: number) {
         "rating:",
         rating
     );
-    // TODO --> Do this for the actual request being sent
-    rating = 6 - rating; // Invert rating to match the database schema
     return new Promise<void>((resolve, reject) => {
         // Check if a rating by the user for the song already exists
 
