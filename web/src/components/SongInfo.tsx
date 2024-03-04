@@ -266,13 +266,29 @@ export default function ({
                             </div>
                         )}
                     </div>
-                    <div className="flex flex-row space-x-0 mx-auto my-1">
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStar className="text-secondary text-3xl" />
-                        <IoMdStarHalf className="text-secondary text-3xl" />
-                    </div>
+                    {songMetadata.rating && (
+                        <div className="flex flex-row space-x-0 mx-auto my-1">
+                            {songMetadata.rating && (
+                                <div className="mx-auto place-content-center flex flex-row space-x-0.5 py-2">
+                                    {Array.from(
+                                        {length: Math.floor(songMetadata.rating)},
+                                        (_, index) => (
+                                            <IoMdStar
+                                                key={index}
+                                                className="text-secondary text-3xl"
+                                            />
+                                        )
+                                    )}
+                                    {songMetadata.rating % 1 !== 0 && (
+                                        <IoMdStarHalf className="text-secondary text-3xl" />
+                                    )}
+                                    {Math.ceil(songMetadata.rating) - songMetadata.rating > 0.5 && (
+                                        <IoMdStarHalf className="text-secondary text-3xl" />
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    )}
                     <div className="flex flex-col -space-y-1 mt-2.5">
                         <h3 className="font-bold text-lg text-text">{songMetadata.name}</h3>
                         <h3 className="font-normal italic text-md text-text/50">
