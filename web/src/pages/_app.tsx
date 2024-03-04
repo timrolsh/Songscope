@@ -11,12 +11,13 @@ interface MyAppProps extends AppProps {
 }
 
 export default ({Component, pageProps: {session, ...pageProps}}: MyAppProps): JSX.Element => {
+    const modifiedSession = session ? {...session, user: {}} : undefined;
     return (
         <>
             <Head>
                 <title>Songscope</title>
             </Head>
-            <SessionProvider session={session}>
+            <SessionProvider session={modifiedSession}>
                 <Component {...pageProps} />
             </SessionProvider>
         </>

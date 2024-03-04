@@ -12,7 +12,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 
-    // @ts-expect-error
     const user: User = session.user;
 
     if (request.method === "POST") {
