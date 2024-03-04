@@ -268,24 +268,14 @@ export default function ({
                     </div>
                     {songMetadata.rating && (
                         <div className="flex flex-row space-x-0 mx-auto my-1">
-                            {songMetadata.rating && (
-                                <div className="mx-auto place-content-center flex flex-row space-x-0.5 py-2">
-                                    {Array.from(
-                                        {length: Math.floor(songMetadata.rating)},
-                                        (_, index) => (
-                                            <IoMdStar
-                                                key={index}
-                                                className="text-secondary text-3xl"
-                                            />
-                                        )
-                                    )}
-                                    {songMetadata.rating % 1 !== 0 && (
-                                        <IoMdStarHalf className="text-secondary text-3xl" />
-                                    )}
-                                    {Math.ceil(songMetadata.rating) - songMetadata.rating > 0.5 && (
-                                        <IoMdStarHalf className="text-secondary text-3xl" />
-                                    )}
-                                </div>
+                            {Array.from({length: Math.floor(songMetadata.rating)}, (_, index) => (
+                                <IoMdStar key={index} className="text-secondary text-3xl" />
+                            ))}
+                            {songMetadata.rating % 1 !== 0 && (
+                                <IoMdStarHalf className="text-secondary text-3xl" />
+                            )}
+                            {Math.ceil(songMetadata.rating) - songMetadata.rating > 0.5 && (
+                                <IoMdStarHalf className="text-secondary text-3xl" />
                             )}
                         </div>
                     )}
