@@ -31,6 +31,34 @@ export default function ({
     const [rating, setRating] = useState(0);
 
     useEffect(() => {
+        async function fetchRating() {
+            const res = await fetch(`/api/db/get-rating`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({songid: songMetadata.id, userid: userId})
+            });
+
+            if (res.status !== 200) console.log("Non 200 code received");
+
+            let data: number;
+
+            if (res.ok) {
+                data = await res.json();
+                console.log("[INFO] Parsed successfully as JSON: ", data);
+                setRating(data);
+            } else {
+                throw new Error("Error fetching rating: " + res.status + " " + res.statusText);
+            }
+        }
+
+        fetchRating().catch((error) => {
+            console.error("Error fetching rating:", error);
+        });
+    }, []);
+
+    useEffect(() => {
         async function fetchPinFav() {
             const res = await fetch(`/api/db/get-favorite-pin`, {
                 method: "POST",
