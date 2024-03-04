@@ -29,6 +29,7 @@ export default function ({
     const [favorite, setFavorite] = useState(false);
     const [pinfavFetched, setPinfavFetched] = useState(false);
     const [rating, setRating] = useState(0);
+    const [initialRating, setInitialRating] = useState(0);
 
     useEffect(() => {
         async function fetchRating() {
@@ -48,6 +49,7 @@ export default function ({
                 data = await res.json();
                 console.log("[INFO] Parsed successfully as JSON: ", data);
                 setRating(data);
+                setInitialRating(data);
             } else {
                 throw new Error("Error fetching rating: " + res.status + " " + res.statusText);
             }
@@ -217,20 +219,22 @@ export default function ({
             await submitToServer(data, "/api/db/insert-review");
         }
 
-        const response = await fetch("/api/db/leave-rating", {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                songId: songMetadata.id,
-                userId: userId,
-                rating: rating
-            })
-        });
+        if (rating !== initialRating) {
+            const response = await fetch("/api/db/leave-rating", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    songId: songMetadata.id,
+                    userId: userId,
+                    rating: rating
+                })
+            });
 
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
         }
 
         setReviewText("");
