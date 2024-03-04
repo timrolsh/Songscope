@@ -54,13 +54,10 @@ export default ({
                         {rating && (
                             <div className="mx-auto place-content-center flex flex-row space-x-0.5 py-2">
                                 {Array.from({length: Math.floor(rating)}, (_, index) => (
-                                    <IoMdStar key={index} className="text-secondary text-2xl" />
+                                    <IoMdStar key={index} className="text-secondary text-3xl" />
                                 ))}
-                                {rating % 1 !== 0 && (
-                                    <IoMdStarHalf className="text-secondary text-2xl" />
-                                )}
-                                {Math.ceil(rating) - rating > 0.5 && (
-                                    <IoMdStarHalf className="text-secondary text-2xl" />
+                                {rating - Math.floor(rating) >= 0.5 && (
+                                    <IoMdStarHalf className="text-secondary text-3xl" />
                                 )}
                             </div>
                         )}

@@ -303,10 +303,7 @@ export default function ({
                             {Array.from({length: Math.floor(songMetadata.rating)}, (_, index) => (
                                 <IoMdStar key={index} className="text-secondary text-3xl" />
                             ))}
-                            {songMetadata.rating % 1 !== 0 && (
-                                <IoMdStarHalf className="text-secondary text-3xl" />
-                            )}
-                            {Math.ceil(songMetadata.rating) - songMetadata.rating > 0.5 && (
+                            {songMetadata.rating - Math.floor(songMetadata.rating) >= 0.5 && (
                                 <IoMdStarHalf className="text-secondary text-3xl" />
                             )}
                         </div>
