@@ -25,14 +25,12 @@ export default ({
                     <div className="flex flex-col h-3/4 py-8 place-content-start overflow-y-scroll">
                         <>
                             {Object.values(providers).map((provider, idx) => (
-                                <>
-                                    <AuthProviderBlock
-                                        key={idx}
-                                        providerName={provider.name}
-                                        iconLink={`/providers/${provider.id}.png`}
-                                        provider={provider}
-                                    />
-                                </>
+                                <AuthProviderBlock
+                                    key={provider.id}
+                                    providerName={provider.name}
+                                    iconLink={`/providers/${provider.id}.png`}
+                                    provider={provider}
+                                />
                             ))}
                         </>
                     </div>
