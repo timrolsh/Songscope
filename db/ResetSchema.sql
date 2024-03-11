@@ -16,7 +16,6 @@ DROP TABLE IF EXISTS sessions cascade;
 DROP TABLE IF EXISTS users cascade;
 DROP TABLE IF EXISTS user_song cascade;
 DROP TABLE IF EXISTS comment cascade;
-DROP TABLE IF EXISTS rating cascade;
 DROP TABLE IF EXISTS comment cascade;
 DROP TABLE IF EXISTS verification_token cascade;
 
