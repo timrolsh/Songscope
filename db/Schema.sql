@@ -60,17 +60,6 @@ create table if not exists comment
         foreign key (user_id) references users (id)
 );
 
-create table if not exists rating
-(
-    spotify_work_id text            not null,
-    rating          float           not null,
-    user_id         bigint unsigned not null,
-    constraint user_id
-        unique (user_id),
-    constraint review_user_fk
-        foreign key (user_id) references users (id)
-);
-
 create table if not exists user_song
 (
     user_id         bigint unsigned      not null,
@@ -90,4 +79,3 @@ create table if not exists verification_token
     token      text      not null,
     primary key (identifier(128), token(128))
 );
-
