@@ -43,20 +43,22 @@ function renderDashboardBody() {
     return (
         <>
             {topSongs && (
-                <div className="flex flex-col">
-                    <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
-                    <div className="flex flex-col overflow-y-scroll">
-                        {topSongs.map((song: SongMetadata) => (
-                            <SidebarEntry key={song.id} song={song} />
-                        ))}
+                <>
+                    <div className="flex flex-col">
+                        <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
+                        <div className="flex flex-col overflow-y-scroll max-h-60">
+                            {topSongs.map((song: SongMetadata) => (
+                                <SidebarEntry key={song.id} song={song} />
+                            ))}
+                        </div>
                     </div>
-                </div>
+                </>
             )}
             {hotSongs && (
                 <>
                     <hr className="border-t-2 border-accent-neutral/20 mt-5 mb-4"></hr>
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
-                    <div className="flex flex-col overflow-y-scroll">
+                    <div className="flex flex-col overflow-y-scroll max-h-60">
                         {hotSongs.map((song: SongMetadata) => (
                             <SidebarEntry key={song.id} song={song} />
                         ))}
@@ -130,7 +132,7 @@ export default ({
             ) : (
                 renderDashboardBody()
             )}
-            <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4"></hr>
+            <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4 "></hr>
             <div className="w-full h-52 flex flex-col mb-4">
                 <div className="my-auto flex flex-col h-full place-content-evenly">
                     <Link
