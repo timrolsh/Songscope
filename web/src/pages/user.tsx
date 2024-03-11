@@ -144,7 +144,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                             <Spinner />
                         </div>
                     ) : searchedSongs.length ? (
-                        <div className="grid grid-cols-4 gap-10 p-12 overflow-auto">
+                        <div className="flex flex-row flex-wrap gap-10 p-12 overflow-auto">
                             {searchedSongs.map((song) => (
                                 <SongTile
                                     key={song.id}
