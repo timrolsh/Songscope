@@ -272,8 +272,8 @@ export default function ({
     }
 
     return (
-        <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
-            <div className="flex flex-col place-content-between h-full w-2/5 overflow-scroll">
+        <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-2">
+            <div className="flex flex-col place-content-between h-full w-2/5 overflow-scroll pr-6">
                 <div>
                     <div className="w-full flex flex-row place-content-between">
                         <Image
