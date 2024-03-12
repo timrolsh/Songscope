@@ -1,6 +1,7 @@
 /*
 For connections with different providers like Spotify and Google
 */
+import {MdLink} from "react-icons/md";
 
 export default ({
     providerName,
@@ -12,16 +13,17 @@ export default ({
     onToggle: () => void;
 }): JSX.Element => {
     return (
-        <div className="flex flex-row items-center justify-between py-2">
+        <>
             <span>{providerName}</span>
             <button
-                className={`px-4 py-2 rounded ${
-                    isConnected ? "bg-green-500" : "bg-red-500"
+                className={`px-4 py-2 rounded-full font-semibold transition-all ${
+                    isConnected ? "bg-green-500 hover:bg-green-600" : "bg-red-500 hover:bg-red-600"
                 } text-white`}
                 onClick={onToggle}
             >
                 {isConnected ? "Connected" : "Connect"}
             </button>
-        </div>
+            <br></br>
+        </>
     );
 };
