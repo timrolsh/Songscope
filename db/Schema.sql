@@ -1,21 +1,29 @@
 -- Use our assigned schema
 USE capstone_2324_songscope;
 
-create table if not exists accounts
+/*
+Each row in this table represents a link between a user and a third party provider, such as Spotify or Google.
+One user can have multiple entries in this table for different providers that they are authenticated with.
+An auth account is tied to a user account, and for each provider, there can only be one account (these are 2 constraints).
+*/
+create table accounts
 (
-    id                bigint unsigned auto_increment
-        primary key,
-    userId            int          not null,
-    type              varchar(255) not null,
-    provider          varchar(255) not null,
-    providerAccountId varchar(255) not null,
-    refresh_token     text         null,
-    access_token      text         null,
-    expires_at        bigint       null,
-    id_token          text         null,
-    scope             text         null,
-    session_state     text         null,
-    token_type        text         null
+    id                bigint unsigned auto_increment not null primary key,
+    userId            int                            not null,
+    type              varchar(255)                   not null,
+    provider          varchar(255)                   not null,
+    providerAccountId varchar(255)                   not null,
+    refresh_token     text                           null,
+    access_token      text                           null,
+    expires_at        bigint                         null,
+    id_token          text                           null,
+    scope             text                           null,
+    session_state     text                           null,
+    token_type        text                           null,
+    constraint accounts_pk
+        unique (provider, providerAccountId),
+    constraint accounts_users_id_fk
+        foreign key (userId) references users (id)
 );
 
 create table if not exists sessions
@@ -29,6 +37,9 @@ create table if not exists sessions
         unique (id)
 );
 
+/*
+A user's primary account for the platform.
+*/
 create table if not exists users
 (
     id                  bigint unsigned auto_increment
