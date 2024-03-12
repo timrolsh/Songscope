@@ -4,9 +4,10 @@ import {authOptions} from "./api/auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {GetServerSideProps} from "next";
 import {UserProps} from "./user";
-import {MdAccountCircle, MdInfoOutline, MdOutlineSecurity} from "react-icons/md";
+import {MdAccountCircle, MdInfoOutline, MdLink, MdOutlineSecurity} from "react-icons/md";
 import {useEffect, useState} from "react";
 import Head from "next/head";
+import ConnectionEntry from "../components/ConnectionEntry";
 
 export function TextEntry({
     name,
@@ -176,6 +177,26 @@ export default ({curSession}: UserProps): JSX.Element => {
                         >
                             Update
                         </button>
+                    </div>
+                    <div className="space-y-4 mt-8">
+                        <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
+                            <MdLink className="my-auto text-xl mr-3" />{" "}
+                            Connections
+                        </h2>
+                        <ConnectionEntry
+                            providerName="Spotify"
+                            isConnected={true /* Replace with actual state */}
+                            onToggle={() => {
+                                /* Replace with actual function */
+                            }}
+                        />
+                        <ConnectionEntry
+                            providerName="Google"
+                            isConnected={false /* Replace with actual state */}
+                            onToggle={() => {
+                                /* Replace with actual function */
+                            }}
+                        />
                     </div>
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
                         <MdOutlineSecurity className="my-auto text-xl mr-3" />
