@@ -5,23 +5,22 @@ import {db} from "../auth/[...nextauth]";
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "POST") {
         const user_id = request.body.user_id as string;
-        const song_id = request.body.song_id as string;
-        const pin_state = request.body.pin_state as boolean;
-        const fav_state = request.body.fav_state as boolean;
+        const comment_id = request.body.comment_id as string;
+        const like = request.body.like as boolean;
         // if (!user_id || !song_id || pin_state || !fav_state) {
         //     response.status(400).send("Malformed Request Body");
         //     return;
         // }
 
         try {
-            const results = await pinOrFavorite(user_id, song_id, pin_state, fav_state);
+            const results = await likeComment(user_id, comment_id, like);
         } catch (e: any) {
-            response.status(500).send("Unable to pin/favorite song: ".concat(e.message));
+            response.status(500).send("Unable to like comment: ".concat(e.message));
             return;
         }
 
         // TODO --> Swap from JSON stringify to just pure JSON
-        response.status(200).send("Toggled Pinned/Favorited Song");
+        response.status(200).send("Toggled Like on Comment");
         return;
     } else {
         response.status(400).send("Malformed Request");
@@ -29,38 +28,36 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 };
 
-async function pinOrFavorite(
+async function likeComment(
     user_id: string,
-    song_id: string,
-    pin_state: boolean,
-    fav_state: boolean
+    comment_id: string,
+    like: boolean,
 ) {
     try {
         // TODO --> Again, likely can be optimized. Big query.
-        // Fix bug with rating... if you give a song a rating then pin/like it, rating will be set to null
         return db.execute(
             `
-                INSERT INTO user_song (user_id, spotify_work_id, favorite, pinned, rating)
-                VALUES (?, ?, ?, ?, ?)
-                ON DUPLICATE KEY UPDATE favorite=?, pinned=?, rating=?;
+                INSERT INTO user_comment(user_id, comment_id, liked)
+                VALUES (?, ?, ?)
+                ON DUPLICATE KEY UPDATE liked=?;
                 `,
-            [user_id, song_id, fav_state, pin_state, null, fav_state, pin_state, null],
+            [user_id, comment_id, like, like],
             (error, results, fields) => {
                 console.log(
-                    "SONGSCOPE: Updated pin/favorite state for user/song: " +
+                    "SONGSCOPE: Updated like state for user/comment: " +
                         user_id +
                         "/" +
-                        song_id
+                        comment_id
                 );
                 if (error) {
-                    console.error("SONGSCOPE: Unable to pin/favorite song", error);
+                    console.error("SONGSCOPE: Unable to like comment", error);
                     return false;
                 }
                 return true;
             }
         );
     } catch (error) {
-        console.error("SONGSCOPE: Unable to fetch reviews", error);
+        console.error("SONGSCOPE: Unable to like comment (outer)", error);
         throw error; // Rethrow the error to be caught by the caller
     }
 }
