@@ -1,12 +1,12 @@
 import type {GetServerSidePropsContext, InferGetServerSidePropsType} from "next";
-import {getProviders, signIn} from "next-auth/react";
+import {getProviders} from "next-auth/react";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "../api/auth/[...nextauth]";
 import AuthProviderBlock from "@/components/AuthProviderBlock";
 
-export default function SignIn({
+export default ({
     providers
-}: InferGetServerSidePropsType<typeof getServerSideProps>) {
+}: InferGetServerSidePropsType<typeof getServerSideProps>): JSX.Element => {
     return (
         <div className="h-screen w-screen m-auto flex place-content-center bg-gradient-radial from-primary/5  to-accent-vivid/5">
             <div className="flex flex-col place-content-center m-auto w-full h-screen">
@@ -25,14 +25,12 @@ export default function SignIn({
                     <div className="flex flex-col h-3/4 py-8 place-content-start overflow-y-scroll">
                         <>
                             {Object.values(providers).map((provider, idx) => (
-                                <>
-                                    <AuthProviderBlock
-                                        key={idx}
-                                        providerName={provider.name}
-                                        iconLink={"/providers/google.png"}
-                                        provider={provider}
-                                    />
-                                </>
+                                <AuthProviderBlock
+                                    key={provider.id}
+                                    providerName={provider.name}
+                                    iconLink={`/providers/${provider.id}.png`}
+                                    provider={provider}
+                                />
                             ))}
                         </>
                     </div>
@@ -40,7 +38,7 @@ export default function SignIn({
             </div>
         </div>
     );
-}
+};
 
 export async function getServerSideProps(context: GetServerSidePropsContext) {
     // @ts-expect-error
