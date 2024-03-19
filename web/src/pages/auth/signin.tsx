@@ -22,7 +22,7 @@ export default ({
                         </h3>
                         <hr className="w-2/3 border-accent-neutral mx-auto mt-4 mb-6"></hr>
                     </div>
-                    <div className="flex flex-col h-3/4 py-8 place-content-start overflow-y-scroll">
+                    <div className="flex flex-col h-3/4 py-8 place-content-start overflow-y-scroll space-y-4">
                         <>
                             {Object.values(providers).map((provider, idx) => (
                                 <AuthProviderBlock

@@ -14,6 +14,7 @@ import ReviewTile from "@/components/ReviewTile";
 import {AccountJoinTimestamp} from "@/dates";
 import Head from "next/head";
 import {ProfileTopReviews} from "../api/db/get-top-user-reviews";
+import clsx from "clsx";
 
 interface ProfileProps {
     curSession: Session;
@@ -261,7 +262,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                                     />
                                                 ))
                                             ) : (
-                                                <div className="w-full flex place-content-center h-80">
+                                                <div className="w-full flex place-content-center h-72">
                                                     <h3 className="text-text/50 italic m-auto">
                                                         No pinned songs yet!
                                                     </h3>
@@ -278,7 +279,7 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                     <div className="pt-5">
                                         <h2 className="text-2xl pl-2 font-bold">
                                             Top Reviews
-                                            <p className="text-text/70 text-md font-light pt-2">
+                                            <p className={clsx("text-text/70 text-md font-light pt-2", !userProfile.show_reviews && "hidden")}>
                                                 <a href="/settings">
                                                     {" "}
                                                     {isOwnProfile &&
