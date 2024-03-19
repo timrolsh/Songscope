@@ -27,8 +27,7 @@ async function fetchRating(songid: string, user_id: string) {
             [songid, user_id]
         )) as RowDataPacket[];
         return rows[0] ? rows[0].rating : null;
-    }
-    catch (error) {
+    } catch (error) {
         console.error("SONGSCOPE: Unable to fetch rating data", error);
         throw error; // Rethrow the error to be caught by the caller
     }
