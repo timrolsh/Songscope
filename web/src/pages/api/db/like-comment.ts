@@ -28,11 +28,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 };
 
-async function likeComment(
-    user_id: string,
-    comment_id: string,
-    like: boolean,
-) {
+async function likeComment(user_id: string, comment_id: string, like: boolean) {
     try {
         // TODO --> Again, likely can be optimized. Big query.
         return db.execute(
@@ -44,10 +40,7 @@ async function likeComment(
             [user_id, comment_id, like, like],
             (error, results, fields) => {
                 console.log(
-                    "SONGSCOPE: Updated like state for user/comment: " +
-                        user_id +
-                        "/" +
-                        comment_id
+                    "SONGSCOPE: Updated like state for user/comment: " + user_id + "/" + comment_id
                 );
                 if (error) {
                     console.error("SONGSCOPE: Unable to like comment", error);

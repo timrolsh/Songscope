@@ -341,7 +341,7 @@ export default function ({
                     <div className="overflow-auto pt-2 h-3/4">
                         {reviews?.length ? (
                             reviews.map((rvw) => {
-                                return ( 
+                                return (
                                     <Comment user={user} review={rvw} dataEmitter={dataEmitter} />
                                 );
                             })

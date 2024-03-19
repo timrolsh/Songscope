@@ -118,12 +118,15 @@ export default function ({
                 </div>
                 <div className="flex flex-col space-y-3">
                     <button
-                        className={clsx(like ? "text-primary hover:text-red-700" : "text-gray-500 hover:text-primary", "hover:cursor-pointer text-sm my-auto")}
+                        className={clsx(
+                            like
+                                ? "text-primary hover:text-red-700"
+                                : "text-gray-500 hover:text-primary",
+                            "hover:cursor-pointer text-sm my-auto"
+                        )}
                         onClick={toggleLike}
                     >
-                        {
-                            like ? <BsHeartFill /> : <BsHeart />
-                        }
+                        {like ? <BsHeartFill /> : <BsHeart />}
                     </button>
                 </div>
             </div>
@@ -133,16 +136,14 @@ export default function ({
                 </span>
                 <div className="flex flex-row place-content-between">
                     <span className="text-sm italic font-normal text-text/40 break-words">
-                        {
-                            review.num_likes === 1 ? (review.num_likes + " like") : (review.num_likes + " likes")
-                        }
+                        {review.num_likes === 1
+                            ? review.num_likes + " like"
+                            : review.num_likes + " likes"}
                     </span>
                     {(user.isAdmin || review.user_id === user.id) && (
                         <button
                             className="text-primary hover:text-red-700 hover:cursor-pointer invisible group-hover:visible"
-                            onClick={() =>
-                                deleteReview(review.comment_id, review.user_id)
-                            }
+                            onClick={() => deleteReview(review.comment_id, review.user_id)}
                         >
                             <MdOutlineDeleteOutline />
                         </button>

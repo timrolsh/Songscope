@@ -49,7 +49,7 @@ export const authOptions = {
         }
     },
     pages: {
-        signIn: '/auth/signin',
+        signIn: "/auth/signin"
     },
     secret: process.env.NEXTAUTH_SECRET
 };

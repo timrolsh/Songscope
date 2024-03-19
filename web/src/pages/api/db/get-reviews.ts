@@ -1,7 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {db} from "../auth/[...nextauth]";
 import {RowDataPacket} from "mysql2";
-import { Review } from "@/types";
+import {Review} from "@/types";
 
 // TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
@@ -31,7 +31,7 @@ async function fetchSongReviews(songid: string) {
             [songid]
         )) as RowDataPacket[];
 
-        return rows.length > 0 ? rows as Review[] : null;
+        return rows.length > 0 ? (rows as Review[]) : null;
     } catch (error) {
         console.error("SONGSCOPE: Unable to fetch reviews", error);
         throw error; // Rethrow the error to be caught by the caller

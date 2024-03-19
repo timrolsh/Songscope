@@ -13,7 +13,7 @@ import {useEffect, useState} from "react";
 import ReviewTile from "@/components/ReviewTile";
 import {AccountJoinTimestamp} from "@/dates";
 import Head from "next/head";
-import { ProfileTopReviews } from "../api/db/get-top-user-reviews";
+import {ProfileTopReviews} from "../api/db/get-top-user-reviews";
 
 interface ProfileProps {
     curSession: Session;
@@ -146,7 +146,9 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                 const data = await res.json();
                 setReviews(data);
             } else {
-                throw new Error("Error fetching user reviews: " + res.status + " " + res.statusText);
+                throw new Error(
+                    "Error fetching user reviews: " + res.status + " " + res.statusText
+                );
             }
             setReviewsLoading(false);
         }
@@ -286,28 +288,24 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                             </p>
                                         </h2>
                                         <div className="flex flex-row w-full mx-auto place-content-evenly pt-1">
-                                            { 
-                                                reviewsLoading ? (
-                                                    <Spinner />
-                                                ) : (
-                                                    reviews?.length ? (
-                                                        reviews.map((review) => (
-                                                            <ReviewTile
-                                                                key={review.comment_id}
-                                                                profileReview={review}
-                                                                // user={curSession.user as User}
-                                                                // dataEmitter={dataEmitter}
-                                                            />
-                                                        ))
-                                                    ) : (
-                                                        <div className="w-full flex place-content-center h-80">
-                                                            <h3 className="text-text/50 italic m-auto">
-                                                                No reviews yet!
-                                                            </h3>
-                                                        </div>
-                                                    )
-                                                )
-                                            }
+                                            {reviewsLoading ? (
+                                                <Spinner />
+                                            ) : reviews?.length ? (
+                                                reviews.map((review) => (
+                                                    <ReviewTile
+                                                        key={review.comment_id}
+                                                        profileReview={review}
+                                                        // user={curSession.user as User}
+                                                        // dataEmitter={dataEmitter}
+                                                    />
+                                                ))
+                                            ) : (
+                                                <div className="w-full flex place-content-center h-80">
+                                                    <h3 className="text-text/50 italic m-auto">
+                                                        No reviews yet!
+                                                    </h3>
+                                                </div>
+                                            )}
                                         </div>
                                     </div>
                                 ) : (

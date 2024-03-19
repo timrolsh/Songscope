@@ -1,7 +1,7 @@
 import {db} from "../auth/[...nextauth]";
 import {NextApiRequest, NextApiResponse} from "next";
-import { enrichSongData } from "./get-top-reviewed";
-import { RowDataPacket } from "mysql2";
+import {enrichSongData} from "./get-top-reviewed";
+import {RowDataPacket} from "mysql2";
 
 interface UserTopReviews extends RowDataPacket {
     user_id: string;
@@ -18,7 +18,7 @@ export interface ProfileTopReviews {
     artist: string;
     album: string;
     image: string;
-    
+
     user_id: string;
     comment_id: string;
     comment_text: string;
@@ -32,7 +32,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
         const userid = parseInt(request.body.user_id as string, 10) || 5; // Default limit to 5 if not specified
         try {
             const results = await fetchTopUserReviews(userid);
-            console.log("Results: ", results)
+            console.log("Results: ", results);
             response.status(200).json(results);
         } catch (error) {
             console.error("Error fetching top songs: ", error);
@@ -65,15 +65,15 @@ async function fetchTopUserReviews(userid: number): Promise<ProfileTopReviews[] 
                     artist: metadata.artist,
                     album: metadata.album,
                     image: metadata.albumArtUrl,
-                    
+
                     user_id: row.user_id,
                     comment_id: row.comment_id,
                     comment_text: row.comment_text,
                     time: row.time,
-                    num_likes: row.num_likes,
-                }
+                    num_likes: row.num_likes
+                };
             })
-        )
+        );
 
         return withSongMetadata.length > 0 ? withSongMetadata : null;
     } catch (error) {
