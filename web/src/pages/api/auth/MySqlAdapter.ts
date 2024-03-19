@@ -150,7 +150,7 @@ export default function MySqlAdapter(db: Pool): Adapter {
                 account.access_token,
                 account.expires_at,
                 account.refresh_token ? account.refresh_token : null,
-                account.id_token,
+                account.id_token ? account.id_token : null,
                 account.scope,
                 account.session_state ? account.session_state : null,
                 account.token_type
