@@ -14,9 +14,9 @@ SET FOREIGN_KEY_CHECKS = 0;
 DROP TABLE IF EXISTS accounts cascade;
 DROP TABLE IF EXISTS sessions cascade;
 DROP TABLE IF EXISTS users cascade;
+DROP TABLE IF EXISTS comment cascade;
+DROP TABLE IF EXISTS user_comment cascade;
 DROP TABLE IF EXISTS user_song cascade;
-DROP TABLE IF EXISTS comment cascade;
-DROP TABLE IF EXISTS comment cascade;
 DROP TABLE IF EXISTS verification_token cascade;
 
 -- re-enable foreign key checks for normal functionality
