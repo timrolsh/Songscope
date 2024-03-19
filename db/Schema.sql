@@ -71,6 +71,20 @@ create table if not exists comment
         foreign key (user_id) references users (id)
 );
 
+create table if not exists user_comment
+(
+    user_id    bigint unsigned      not null,
+    comment_id int                  not null,
+    liked      tinyint(1) default 0 not null,
+    primary key (user_id, comment_id),
+    constraint user_comment_comment_fk
+        foreign key (comment_id) references comment (id)
+            on delete cascade,
+    constraint user_comment_user_fk
+        foreign key (user_id) references users (id)
+            on delete cascade
+);
+
 create table if not exists user_song
 (
     user_id         bigint unsigned      not null,
