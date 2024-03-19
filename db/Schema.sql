@@ -6,7 +6,7 @@ Each row in this table represents a link between a user and a third party provid
 One user can have multiple entries in this table for different providers that they are authenticated with.
 An auth account is tied to a user account, and for each provider, there can only be one account (these are 2 constraints).
 */
-create table accounts
+create table if not exists accounts
 (
     id                bigint unsigned auto_increment not null primary key,
     userId            int                            not null,
