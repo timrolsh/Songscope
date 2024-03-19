@@ -37,6 +37,7 @@ async function pinOrFavorite(
 ) {
     try {
         // TODO --> Again, likely can be optimized. Big query.
+        // Fix bug with rating... if you give a song a rating then pin/like it, rating will be set to null
         return db.execute(
             `
                 INSERT INTO user_song (user_id, spotify_work_id, favorite, pinned, rating)

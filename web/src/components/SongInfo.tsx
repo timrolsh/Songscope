@@ -6,13 +6,10 @@ import Image from "next/image";
 import {BsHeart, BsHeartFill, BsPinAngle, BsPinAngleFill} from "react-icons/bs";
 import {IoMdStar, IoMdStarHalf} from "react-icons/io";
 import {IoPauseCircleOutline, IoPlayCircleOutline} from "react-icons/io5";
-import Link from "next/link";
 
 import {theme} from "../../tailwind.config";
-import {CommentTimestamp} from "@/dates";
-import clsx from "clsx";
 import {User} from "../types";
-import {MdOutlineDeleteOutline} from "react-icons/md";
+import Comment from "./Comment";
 const tailwindColors = theme.extend.colors;
 
 export default function ({
@@ -243,37 +240,9 @@ export default function ({
         if (dataEmitter) dataEmitter();
     }
 
-    async function deleteReview(comment_id: string, comment_user_id: string) {
-        if (!user) {
-            console.error("No user session found");
-            return;
-        }
-        if (comment_user_id !== userId && !user.isAdmin) {
-            console.error("Unauthorized to delete review");
-            return;
-        }
-
-        const response = await fetch("/api/db/delete-review", {
-            method: "DELETE",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({comment_id, comment_user_id})
-        });
-
-        if (response.status === 401) console.error("Unauthorized");
-        else if (response.status !== 200) console.log("Non 200 code received");
-
-        if (response.ok && dataEmitter) {
-            dataEmitter();
-        } else {
-            console.error("Error deleting review: ", response.status, response.statusText);
-        }
-    }
-
     return (
-        <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-8">
-            <div className="flex flex-col place-content-between h-full w-2/5 overflow-scroll">
+        <div className="flex flex-row h-full divide-x divide-accent-neutral/20 space-x-2">
+            <div className="flex flex-col place-content-between h-full w-2/5 overflow-scroll pr-6">
                 <div>
                     <div className="w-full flex flex-row place-content-between">
                         <Image
@@ -371,45 +340,9 @@ export default function ({
                     <h3 className="text-lg font-bold text-text">See what others are saying!</h3>
                     <div className="overflow-auto pt-2 h-3/4">
                         {reviews?.length ? (
-                            reviews.map((rvw, idx) => {
+                            reviews.map((rvw) => {
                                 return (
-                                    <div
-                                        className={clsx(
-                                            (user.isAdmin || rvw.user_id === user.id) &&
-                                                "hover:bg-accent-neutral/10 rounded-sm",
-                                            "w-full flex flex-col py-1 group"
-                                        )}
-                                        key={idx}
-                                    >
-                                        <div className="flex flex-row space-x-2 pl-1">
-                                            <h3 className="font-semibold text-text/90 w-11/12">
-                                                &gt;{" "}
-                                                <Link
-                                                    className="hover:text-text font-bold"
-                                                    href={"/profile/" + rvw.user_id}
-                                                >
-                                                    {rvw.name}
-                                                </Link>{" "}
-                                                <span className="italic font-normal">says </span>
-                                                <span className="font-normal text-text/90 break-words">
-                                                    "{rvw.comment_text}"
-                                                </span>
-                                            </h3>
-                                        </div>
-                                        <h4 className="font-light italic text-text/40 px-2 flex flex-row place-content-between">
-                                            {CommentTimestamp(rvw.time)}
-                                            {(user.isAdmin || rvw.user_id === user.id) && (
-                                                <button
-                                                    className="text-red-500 hover:text-red-700 hover:cursor-pointer invisible group-hover:visible"
-                                                    onClick={() =>
-                                                        deleteReview(rvw.comment_id, rvw.user_id)
-                                                    }
-                                                >
-                                                    <MdOutlineDeleteOutline />
-                                                </button>
-                                            )}
-                                        </h4>
-                                    </div>
+                                    <Comment user={user} review={rvw} dataEmitter={dataEmitter} />
                                 );
                             })
                         ) : (

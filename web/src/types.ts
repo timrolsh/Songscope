@@ -25,6 +25,7 @@ export interface Review {
     comment_text: string;
     name: string;
     time: string;
+    num_likes: number;
 }
 
 export interface UserProfileSongs {

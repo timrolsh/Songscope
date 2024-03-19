@@ -33,7 +33,7 @@ export default function ({
         >
             {/* This div will serve as the body for the modal. TODO --> Convert to a slotted component for reuse */}
             <div
-                className="relative mx-auto z-30 border px-8 py-5 border-secondary w-1/2 h-1/2 bg-background/70 backdrop-blur-lg rounded-lg"
+                className="relative mx-auto z-30 border px-8 py-5 border-secondary w-3/5 h-3/5 bg-background/70 backdrop-blur-lg rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
                 <SongInfo songMetadata={songMetadata} user={user} dataEmitter={dataEmitter} />

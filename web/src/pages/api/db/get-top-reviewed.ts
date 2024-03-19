@@ -15,7 +15,7 @@ export interface EnrichedSongMetadata extends SongMetadata {
     num_reviews: number;
 }
 
-async function enrichSongData(spotify_work_id: string): Promise<EnrichedSongMetadata> {
+export async function enrichSongData(spotify_work_id: string): Promise<EnrichedSongMetadata> {
     const metadata = await spotifyApi.getSong(spotify_work_id);
     return {
         ...metadata,
