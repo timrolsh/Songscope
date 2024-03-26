@@ -5,6 +5,7 @@ export interface SongMetadata {
     artist_id: string;
     album: string;
     album_id: string;
+    explicit: boolean;
     albumArtUrl: string;
     releaseDate: string;
     popularity: string;

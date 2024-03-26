@@ -131,7 +131,7 @@ export default ({curSession}: UserProps): JSX.Element => {
         }
     };
 
-    const updatePrivacySetting = async (apiRoute: string, value: boolean) => {
+    const updateToggleSetting = async (apiRoute: string, value: boolean) => {
         try {
             const response = await fetch(apiRoute, {
                 method: "POST",
@@ -180,8 +180,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                     </div>
                     <div className="space-y-4 mt-8">
                         <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
-                            <MdLink className="my-auto text-xl mr-3" />{" "}
-                            Connections
+                            <MdLink className="my-auto text-xl mr-3" /> Connections
                         </h2>
                         <ConnectionEntry
                             providerName="Spotify"
@@ -205,13 +204,13 @@ export default ({curSession}: UserProps): JSX.Element => {
                     <div className="space-y-4">
                         <ButtonEntry
                             name={"Show Favorite Songs"}
-                            onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
+                            onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
                             apiRoute={"api/db/update-favorite-songs-visibility"}
                             checked={showFavoriteSongs}
                         />
                         <ButtonEntry
                             name={"Show Reviews on Profile"}
-                            onChange={(isChecked, value) => updatePrivacySetting(value, isChecked)}
+                            onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
                             apiRoute={"api/db/update-review-visibility"}
                             checked={showReviews}
                         />
@@ -221,6 +220,12 @@ export default ({curSession}: UserProps): JSX.Element => {
                         Account
                     </h2>
                     <div className="space-y-4">
+                        <ButtonEntry
+                            name={"Show Explicit Songs"}
+                            onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
+                            apiRoute={"api/db/update-explicit-song-visibility"}
+                            checked={showFavoriteSongs}
+                        />
                         <button className="text-red-500" onClick={deleteUser}>
                             Delete Account
                         </button>
