@@ -53,6 +53,7 @@ create table if not exists users
     bio                 text                                 null,
     show_favorite_songs tinyint(1) default 1                 not null,
     show_reviews        tinyint(1) default 1                 not null,
+    show_explicit       tinyint(1) default 1                 not null,
     join_date           timestamp  default CURRENT_TIMESTAMP not null,
     isAdmin             tinyint(1) default 0                 not null,
     constraint id

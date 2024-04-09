@@ -23,7 +23,7 @@ async function getUsers(user_id: string): Promise<User> {
         const [userData] = (
             await db.promise().query(
                 `
-            select u.id, u.name, u.email, u.image, u.bio, u.join_date, u.show_favorite_songs, u.show_reviews, u.isAdmin
+            select u.id, u.name, u.email, u.image, u.bio, u.join_date, u.show_favorite_songs, u.show_reviews, u.show_explicit, u.isAdmin
                 from users u
                 where id=?;`,
                 [user_id]
@@ -40,8 +40,10 @@ async function getUsers(user_id: string): Promise<User> {
             role: "", // TODO --> update this when admin accounts exist
             show_favorite_songs: Boolean(userData.show_favorite_songs),
             show_reviews: Boolean(userData.show_reviews),
+            show_explicit: Boolean(userData.show_explicit),
             isAdmin: Boolean(userData.isAdmin)
         };
+        console.log("SONGSCOPE: Fetched user data", user);
         return user;
     } catch (error) {
         console.error("SONGSCOPE: Unable to fetch reviews", error);

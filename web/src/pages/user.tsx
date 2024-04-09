@@ -22,6 +22,28 @@ export default ({curSession}: UserProps): JSX.Element => {
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [songs, setSongs] = useState<SongMetadata[]>([]);
+    const [showExplicit, setShowExplicit] = useState(false);
+    const [userDataFetched, setUserDataFetched] = useState(false);
+
+    useEffect(() => {
+        const fetchUserData = async () => {
+            const res = await fetch("/api/db/get-user", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({user_id: curSession.user?.id})
+            });
+            if (res.ok) {
+                const data = await res.json();
+                setShowExplicit(data.show_explicit);
+                setUserDataFetched(true);
+            } else {
+                console.error("Error fetching user data");
+            }
+        };
+        fetchUserData();
+    }, [curSession.user?.id]);
 
     const fetchMoreSongs = async () => {
         if (loading) return; // Do not search if already searching
@@ -41,7 +63,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                 const data = await response.json();
                 // Filter out songs that are already in the list
                 // Return the most popular/newest released song since that will likely be most accurate (in terms of popularity, views, etc))
-                const newSongs = data.filter(
+                let newSongs = data.filter(
                     (song: SongMetadata) =>
                         !songs.some((existingSong) => existingSong.id === song.id) &&
                         !songs.some(
@@ -50,6 +72,9 @@ export default ({curSession}: UserProps): JSX.Element => {
                                 existingSong.artist === song.artist
                         )
                 );
+                if (!showExplicit) {
+                    newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
+                }
                 setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
                 console.error("Error fetching more songs from Spotify");
@@ -69,6 +94,7 @@ export default ({curSession}: UserProps): JSX.Element => {
     });
 
     useEffect(() => {
+        if (!userDataFetched) return;
         const initSongs = async () => {
             setLoading(true);
             const res = await fetch("/api/spotify/playlist", {
@@ -82,20 +108,23 @@ export default ({curSession}: UserProps): JSX.Element => {
             if (res.ok) {
                 const data = await res.json();
                 songsCache = data;
+                if (!showExplicit) {
+                    songsCache = songsCache.filter((song) => !song.explicit);
+                }
             } else {
                 throw new Error(
                     "Error fetching songs from Spotify: " + res.status + " " + res.statusText
                 );
             }
 
-            setSongs(songs.concat(songsCache));
+            setSongs((currentSongs) => [...currentSongs, ...songsCache]);
             setLoading(false);
         };
 
         initSongs().catch((error) => {
             console.error("Error fetching songs:", error);
         });
-    }, []);
+    }, [userDataFetched, showExplicit]);
 
     useEffect(() => {
         if (!songs) setSearchedSongs([]);

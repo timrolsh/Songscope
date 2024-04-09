@@ -1,4 +1,4 @@
-import {useState} from "react";
+import {useState, useEffect} from "react";
 
 export default function ToggleButton({
     onChange,
@@ -10,6 +10,10 @@ export default function ToggleButton({
     checked: boolean;
 }) {
     const [isChecked, setIsChecked] = useState(checked);
+
+    useEffect(() => {
+        setIsChecked(checked);
+    }, [checked]);
 
     const handleClick = () => {
         const newChecked = !isChecked;
