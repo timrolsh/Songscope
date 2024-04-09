@@ -252,7 +252,8 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                     <div className="flex flex-row w-full mx-auto place-content-between pt-5">
                                         {!pinnedFavoritesLoading && pinnedSongs ? (
                                             pinnedSongs.length ? (
-                                                pinnedSongs.map((song) => (
+                                                // TODO --> Fix this, bandaid solution to only show 3 pinned songs (better for display purposes)
+                                                pinnedSongs.slice(0, 3).map((song) => (
                                                     <SongTile
                                                         key={song.id}
                                                         rating={song.rating}
