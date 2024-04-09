@@ -42,7 +42,6 @@ export default ({curSession}: UserProps): JSX.Element => {
                 console.error("Error fetching user data");
             }
         };
-
         fetchUserData();
     }, [curSession.user?.id]);
 
@@ -64,7 +63,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                 const data = await response.json();
                 // Filter out songs that are already in the list
                 // Return the most popular/newest released song since that will likely be most accurate (in terms of popularity, views, etc))
-                const newSongs = data.filter(
+                let newSongs = data.filter(
                     (song: SongMetadata) =>
                         !songs.some((existingSong) => existingSong.id === song.id) &&
                         !songs.some(
@@ -73,6 +72,9 @@ export default ({curSession}: UserProps): JSX.Element => {
                                 existingSong.artist === song.artist
                         )
                 );
+                if (!showExplicit) {
+                    newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
+                }
                 setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
                 console.error("Error fetching more songs from Spotify");
