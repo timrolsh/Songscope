@@ -14,6 +14,8 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 
     const user: User = session.user;
 
+    console.log("useid: ", user.id, "reqbody:", request.body.userid );
+    console.log("useid: ", (typeof user.id), "reqbody:", (typeof request.body.userid) );
     if (request.method === "POST") {
         console.log("reqbody:", request.body);
         const {songid, reviewbody} = request.body;
@@ -21,7 +23,8 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         if(!songid || !reviewbody) {
             response.status(400).send("Malformed Request Body");
             return;
-        } else if(user.id !== request.body.userid) {
+            // TODO --> improve the comparison check here
+        } else if(String(user.id) !== request.body.userid) {
             response.status(401).send("Unauthorized");
             return;
         }
