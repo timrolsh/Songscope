@@ -45,6 +45,7 @@ export interface User {
     role?: string; // as of right now, this is undefined (no artists, etc.)
     show_favorite_songs: boolean;
     show_reviews: boolean;
+    show_explicit: boolean;
     isAdmin: boolean;
 }
 

@@ -56,6 +56,7 @@ export default ({curSession}: UserProps): JSX.Element => {
     const [bio, setBio] = useState("");
     const [showFavoriteSongs, setShowFavoriteSongs] = useState(false);
     const [showReviews, setShowReviews] = useState(false);
+    const [showExplicitSongs, setShowExplicitSongs] = useState(false);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -73,6 +74,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                 setBio(data.bio);
                 setShowFavoriteSongs(data.show_favorite_songs);
                 setShowReviews(data.show_reviews);
+                setShowExplicitSongs(data.show_explicit);
             } else {
                 // Handle error case
                 console.error("Error fetching user data");
@@ -143,12 +145,12 @@ export default ({curSession}: UserProps): JSX.Element => {
 
             if (response.ok) {
                 // TODO: Add a better success message
-                alert("Privacy settings updated");
+                alert("Settings updated");
             } else {
-                console.error("Error updating privacy settings");
+                console.error("Error updating settings");
             }
         } catch (error) {
-            console.error("Error updating privacy settings:", error);
+            console.error("Error updating settings:", error);
         }
     };
 
@@ -224,7 +226,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                             name={"Show Explicit Songs"}
                             onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
                             apiRoute={"api/db/update-explicit-song-visibility"}
-                            checked={showFavoriteSongs}
+                            checked={showExplicitSongs}
                         />
                         <button className="text-red-500" onClick={deleteUser}>
                             Delete Account
