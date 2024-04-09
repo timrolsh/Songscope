@@ -17,9 +17,8 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "POST") {
         const {songId, userId, rating} = request.body;
 
-        // Ensure the authenticated user is the one making the request or is an admin
-        if (userId !== session.user.id && !session.user.isAdmin) {
-            response.status(403).send("Forbidden");
+        if (userId !== session.user.id) {
+            response.status(401).send("Unauthorized");
             return;
         }
 

@@ -4,7 +4,6 @@ import {getServerSession} from "next-auth/next";
 import {User} from "@/types";
 import {RowDataPacket} from "mysql2";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session = await getServerSession(request, response, authOptions);
@@ -18,7 +17,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         console.log("reqbody:", request.body);
         const name = request.body.displayName;
         const bio = request.body.bio;
-        if (user.id !== request.body.user_id) {
+        if (user.id !== request.body.user_id && !user.isAdmin) {
             response.status(401).send("Unauthorized");
             return;
         }

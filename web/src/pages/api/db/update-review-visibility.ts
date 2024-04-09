@@ -3,7 +3,6 @@ import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {Session, User} from "next-auth";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session: Session = await getServerSession(request, response, authOptions);
