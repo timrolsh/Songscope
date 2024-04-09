@@ -3,20 +3,31 @@ import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {User} from "@/types";
 
-// TODO: Add authentication
+// Maybe look into just inserting with the current server session userid?
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session = await getServerSession(request, response, authOptions);
-    if (!session) {
+    if (!session || !session.user) {
         response.status(401).send("Unauthorized");
         return;
     }
 
     const user: User = session.user;
 
+    console.log("useid: ", user.id, "reqbody:", request.body.userid );
+    console.log("useid: ", (typeof user.id), "reqbody:", (typeof request.body.userid) );
     if (request.method === "POST") {
         console.log("reqbody:", request.body);
         const {songid, reviewbody} = request.body;
+
+        if(!songid || !reviewbody) {
+            response.status(400).send("Malformed Request Body");
+            return;
+            // TODO --> improve the comparison check here
+        } else if(String(user.id) !== request.body.userid) {
+            response.status(401).send("Unauthorized");
+            return;
+        }
 
         await insertReview(songid, user.id, reviewbody);
         response.status(200).send("Inserted review");
