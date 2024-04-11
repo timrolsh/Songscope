@@ -1,7 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
-import {Session, User} from "next-auth";
+import {Session} from "next-auth";
 
 // TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
@@ -44,11 +44,11 @@ async function deleteUser(user_id: string) {
         `,
             [user_id],
             (error, results, fields) => {
-                console.log("SONGSCOPE: Deleted user");
                 if (error) {
                     console.error("SONGSCOPE: Unable to delete user", error);
                     resolve(false);
                 } else {
+                    console.log("SONGSCOPE: Deleted user");
                     resolve(true);
                 }
             }
