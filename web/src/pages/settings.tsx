@@ -1,13 +1,13 @@
 import ToggleButton from "../components/ToggleButton";
 import SideBar from "../components/SideBar";
-import {authOptions} from "./api/auth/[...nextauth]";
+import {authOptions, db} from "./api/auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {GetServerSideProps} from "next";
-import {UserProps} from "./user";
 import {MdAccountCircle, MdInfoOutline, MdLink, MdOutlineSecurity} from "react-icons/md";
 import {useEffect, useState} from "react";
 import Head from "next/head";
 import ConnectionEntry from "../components/ConnectionEntry";
+import { Session } from "next-auth";
 
 export function TextEntry({
     name,
@@ -51,7 +51,13 @@ export function ButtonEntry({
     );
 }
 
-export default ({curSession}: UserProps): JSX.Element => {
+export default ({
+    curSession,
+    connections
+}: {
+    curSession: Session;
+    connections: {"google": boolean; "spotify": boolean};
+}): JSX.Element => {
     const [displayName, setDisplayName] = useState("");
     const [bio, setBio] = useState("");
     const [showFavoriteSongs, setShowFavoriteSongs] = useState(false);
@@ -186,14 +192,14 @@ export default ({curSession}: UserProps): JSX.Element => {
                         </h2>
                         <ConnectionEntry
                             providerName="Spotify"
-                            isConnected={true /* Replace with actual state */}
+                            isConnected={connections.spotify}
                             onToggle={() => {
                                 /* Replace with actual function */
                             }}
                         />
                         <ConnectionEntry
                             providerName="Google"
-                            isConnected={false /* Replace with actual state */}
+                            isConnected={connections.google}
                             onToggle={() => {
                                 /* Replace with actual function */
                             }}
@@ -251,5 +257,28 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    return {props: {curSession: session}};
+    const results = await new Promise((resolve, reject) => {
+        db.execute(
+            `select provider FROM accounts WHERE userId = ?`,
+            [session.user.id],
+            (error, results, fields) => {
+                if (error) {
+                    console.error("SONGSCOPE: Unable to fetch user connections", error);
+                    reject(error);
+                } else {
+                    console.log("SONGSCOPE: Fetched user connections");
+                    const booleans = {google: false, spotify: false};
+                    for (const object of results as Array<object>) {
+                        if ((object as any)["provider"] === "google") {
+                            booleans.google = true;
+                        } else if ((object as any)["provider"] === "spotify") {
+                            booleans.spotify = true;
+                        }
+                    }
+                    resolve(booleans);
+                }
+            }
+        );
+    });
+    return {props: {curSession: session, connections: results}};
 };
