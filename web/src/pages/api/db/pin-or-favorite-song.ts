@@ -1,6 +1,6 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
-import { getServerSession, Session } from "next-auth";
+import {getServerSession, Session} from "next-auth";
 
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error

@@ -1,7 +1,6 @@
 /*
 For connections with different providers like Spotify and Google
 */
-import {MdLink} from "react-icons/md";
 
 export default ({
     providerName,

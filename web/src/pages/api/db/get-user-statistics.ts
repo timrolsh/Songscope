@@ -1,7 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {db} from "../auth/[...nextauth]";
 import {RowDataPacket} from "mysql2";
-import {ProfileStatistics, User} from "@/types";
+import {ProfileStatistics} from "@/types";
 
 // TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {

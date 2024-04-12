@@ -253,15 +253,17 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                         {!pinnedFavoritesLoading && pinnedSongs ? (
                                             pinnedSongs.length ? (
                                                 // TODO --> Fix this, bandaid solution to only show 3 pinned songs (better for display purposes)
-                                                pinnedSongs.slice(0, 3).map((song) => (
-                                                    <SongTile
-                                                        key={song.id}
-                                                        rating={song.rating}
-                                                        metadata={song}
-                                                        user={curSession.user as User}
-                                                        dataEmitter={dataEmitter}
-                                                    />
-                                                ))
+                                                pinnedSongs
+                                                    .slice(0, 3)
+                                                    .map((song) => (
+                                                        <SongTile
+                                                            key={song.id}
+                                                            rating={song.rating}
+                                                            metadata={song}
+                                                            user={curSession.user as User}
+                                                            dataEmitter={dataEmitter}
+                                                        />
+                                                    ))
                                             ) : (
                                                 <div className="w-full flex place-content-center h-72">
                                                     <h3 className="text-text/50 italic m-auto">
@@ -280,7 +282,12 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                     <div className="pt-5">
                                         <h2 className="text-2xl pl-2 font-bold">
                                             Top Reviews
-                                            <p className={clsx("text-text/70 text-md font-light pt-2", !userProfile.show_reviews && "hidden")}>
+                                            <p
+                                                className={clsx(
+                                                    "text-text/70 text-md font-light pt-2",
+                                                    !userProfile.show_reviews && "hidden"
+                                                )}
+                                            >
                                                 <a href="/settings">
                                                     {" "}
                                                     {isOwnProfile &&

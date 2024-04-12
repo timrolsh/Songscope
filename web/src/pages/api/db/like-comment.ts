@@ -1,6 +1,6 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
-import { getServerSession, Session } from "next-auth";
+import {getServerSession, Session} from "next-auth";
 
 // TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
@@ -10,22 +10,22 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         response.status(401).send("Unauthorized");
         return;
     }
-    
+
     if (request.method === "POST") {
         const user_id = request.body.user_id as string;
         const comment_id = request.body.comment_id as string;
         const like = request.body.like as boolean;
-        
+
         // if (!user_id || !song_id || pin_state || !fav_state) {
         //     response.status(400).send("Malformed Request Body");
         //     return;
         // }
 
-        if(user_id !== session.user.id) {
+        if (user_id !== session.user.id) {
             response.status(401).send("Unauthorized");
             return;
         }
-        
+
         try {
             const results = await likeComment(user_id, comment_id, like);
         } catch (e: any) {

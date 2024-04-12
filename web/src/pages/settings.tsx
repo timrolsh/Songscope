@@ -7,7 +7,7 @@ import {MdAccountCircle, MdInfoOutline, MdLink, MdOutlineSecurity} from "react-i
 import {useEffect, useState} from "react";
 import Head from "next/head";
 import ConnectionEntry from "../components/ConnectionEntry";
-import { Session } from "next-auth";
+import {Session} from "next-auth";
 
 export function TextEntry({
     name,
