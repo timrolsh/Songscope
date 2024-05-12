@@ -102,7 +102,8 @@ export default ({curSession}: UserProps): JSX.Element => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({playlist_id: "0OwFb8rH79YQ76ln376pyn"})
+                // TODO: If user is integrated with Spotify, use their recommendations
+                body: JSON.stringify({playlist_id: "37i9dQZEVXbLp5XoPON0wI"})
             });
 
             if (res.ok) {
