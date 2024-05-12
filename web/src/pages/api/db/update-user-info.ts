@@ -21,11 +21,13 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
             response.status(401).send("Unauthorized");
             return;
         }
-        // make sure new name is not already taken
-        const nameTaken: boolean = await checkName(name);
-        if (nameTaken) {
-            response.status(409).send("Name already taken");
-            return;
+        // make sure new name is not already taken by another user
+        if (name != user.name) {
+            const nameTaken: boolean = await checkName(name);
+            if (nameTaken) {
+                response.status(409).send("Name already taken");
+                return;
+            }
         }
         await updateUserInfo(user.id, name, bio);
         response.status(200).send("Updated user info");

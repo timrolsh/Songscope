@@ -128,11 +128,12 @@ export default ({
                 })
             });
 
-            if (response.ok) {
-                // TODO: Add a better success message
-                alert("User info updated");
-            } else {
-                console.error("Error updating user info");
+            if (!response.ok) {
+                if (response.status === 409) {
+                    alert("Display name already taken");
+                } else {
+                    alert("Error updating user info, please try again later");
+                }
             }
         } catch (error) {
             console.error("Error updating user info:", error);
@@ -149,11 +150,8 @@ export default ({
                 body: JSON.stringify({user_id: curSession.user?.id, value: value})
             });
 
-            if (response.ok) {
-                // TODO: Add a better success message
-                alert("Settings updated");
-            } else {
-                console.error("Error updating settings");
+            if (!response.ok) {
+                alert("Error updating settings, please try again later");
             }
         } catch (error) {
             console.error("Error updating settings:", error);
