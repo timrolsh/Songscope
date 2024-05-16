@@ -1,16 +1,22 @@
+import {signIn} from "next-auth/react";
+
 /*
 For connections with different providers like Spotify and Google
 */
 
-export default ({
+export default function ConnectionEntry({
     providerName,
-    isConnected,
-    onToggle
+    isConnected
 }: {
     providerName: string;
     isConnected: boolean;
-    onToggle: () => void;
-}): JSX.Element => {
+}): JSX.Element {
+    const handleConnect = () => {
+        if (!isConnected) {
+            signIn(providerName.toLowerCase());
+        }
+    };
+
     return (
         <>
             <span>{providerName}</span>
@@ -18,11 +24,12 @@ export default ({
                 className={`px-3 py-1.5 ml-1.5 rounded-full font-semibold transition-all ${
                     isConnected ? "bg-green-600 hover:bg-green-700" : "bg-red-700 hover:bg-red-800"
                 } text-white`}
-                onClick={onToggle}
+                onClick={handleConnect}
+                disabled={isConnected}
             >
                 {isConnected ? "Connected" : "Connect"}
             </button>
             <br></br>
         </>
     );
-};
+}

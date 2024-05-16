@@ -188,20 +188,8 @@ export default ({
                         <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
                             <MdLink className="my-auto text-xl mr-3" /> Connections
                         </h2>
-                        <ConnectionEntry
-                            providerName="Spotify"
-                            isConnected={connections.spotify}
-                            onToggle={() => {
-                                /* Replace with actual function */
-                            }}
-                        />
-                        <ConnectionEntry
-                            providerName="Google"
-                            isConnected={connections.google}
-                            onToggle={() => {
-                                /* Replace with actual function */
-                            }}
-                        />
+                        <ConnectionEntry providerName="Spotify" isConnected={connections.spotify} />
+                        <ConnectionEntry providerName="Google" isConnected={connections.google} />
                     </div>
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
                         <MdOutlineSecurity className="my-auto text-xl mr-3" />
