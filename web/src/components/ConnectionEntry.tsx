@@ -6,14 +6,14 @@ For connections with different providers like Spotify and Google
 
 export default function ConnectionEntry({
     providerName,
-    isConnected
+    isConnected,
 }: {
     providerName: string;
     isConnected: boolean;
 }): JSX.Element {
     const handleConnect = () => {
         if (!isConnected) {
-            signIn(providerName.toLowerCase());
+            signIn(providerName.toLowerCase(), {callbackUrl: "/settings"});
         }
     };
 
