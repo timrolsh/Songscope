@@ -1,10 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, {Session} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import SpotifyProvider from "next-auth/providers/spotify";
 
 import MySqlAdapter from "./MySqlAdapter";
 
 import {createPool} from "mysql2";
+import {User} from "@/types";
 
 // check to make sure all environment variables are set
 if (
@@ -45,12 +46,12 @@ export const authOptions = {
         })
     ],
     callbacks: {
-        async session({session, token, user}: {session: any; token: any; user: any}) {
-            session.user.id = user.id;
-            session.user.bio = user.bio;
+        // Using the session callback to add user data to the session so it can be easily accessed, the User type is our type for our database custom table for Users
+        async session({session, user}: {session: Session; user: User}) {
+            console.log("SONGSCOPE: Session callback", user);
+            session.user = user;
+            // Convert the date to a string so it can be serialized to prevent error
             session.user.join_date = JSON.stringify(user.join_date);
-            session.user.role = user.role ?? "user";
-            session.user.isAdmin = Boolean(user.isAdmin);
             return session;
         }
     },
