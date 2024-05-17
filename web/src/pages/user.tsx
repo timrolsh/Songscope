@@ -6,7 +6,6 @@ import Fuse from "fuse.js";
 import {getServerSession} from "next-auth/next";
 import {authOptions} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
-import {Session} from "@auth/core/types";
 import Spinner from "@/components/Spinner";
 import {SongMetadata, User} from "@/types";
 import Head from "next/head";
@@ -14,36 +13,14 @@ import Head from "next/head";
 let songsCache: SongMetadata[] = [];
 
 export interface UserProps {
-    curSession: Session;
+    user: User;
 }
 
-export default ({curSession}: UserProps): JSX.Element => {
+export default ({user}: UserProps): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [songs, setSongs] = useState<SongMetadata[]>([]);
-    const [showExplicit, setShowExplicit] = useState(false);
-    const [userDataFetched, setUserDataFetched] = useState(false);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const res = await fetch("/api/db/get-user", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({user_id: curSession.user?.id})
-            });
-            if (res.ok) {
-                const data = await res.json();
-                setShowExplicit(data.show_explicit);
-                setUserDataFetched(true);
-            } else {
-                console.error("Error fetching user data");
-            }
-        };
-        fetchUserData();
-    }, [curSession.user?.id]);
 
     const fetchMoreSongs = async () => {
         if (loading) return; // Do not search if already searching
@@ -72,7 +49,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                                 existingSong.artist === song.artist
                         )
                 );
-                if (!showExplicit) {
+                if (!user.show_explicit) {
                     newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
                 }
                 setSongs((currentSongs) => [...currentSongs, ...newSongs]);
@@ -94,7 +71,6 @@ export default ({curSession}: UserProps): JSX.Element => {
     });
 
     useEffect(() => {
-        if (!userDataFetched) return;
         const initSongs = async () => {
             setLoading(true);
             const res = await fetch("/api/spotify/playlist", {
@@ -109,7 +85,7 @@ export default ({curSession}: UserProps): JSX.Element => {
             if (res.ok) {
                 const data = await res.json();
                 songsCache = data;
-                if (!showExplicit) {
+                if (!user.show_explicit) {
                     songsCache = songsCache.filter((song) => !song.explicit);
                 }
             } else {
@@ -125,7 +101,7 @@ export default ({curSession}: UserProps): JSX.Element => {
         initSongs().catch((error) => {
             console.error("Error fetching songs:", error);
         });
-    }, [userDataFetched, showExplicit]);
+    }, []);
 
     useEffect(() => {
         if (!songs) setSearchedSongs([]);
@@ -143,12 +119,10 @@ export default ({curSession}: UserProps): JSX.Element => {
                 <title>Songscope - User</title>
             </Head>
             <div className="flex flex-row h-full">
-                <SideBar variant="" user={curSession.user ?? undefined} />
+                <SideBar variant="" user={user} />
                 <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                     <div className="flex flex-col h-24">
-                        <h1 className="text-4xl font-bold px-12 pt-4">
-                            Welcome, {curSession.user?.name ?? ""}!
-                        </h1>
+                        <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {user.name}!</h1>
                         <div className="flex flex-row place-content-between px-12 mr-2">
                             <h2 className="text-xl italic text-accent-neutral/50">
                                 Browse Songs, Albums, and Artists
@@ -180,7 +154,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                                     key={song.id}
                                     rating={song.rating}
                                     metadata={song}
-                                    user={curSession.user as User}
+                                    user={user}
                                 />
                             ))}
                         </div>
@@ -205,6 +179,7 @@ export default ({curSession}: UserProps): JSX.Element => {
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
+    console.log("Session from get server side", session);
 
     if (!session) {
         return {
@@ -220,5 +195,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         session.user.join_date = null; // Or apply any other default value/formatting
     }
 
-    return {props: {curSession: session}};
+    return {props: {user: session.user}};
 };
