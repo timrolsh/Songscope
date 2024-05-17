@@ -4,13 +4,13 @@ import {signIn} from "next-auth/react";
 For connections with different providers like Spotify and Google
 */
 
-export default function ConnectionEntry({
+export default ({
     providerName,
-    isConnected,
+    isConnected
 }: {
     providerName: string;
     isConnected: boolean;
-}): JSX.Element {
+}): JSX.Element => {
     const handleConnect = () => {
         if (!isConnected) {
             signIn(providerName.toLowerCase(), {callbackUrl: "/settings"});
@@ -32,4 +32,4 @@ export default function ConnectionEntry({
             <br></br>
         </>
     );
-}
+};
