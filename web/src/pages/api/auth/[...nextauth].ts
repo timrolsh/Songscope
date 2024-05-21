@@ -48,7 +48,6 @@ export const authOptions = {
     callbacks: {
         // Using the session callback to add user data to the session so it can be easily accessed, the User type is our type for our database custom table for Users
         async session({session, user}: {session: Session; user: User}) {
-            console.log("SONGSCOPE: Session callback", user);
             session.user = user;
             // Convert the date to a string so it can be serialized to prevent error
             session.user.join_date = JSON.stringify(user.join_date);

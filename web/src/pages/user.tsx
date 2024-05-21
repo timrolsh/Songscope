@@ -4,19 +4,24 @@ import SongTile from "../components/SongTile";
 import Fuse from "fuse.js";
 
 import {getServerSession} from "next-auth/next";
-import {authOptions} from "./api/auth/[...nextauth]";
+import {authOptions, db} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import Spinner from "@/components/Spinner";
-import {SongMetadata, User} from "@/types";
+import {SongMetadata, SongReviewRow, User, EnrichedSongMetadata} from "@/types";
 import Head from "next/head";
+import spotifyApi from "./api/spotify/wrapper";
 
 let songsCache: SongMetadata[] = [];
 
-export interface UserProps {
+export default ({
+    user,
+    hotSongs,
+    topSongs
+}: {
     user: User;
-}
-
-export default ({user}: UserProps): JSX.Element => {
+    hotSongs: EnrichedSongMetadata[];
+    topSongs: EnrichedSongMetadata[];
+}): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
@@ -73,6 +78,7 @@ export default ({user}: UserProps): JSX.Element => {
     useEffect(() => {
         const initSongs = async () => {
             setLoading(true);
+            // TODO turn this into server side rendered if user is not currently signed in with Spotify. If they are signed in with Spotify, get them their Spotify token so that they can make api requests to Spotify themselves
             const res = await fetch("/api/spotify/playlist", {
                 method: "POST",
                 headers: {
@@ -119,7 +125,7 @@ export default ({user}: UserProps): JSX.Element => {
                 <title>Songscope - User</title>
             </Head>
             <div className="flex flex-row h-full">
-                <SideBar variant="" user={user} />
+                <SideBar variant="" user={user} hotSongs={hotSongs} topSongs={topSongs} />
                 <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                     <div className="flex flex-col h-24">
                         <h1 className="text-4xl font-bold px-12 pt-4">Welcome, {user.name}!</h1>
@@ -176,10 +182,54 @@ export default ({user}: UserProps): JSX.Element => {
     );
 };
 
+async function loadTopAndHotSongs(): Promise<{
+    topSongs: EnrichedSongMetadata[];
+    hotSongs: EnrichedSongMetadata[];
+}> {
+    const limit = 5;
+    // get a date for a week ago
+    let date = new Date();
+    date.setDate(date.getDate() - 7);
+    // put date into mysql format
+    const daysAgo = 7; // Number of days to consider a song as hot
+    const recentDate = new Date();
+    recentDate.setDate(recentDate.getDate() - daysAgo);
+
+    const [rows] = await db.promise().query<SongReviewRow[]>(
+        `
+        SELECT c.spotify_work_id, COUNT(*) as num_reviews,
+            CASE WHEN c.time >= ? THEN 1 ELSE 0 END as is_hot
+        FROM comment c
+        GROUP BY c.spotify_work_id
+        ORDER BY num_reviews DESC, c.time DESC
+        LIMIT ?;
+        `,
+        [recentDate, 10]
+    );
+
+    const enrichedData = await Promise.all(
+        rows.map(async (row) => {
+            const metadata = await spotifyApi.getSong(row.spotify_work_id);
+            return {
+                ...metadata,
+                num_reviews: row.num_reviews,
+                is_hot: row.is_hot
+            };
+        })
+    );
+
+    const topSongs = enrichedData.filter((song) => !song.is_hot).slice(0, limit);
+    const hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit);
+
+    const combinedResults = {topSongs, hotSongs};
+    return combinedResults;
+}
+
+let topSongs: EnrichedSongMetadata[] = [];
+let hotSongs: EnrichedSongMetadata[] = [];
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
-    console.log("Session from get server side", session);
 
     if (!session) {
         return {
@@ -194,6 +244,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (session.user && session.user.join_date === undefined) {
         session.user.join_date = null; // Or apply any other default value/formatting
     }
-
-    return {props: {user: session.user}};
+    if (topSongs.length === 0 || hotSongs.length === 0) {
+        const temp = await loadTopAndHotSongs();
+        topSongs = temp.topSongs;
+        hotSongs = temp.hotSongs;
+    }
+    return {props: {user: session.user, hotSongs, topSongs}};
 };

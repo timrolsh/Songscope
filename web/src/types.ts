@@ -1,3 +1,5 @@
+import {RowDataPacket} from "mysql2";
+
 export interface SongMetadata {
     id: string;
     name: string;
@@ -55,4 +57,15 @@ export interface ProfileStatistics {
     avg_rating?: number;
     totalFollowers?: number;
     totalFollowing?: number;
+}
+
+export interface SongReviewRow extends RowDataPacket {
+    id: string;
+    num_reviews: number;
+    title: string;
+    artist: string;
+}
+
+export interface EnrichedSongMetadata extends SongMetadata {
+    num_reviews: number;
 }

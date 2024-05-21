@@ -3,43 +3,16 @@ import SidebarEntry from "./SidebarEntry";
 import {signOut} from "next-auth/react";
 import {SongMetadata} from "@/types";
 
-import Spinner from "@/components/Spinner";
-import {useEffect, useState} from "react";
-import {EnrichedSongMetadata} from "@/pages/api/db/get-top-reviewed";
+import {EnrichedSongMetadata} from "@/types";
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 
 // TODO --> Migrate this to slot architecture for better reusability
-function renderDashboardBody() {
-    const [hotSongs, setHotSongs] = useState<EnrichedSongMetadata[]>([]);
-    const [topSongs, setTopSongs] = useState<EnrichedSongMetadata[]>([]);
-    const [loading, setLoading] = useState(true);
-
-    useEffect(() => {
-        async function fetchSongs() {
-            setLoading(true);
-            try {
-                const hotResponse = await fetch("/api/db/get-hot-reviewed");
-                const hotSongsData = await hotResponse.json();
-                setHotSongs(hotSongsData);
-
-                const topResponse = await fetch("/api/db/get-top-reviewed");
-                const topSongsData = await topResponse.json();
-                setTopSongs(topSongsData);
-            } catch (error) {
-                console.error("Failed to fetch songs:", error);
-            }
-            setLoading(false);
-        }
-
-        fetchSongs();
-    }, []);
-
-    if (loading) {
-        return <Spinner />;
-    }
-
+function renderDashboardBody(
+    hotSongs: EnrichedSongMetadata[],
+    topSongs: EnrichedSongMetadata[]
+): JSX.Element {
     return (
         <>
             {topSongs && (
@@ -102,18 +75,23 @@ function renderProfileBody(
     );
 }
 
+// TODO for these components, put the db requests in server side props on the user page and then pass down all the user data to the export default component and then have that one pass all the needed props down to these components
 export default ({
     variant,
     user,
     favoriteSongs,
     showFavoriteSongs,
-    isOwnProfile
+    isOwnProfile,
+    hotSongs,
+    topSongs
 }: {
     variant: string;
     user: any;
     favoriteSongs?: SongMetadata[];
     showFavoriteSongs?: boolean;
     isOwnProfile?: boolean;
+    hotSongs: EnrichedSongMetadata[];
+    topSongs: EnrichedSongMetadata[];
 }) => {
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
@@ -130,7 +108,7 @@ export default ({
             ) : variant == "settings" ? (
                 <></>
             ) : (
-                renderDashboardBody()
+                renderDashboardBody(hotSongs, topSongs)
             )}
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4 "></hr>
             <div className="w-full h-52 flex flex-col mb-4">

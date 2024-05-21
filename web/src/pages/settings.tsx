@@ -244,6 +244,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     }
 
     const results = await new Promise((resolve, reject) => {
+        // TODO remove this block and find the other point where this is used, add joins so that when a user is requested, we can easily get data about whether they are signed in or not through google, spotify, and then if they are signed in through spotify, get their token or whatever data from their account provider row that spoitfy needs to make web requuests to its api, look into how that works
         db.execute(
             `select provider FROM accounts WHERE userId = ?`,
             [session.user.id],
