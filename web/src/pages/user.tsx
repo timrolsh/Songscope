@@ -4,12 +4,12 @@ import SongTile from "../components/SongTile";
 import Fuse from "fuse.js";
 
 import {getServerSession} from "next-auth/next";
-import {authOptions} from "./api/auth/[...nextauth]";
+import {authOptions, db} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import Spinner from "@/components/Spinner";
-import {SongMetadata, User, EnrichedSongMetadata} from "@/types";
+import {SongMetadata, User, EnrichedSongMetadata, SongReviewRow} from "@/types";
 import Head from "next/head";
-import {hotSongs, topSongs, loadTopAndHotSongs, setHotSongs, setTopSongs} from "@/TopHotSongsCache";
+import spotifyApi from "./api/spotify/wrapper";
 
 let songsCache: SongMetadata[] = [];
 
@@ -182,6 +182,46 @@ export default ({
     );
 };
 
+let hotSongs: EnrichedSongMetadata[] = [];
+let topSongs: EnrichedSongMetadata[] = [];
+
+async function loadTopAndHotSongs() {
+    const limit = 5;
+    // get a date for a week ago
+    let date = new Date();
+    date.setDate(date.getDate() - 7);
+    // put date into mysql format
+    const daysAgo = 7; // Number of days to consider a song as hot
+    const recentDate = new Date();
+    recentDate.setDate(recentDate.getDate() - daysAgo);
+
+    const [rows] = await db.promise().query<SongReviewRow[]>(
+        `
+        SELECT c.spotify_work_id, COUNT(*) as num_reviews,
+            CASE WHEN c.time >= ? THEN 1 ELSE 0 END as is_hot
+        FROM comment c
+        GROUP BY c.spotify_work_id
+        ORDER BY num_reviews DESC, c.time DESC
+        LIMIT ?;
+        `,
+        [recentDate, 10]
+    );
+
+    const enrichedData = await Promise.all(
+        rows.map(async (row) => {
+            const metadata = await spotifyApi.getSong(row.spotify_work_id);
+            return {
+                ...metadata,
+                num_reviews: row.num_reviews,
+                is_hot: row.is_hot
+            };
+        })
+    );
+
+    topSongs = enrichedData.filter((song) => !song.is_hot).slice(0, limit);
+    hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit);
+}
+
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
@@ -200,9 +240,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         session.user.join_date = null; // Or apply any other default value/formatting
     }
     if (topSongs.length === 0 || hotSongs.length === 0) {
-        const temp = await loadTopAndHotSongs();
-        setTopSongs(temp.topSongs);
-        setHotSongs(temp.hotSongs);
+        await loadTopAndHotSongs();
     }
     return {props: {user: session.user, hotSongs, topSongs}};
 };
