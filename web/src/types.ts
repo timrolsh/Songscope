@@ -69,3 +69,25 @@ export interface SongReviewRow extends RowDataPacket {
 export interface EnrichedSongMetadata extends SongMetadata {
     num_reviews: number;
 }
+
+export interface UserTopReviews extends RowDataPacket {
+    user_id: string;
+    comment_id: string;
+    spotify_work_id: string;
+    comment_text: string;
+    time: string;
+    num_likes: number;
+}
+
+export interface ProfileTopReviews {
+    spotify_work_id: string;
+    title: string;
+    artist: string;
+    album: string;
+    image: string;
+    user_id: string;
+    comment_id: string;
+    comment_text: string;
+    time: string;
+    num_likes: number;
+}
