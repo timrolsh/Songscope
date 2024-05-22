@@ -8,6 +8,8 @@ import {useEffect, useState} from "react";
 import Head from "next/head";
 import ConnectionEntry from "../components/ConnectionEntry";
 import {Session} from "next-auth";
+import {User} from "@/types";
+import user from "./user";
 
 export function TextEntry({
     name,
@@ -52,10 +54,10 @@ export function ButtonEntry({
 }
 
 export default ({
-    curSession,
+    user,
     connections
 }: {
-    curSession: Session;
+    user: User;
     connections: {"google": boolean; "spotify": boolean};
 }): JSX.Element => {
     const [displayName, setDisplayName] = useState("");
@@ -71,7 +73,7 @@ export default ({
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id})
+                body: JSON.stringify({user_id: user})
             });
 
             if (res.ok) {
@@ -88,7 +90,7 @@ export default ({
         };
 
         fetchUserData();
-    }, [curSession.user?.id]);
+    }, [user.id]);
     const deleteUser = async () => {
         if (!confirm("Are you sure you want to continue?")) {
             return;
@@ -99,7 +101,7 @@ export default ({
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id})
+                body: JSON.stringify({user_id: user.id})
             });
 
             if (response.ok) {
@@ -122,7 +124,7 @@ export default ({
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    user_id: curSession.user?.id,
+                    user_id: user.id,
                     displayName: displayName,
                     bio: bio
                 })
@@ -147,7 +149,7 @@ export default ({
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id, value: value})
+                body: JSON.stringify({user_id: user.id, value: value})
             });
 
             if (!response.ok) {
@@ -164,7 +166,8 @@ export default ({
                 <title>Songscope - Settings</title>
             </Head>
             <div className="flex flex-row h-full">
-                <SideBar variant={"settings"} user={curSession.user} />
+                {/* Top and Hot Songs are not rendered in the sidebar for the settings page */}
+                <SideBar variant="settings" user={user} hotSongs={[]} topSongs={[]} />
                 <div className="w-4/5 pl-8 h-screen overflow-auto">
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
                         <MdAccountCircle className="my-auto text-xl mr-3" />
@@ -246,6 +249,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const results = await new Promise((resolve, reject) => {
         // TODO remove this block and find the other point where this is used, add joins so that when a user is requested, we can easily get data about whether they are signed in or not through google, spotify, and then if they are signed in through spotify, get their token or whatever data from their account provider row that spoitfy needs to make web requuests to its api, look into how that works
         db.execute(
+            // TODO this query needs to be fixed its erroring
             `select provider FROM accounts WHERE userId = ?`,
             [session.user.id],
             (error, results, fields) => {
@@ -267,5 +271,5 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             }
         );
     });
-    return {props: {curSession: session, connections: results}};
+    return {props: {user: session.user, connections: results}};
 };
