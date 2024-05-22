@@ -18,7 +18,6 @@ if (
     )
 ) {
     console.log("Error: Environment variables for the database are not set.");
-    process.exit(1);
 }
 
 // create the connection to database
@@ -27,7 +26,7 @@ export const db = createPool({
     user: process.env.DB_USER,
     database: process.env.DB_SCHEMA,
     password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT), // Convert the port value to a number
+    port: parseInt(process.env.DB_PORT || "3306"), // Convert the port value to a number
     waitForConnections: true,
     connectionLimit: 180, // Arbitrarily picked, likely will be fine for the database size we have
     queueLimit: 0
