@@ -1,5 +1,5 @@
 import {CommentTimestamp} from "@/dates";
-import {ProfileTopReviews} from "@/pages/api/db/get-top-user-reviews";
+import {ProfileTopReviews} from "@/types";
 import {BsHeartFill} from "react-icons/bs";
 
 export default ({profileReview}: {profileReview: ProfileTopReviews}) => {
