@@ -13,7 +13,7 @@ import {AccountJoinTimestamp} from "@/dates";
 import Head from "next/head";
 import clsx from "clsx";
 import spotifyApi from "../api/spotify/wrapper";
-import { useEffect } from "react";
+import {useEffect} from "react";
 
 export default ({
     user,
@@ -33,9 +33,6 @@ export default ({
 }): JSX.Element => {
     const isOwnProfile = user.id === userId;
 
-    useEffect(() => {
-        console.log(AccountJoinTimestamp(user.join_date))
-    }, []);
     return (
         <>
             <Head>
@@ -104,7 +101,7 @@ export default ({
                                                             {/* TODO --> Figure out some nicer fallback for no rating... */}
                                                             <h3>
                                                                 Average Rating:{" "}
-                                                                {sideStatistics.avg_rating !== -1
+                                                                {sideStatistics.avg_rating
                                                                     ? sideStatistics.avg_rating.toFixed(
                                                                           2
                                                                       )
@@ -310,7 +307,7 @@ GROUP BY u.id;
             sideStatistics: {
                 total_comments: dbResponseAny.total_comments,
                 total_favorites: dbResponseAny.total_favorites,
-                avg_rating: dbResponseAny.avg_rating || -1
+                avg_rating: dbResponseAny.avg_rating
             },
             reviews: dbResponseAny.top_reviews || [],
             userId: ctx.params.userId,
