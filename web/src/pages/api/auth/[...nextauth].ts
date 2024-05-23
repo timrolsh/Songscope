@@ -49,7 +49,7 @@ export const authOptions = {
         async session({session, user}: {session: Session; user: User}) {
             session.user = user;
             // Convert the date to a string so it can be serialized to prevent error
-            session.user.join_date = JSON.stringify(user.join_date);
+            session.user.join_date = JSON.stringify(user.join_date).slice(1, -1);
             return session;
         }
     },
