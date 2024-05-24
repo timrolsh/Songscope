@@ -25,7 +25,6 @@ export default ({
 }: {
     user: User;
     userId: string;
-    // TODO verify this type
     sideStatistics: ProfileStatistics;
     reviews: ProfileTopReviews[];
     favoriteSongs: SongMetadata[];
@@ -217,7 +216,6 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             }
         };
     }
-    console.log(session.user.join_date);
     const dbResponse = await db.promise().query(
         `
 SELECT u.*,
@@ -262,7 +260,6 @@ GROUP BY u.id;
         [ctx.params.userId]
     );
 
-    // TODO make spotify api request to get metadata for all of the songs and then add it to the objects before returning them
     const dbResponseAny = (dbResponse as any)[0][0];
     const favoriteSongs: SongMetadata[] = dbResponseAny.favoriteSongs;
     const pinnedSongs: SongMetadata[] = dbResponseAny.pinnedSongs;
