@@ -4,12 +4,10 @@ import {authOptions, db} from "./api/auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {GetServerSideProps} from "next";
 import {MdAccountCircle, MdInfoOutline, MdLink, MdOutlineSecurity} from "react-icons/md";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import Head from "next/head";
 import ConnectionEntry from "../components/ConnectionEntry";
-import {Session} from "next-auth";
 import {User} from "@/types";
-import user from "./user";
 
 export function TextEntry({
     name,
@@ -65,32 +63,6 @@ export default ({
     const [showFavoriteSongs, setShowFavoriteSongs] = useState(false);
     const [showReviews, setShowReviews] = useState(false);
     const [showExplicitSongs, setShowExplicitSongs] = useState(false);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const res = await fetch("/api/db/get-user", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({user_id: user})
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setDisplayName(data.name);
-                setBio(data.bio);
-                setShowFavoriteSongs(data.show_favorite_songs);
-                setShowReviews(data.show_reviews);
-                setShowExplicitSongs(data.show_explicit);
-            } else {
-                // Handle error case
-                console.error("Error fetching user data");
-            }
-        };
-
-        fetchUserData();
-    }, [user.id]);
     const deleteUser = async () => {
         if (!confirm("Are you sure you want to continue?")) {
             return;
@@ -246,30 +218,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    const results = await new Promise((resolve, reject) => {
-        // TODO remove this block and find the other point where this is used, add joins so that when a user is requested, we can easily get data about whether they are signed in or not through google, spotify, and then if they are signed in through spotify, get their token or whatever data from their account provider row that spoitfy needs to make web requuests to its api, look into how that works
-        db.execute(
-            // TODO this query needs to be fixed its erroring
-            `select provider FROM accounts WHERE userId = ?`,
-            [session.user.id],
-            (error, results, fields) => {
-                if (error) {
-                    console.error("SONGSCOPE: Unable to fetch user connections", error);
-                    reject(error);
-                } else {
-                    console.log("SONGSCOPE: Fetched user connections");
-                    const booleans = {google: false, spotify: false};
-                    for (const object of results as Array<object>) {
-                        if ((object as any)["provider"] === "google") {
-                            booleans.google = true;
-                        } else if ((object as any)["provider"] === "spotify") {
-                            booleans.spotify = true;
-                        }
-                    }
-                    resolve(booleans);
-                }
-            }
-        );
-    });
-    return {props: {user: session.user, connections: results}};
+    const results = await db
+        .promise()
+        .query(`select provider FROM accounts WHERE userId = ?`, [session.user.id]);
+    const booleans = {google: false, spotify: false};
+    for (const entry of (results as any)[0]) {
+        if (entry.provider === "spotify") {
+            booleans.spotify = true;
+        } else if (entry.provider === "google") {
+            booleans.google = true;
+        }
+    }
+    return {props: {user: session.user, connections: booleans}};
 };
