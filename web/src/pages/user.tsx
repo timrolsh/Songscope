@@ -7,25 +7,26 @@ import {getServerSession} from "next-auth/next";
 import {authOptions, db} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import Spinner from "@/components/Spinner";
-import {SongMetadata, User, EnrichedSongMetadata, SongReviewRow} from "@/types";
+import {SongMetadata, User, SongReviewRow} from "@/types";
 import Head from "next/head";
 import spotifyApi from "./api/spotify/wrapper";
-
-let songsCache: SongMetadata[] = [];
 
 export default ({
     user,
     hotSongs,
-    topSongs
+    topSongs,
+    initialSongs
 }: {
     user: User;
-    hotSongs: EnrichedSongMetadata[];
-    topSongs: EnrichedSongMetadata[];
+    hotSongs: SongMetadata[];
+    topSongs: SongMetadata[];
+    initialSongs: SongMetadata[];
 }): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
     const [songs, setSongs] = useState<SongMetadata[]>([]);
+    const [songsCache, setSongsCache] = useState<SongMetadata[]>([]);
 
     const fetchMoreSongs = async () => {
         if (loading) return; // Do not search if already searching
@@ -76,37 +77,13 @@ export default ({
     });
 
     useEffect(() => {
-        const initSongs = async () => {
-            setLoading(true);
-            // TODO turn this into server side rendered if user is not currently signed in with Spotify. If they are signed in with Spotify, get them their Spotify token so that they can make api requests to Spotify themselves
-            const res = await fetch("/api/spotify/playlist", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                // TODO: If user is integrated with Spotify, use their recommendations
-                body: JSON.stringify({playlist_id: "37i9dQZEVXbLp5XoPON0wI"})
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                songsCache = data;
-                if (!user.show_explicit) {
-                    songsCache = songsCache.filter((song) => !song.explicit);
-                }
-            } else {
-                throw new Error(
-                    "Error fetching songs from Spotify: " + res.status + " " + res.statusText
-                );
-            }
-
-            setSongs((currentSongs) => [...currentSongs, ...songsCache]);
-            setLoading(false);
-        };
-
-        initSongs().catch((error) => {
-            console.error("Error fetching songs:", error);
-        });
+        console.log(initialSongs)
+        setSongsCache(initialSongs);
+        if (!user.show_explicit) {
+            setSongsCache(songsCache.filter((song) => !song.explicit));
+        }
+        setSongs((currentSongs) => [...currentSongs, ...songsCache]);
+        setLoading(false);
     }, []);
 
     useEffect(() => {
@@ -182,9 +159,10 @@ export default ({
     );
 };
 
-let hotSongs: EnrichedSongMetadata[] = [];
-let topSongs: EnrichedSongMetadata[] = [];
+let hotSongs: SongMetadata[] = [];
+let topSongs: SongMetadata[] = [];
 
+// it is this method here that is causing the thing to fail
 async function loadTopAndHotSongs() {
     const limit = 5;
     // get a date for a week ago
@@ -207,19 +185,33 @@ async function loadTopAndHotSongs() {
         [recentDate, 10]
     );
 
-    const enrichedData = await Promise.all(
-        rows.map(async (row) => {
-            const metadata = await spotifyApi.getSong(row.spotify_work_id);
-            return {
-                ...metadata,
-                num_reviews: row.num_reviews,
-                is_hot: row.is_hot
-            };
-        })
-    );
+    // Extract all Spotify IDs to fetch in bulk and fetch song metadata in bulk
+    const songsMetadata = await spotifyApi.getMultipleSongs(rows.map((row) => row.spotify_work_id));
 
+    // Enrich the metadata with review counts and hotness
+    const enrichedData = songsMetadata.map((songMetadata) => {
+        const songExtra = rows.find((row) => row.spotify_work_id === songMetadata.id);
+        return {
+            ...songMetadata,
+            num_reviews: songExtra ? songExtra.num_reviews : null,
+            is_hot: songExtra ? songExtra.is_hot : null
+        };
+    });
+
+    // Separate into top and hot songs based on flags and limiting the results
     topSongs = enrichedData.filter((song) => !song.is_hot).slice(0, limit);
     hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit);
+}
+
+let initialSongs: SongMetadata[] = [];
+/*
+For users who are not logged into their own Spotify accounts and cannot receive their own 
+personalized content: Deliver Spotify's playlist 
+"our weekly update of the most played tracks right now - USA". 
+Cache the results as well as the playlist will generally stay the same during the server's runtime.
+*/
+async function loadInitialSongs() {
+    initialSongs = await spotifyApi.getSongsFromPlaylist("37i9dQZEVXbLp5XoPON0wI");
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -242,5 +234,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (topSongs.length === 0 || hotSongs.length === 0) {
         await loadTopAndHotSongs();
     }
-    return {props: {user: session.user, hotSongs, topSongs}};
+    if (initialSongs.length === 0) {
+        await loadInitialSongs();
+    }
+    return {props: {user: session.user, hotSongs, topSongs, initialSongs}};
 };

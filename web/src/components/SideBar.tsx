@@ -3,16 +3,12 @@ import SidebarEntry from "./SidebarEntry";
 import {signOut} from "next-auth/react";
 import {SongMetadata} from "@/types";
 
-import {EnrichedSongMetadata} from "@/types";
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 
 // TODO --> Migrate this to slot architecture for better reusability
-function renderDashboardBody(
-    hotSongs: EnrichedSongMetadata[],
-    topSongs: EnrichedSongMetadata[]
-): JSX.Element {
+function renderDashboardBody(hotSongs: SongMetadata[], topSongs: SongMetadata[]): JSX.Element {
     return (
         <>
             {topSongs && (
@@ -90,8 +86,8 @@ export default ({
     favoriteSongs?: SongMetadata[];
     showFavoriteSongs?: boolean;
     isOwnProfile?: boolean;
-    hotSongs: EnrichedSongMetadata[];
-    topSongs: EnrichedSongMetadata[];
+    hotSongs: SongMetadata[];
+    topSongs: SongMetadata[];
 }) => {
     return (
         <div className="flex flex-col w-1/5 sm:w-1/6 bg-accent-neutral/5 border-r-2 border-accent-neutral/5 h-screen px-3">
