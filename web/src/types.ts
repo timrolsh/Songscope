@@ -13,7 +13,8 @@ export interface SongMetadata {
     popularity: string;
     previewUrl: string;
     availableMarkets: string[];
-    rating?: number | null;
+    rating: number | null;
+    num_reviews: number | null;
 }
 
 export interface Song {
@@ -54,7 +55,7 @@ export interface User {
 export interface ProfileStatistics {
     total_comments: number;
     total_favorites: number;
-    avg_rating?: number;
+    avg_rating: number;
     totalFollowers?: number;
     totalFollowing?: number;
 }
@@ -64,10 +65,6 @@ export interface SongReviewRow extends RowDataPacket {
     num_reviews: number;
     title: string;
     artist: string;
-}
-
-export interface EnrichedSongMetadata extends SongMetadata {
-    num_reviews: number;
 }
 
 export interface UserTopReviews extends RowDataPacket {
