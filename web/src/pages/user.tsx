@@ -2,7 +2,6 @@ import SideBar from "../components/SideBar";
 import {useEffect, useState} from "react";
 import SongTile from "../components/SongTile";
 import Fuse from "fuse.js";
-
 import {getServerSession} from "next-auth/next";
 import {authOptions, db} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
@@ -22,43 +21,31 @@ export default ({
     topSongs: SongMetadata[];
     initialSongs: SongMetadata[];
 }): JSX.Element => {
-    const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
+    const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>(initialSongs);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
-    const [songs, setSongs] = useState<SongMetadata[]>([]);
-    const [songsCache, setSongsCache] = useState<SongMetadata[]>([]);
+    const [songs, setSongs] = useState<SongMetadata[]>(initialSongs);
 
     const fetchMoreSongs = async () => {
-        if (loading) return; // Do not search if already searching
-        if (!searchQuery) return; // Do not search if query is empty
+        if (loading || !searchQuery) return; // Do not search if already searching or query is empty
 
         setLoading(true);
         try {
             const response = await fetch("/api/spotify/search", {
                 method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
+                headers: {"Content-Type": "application/json"},
                 body: JSON.stringify({search_string: searchQuery})
             });
 
             if (response.ok) {
-                const data = await response.json();
-                // Filter out songs that are already in the list
-                // Return the most popular/newest released song since that will likely be most accurate (in terms of popularity, views, etc))
-                let newSongs = data.filter(
-                    (song: SongMetadata) =>
-                        !songs.some((existingSong) => existingSong.id === song.id) &&
-                        !songs.some(
-                            (existingSong) =>
-                                existingSong.name === song.name &&
-                                existingSong.artist === song.artist
-                        )
-                );
-                if (!user.show_explicit) {
-                    newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
-                }
-                setSongs((currentSongs) => [...currentSongs, ...newSongs]);
+                const newSongs = await response.json();
+                const filteredSongs = newSongs
+                    .filter(
+                        (song: SongMetadata) =>
+                            !songs.some((existingSong) => existingSong.id === song.id)
+                    )
+                    .filter((song: SongMetadata) => user.show_explicit || !song.explicit);
+                setSongs((currentSongs) => [...currentSongs, ...filteredSongs]);
             } else {
                 console.error("Error fetching more songs from Spotify");
             }
@@ -77,21 +64,11 @@ export default ({
     });
 
     useEffect(() => {
-        console.log(initialSongs)
-        setSongsCache(initialSongs);
-        if (!user.show_explicit) {
-            setSongsCache(songsCache.filter((song) => !song.explicit));
-        }
-        setSongs((currentSongs) => [...currentSongs, ...songsCache]);
-        setLoading(false);
-    }, []);
-
-    useEffect(() => {
-        if (!songs) setSearchedSongs([]);
-        if (searchQuery === "") {
-            setSearchedSongs(songs);
+        if (searchQuery) {
+            const results = fuse.search(searchQuery).map((result) => result.item);
+            setSearchedSongs(results);
         } else {
-            setSearchedSongs(fuse.search(searchQuery).map((result) => result.item));
+            setSearchedSongs(songs);
         }
     }, [songs, searchQuery]);
 
@@ -127,9 +104,7 @@ export default ({
                         </div>
                     </div>
                     {loading ? (
-                        <div className="flex h-5/6 justify-center items-center m-auto">
-                            <Spinner />
-                        </div>
+                        <Spinner />
                     ) : searchedSongs.length ? (
                         <div className="flex flex-row flex-wrap gap-10 p-12 overflow-auto">
                             {searchedSongs.map((song) => (
@@ -186,7 +161,9 @@ async function loadTopAndHotSongs() {
     );
 
     // Extract all Spotify IDs to fetch in bulk and fetch song metadata in bulk
-    const songsMetadata = await spotifyApi.getMultipleSongs(rows.map((row) => row.spotify_work_id));
+    const songsMetadata = Object.values(
+        await spotifyApi.getMultipleSongs(rows.map((row) => row.spotify_work_id))
+    );
 
     // Enrich the metadata with review counts and hotness
     const enrichedData = songsMetadata.map((songMetadata) => {
@@ -203,7 +180,7 @@ async function loadTopAndHotSongs() {
     hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit);
 }
 
-let initialSongs: SongMetadata[] = [];
+let initialSongs: {[key: string]: SongMetadata} = {};
 /*
 For users who are not logged into their own Spotify accounts and cannot receive their own 
 personalized content: Deliver Spotify's playlist 
@@ -234,8 +211,27 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (topSongs.length === 0 || hotSongs.length === 0) {
         await loadTopAndHotSongs();
     }
-    if (initialSongs.length === 0) {
+    if (Object.values(initialSongs).length === 0) {
         await loadInitialSongs();
     }
-    return {props: {user: session.user, hotSongs, topSongs, initialSongs}};
+    // Cache only the Spotify API data, do not cache revies or user data
+    const [ratingReviewCounts] = await db.promise().query(
+        `
+    SELECT spotify_work_id AS song_id,
+        COUNT(user_id)  AS review_count,
+        AVG(rating)     AS average_rating
+    FROM user_song
+    WHERE spotify_work_id IN (?)
+    GROUP BY spotify_work_id;
+    `,
+        [Object.keys(initialSongs)]
+    );
+    for (const ratingReviewCount of ratingReviewCounts as any[]) {
+        const songId = ratingReviewCount.song_id;
+        initialSongs[songId].rating = ratingReviewCount.average_rating;
+        initialSongs[songId].num_reviews = ratingReviewCount.review_count;
+    }
+    return {
+        props: {user: session.user, hotSongs, topSongs, initialSongs: Object.values(initialSongs)}
+    };
 };

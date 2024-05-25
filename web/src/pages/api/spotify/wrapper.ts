@@ -56,7 +56,7 @@ class SpotifyApi {
             spotifyWebApi.getTracks.bind(spotifyWebApi),
             songIds
         );
-        return await this.formatSongMetadata(spotifyResponse.body.tracks);
+        return Object.values(await this.formatSongMetadata(spotifyResponse.body.tracks));
     }
 
     async getSongsFromAlbum(albumId: string): Promise<SongMetadata[]> {
@@ -75,7 +75,11 @@ class SpotifyApi {
         }));
     }
 
-    async getSongsFromPlaylist(playlistId: string): Promise<SongMetadata[]> {
+    /*
+    This method returns an object of SongMetadata objects indexed by spotify ID, object as opposed
+    to simply an array for caching purposes on the user page. 
+    */
+    async getSongsFromPlaylist(playlistId: string): Promise<{[key: string]: SongMetadata}> {
         const spotifyResponse = await executeMethod(
             spotifyWebApi.getPlaylist.bind(spotifyWebApi),
             playlistId
@@ -89,7 +93,7 @@ class SpotifyApi {
         const spotifyResponse = await executeMethod(
             spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
         );
-        return await this.formatSongMetadata(spotifyResponse.body.tracks.items);
+        return Object.values(await this.formatSongMetadata(spotifyResponse.body.tracks.items));
     }
 
     /*
@@ -99,7 +103,7 @@ class SpotifyApi {
     from Spotify with data from our database itself, such as the average rating a song has and the
     number of reviews it has received.
     */
-    async formatSongMetadata(spotifyApiResponse: any[]): Promise<SongMetadata[]> {
+    async formatSongMetadata(spotifyApiResponse: any[]): Promise<{[key: string]: SongMetadata}> {
         const spotifyIds: string[] = [];
         const songMetadataMap: {[key: string]: SongMetadata} = {};
         for (let song of spotifyApiResponse) {
@@ -140,7 +144,7 @@ class SpotifyApi {
             songMetadataMap[songId].rating = ratingReviewCount.average_rating;
             songMetadataMap[songId].num_reviews = ratingReviewCount.review_count;
         }
-        return Object.values(songMetadataMap);
+        return songMetadataMap;
     }
 }
 
