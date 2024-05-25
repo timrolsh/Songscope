@@ -1,5 +1,4 @@
 import {db} from "../auth/[...nextauth]";
-import {RowDataPacket} from "mysql2";
 import SpotifyWebApi from "spotify-web-api-node";
 import {SongMetadata} from "@/types";
 
@@ -48,50 +47,16 @@ class SpotifyApi {
     // TODO, add in market
     async getSong(songId: string): Promise<SongMetadata> {
         const result = await executeMethod(spotifyWebApi.getTrack.bind(spotifyWebApi), songId);
-        const rating = await this.fetchSongRating(songId);
-        return {
-            id: result.body.id,
-            name: result.body.name,
-            artist: result.body.artists[0].name,
-            artist_id: result.body.artists[0].id,
-            album: result.body.album.name,
-            album_id: result.body.album.id,
-            explicit: result.body.explicit,
-            albumArtUrl: result.body.album.images[0].url,
-            releaseDate: result.body.album.release_date,
-            popularity: result.body.popularity,
-            previewUrl: result.body.preview_url,
-            availableMarkets: result.body.available_markets,
-            rating: rating
-        };
+        return (await this.formatSongMetadata([result.body]))[0];
     }
 
     async getMultipleSongs(songIds: string[]): Promise<SongMetadata[]> {
         console.log("SONGSCOPE: Getting multiple songs", songIds);
-        const result = await executeMethod(spotifyWebApi.getTracks.bind(spotifyWebApi), songIds);
-        const songs: SongMetadata[] = [];
-        for (const song of result.body.tracks) {
-            const rating = await this.fetchSongRating(song.id);
-            let albumArtUrl = song.album.images.length
-                ? song.album.images[0].url
-                : "/no-album-cover.jpg";
-            songs.push({
-                id: song.id,
-                name: song.name,
-                artist: song.artists[0].name,
-                artist_id: song.artists[0].id,
-                album: song.album.name,
-                album_id: song.album.id,
-                explicit: song.explicit,
-                releaseDate: song.album.release_date,
-                albumArtUrl: albumArtUrl,
-                popularity: song.popularity,
-                previewUrl: song.preview_url,
-                availableMarkets: song.available_markets,
-                rating: rating
-            });
-        }
-        return songs;
+        const spotifyResponse = await executeMethod(
+            spotifyWebApi.getTracks.bind(spotifyWebApi),
+            songIds
+        );
+        return await this.formatSongMetadata(spotifyResponse.body.tracks);
     }
 
     async getSongsFromAlbum(albumId: string): Promise<SongMetadata[]> {
@@ -111,78 +76,71 @@ class SpotifyApi {
     }
 
     async getSongsFromPlaylist(playlistId: string): Promise<SongMetadata[]> {
-        const result = await executeMethod(
+        const spotifyResponse = await executeMethod(
             spotifyWebApi.getPlaylist.bind(spotifyWebApi),
             playlistId
         );
-        const songs: SongMetadata[] = [];
-        for (const item of result.body.tracks.items) {
-            const song = item.track;
-            const rating = await this.fetchSongRating(song.id);
-            let albumArtUrl = song.album.images.length
-                ? song.album.images[0].url
-                : "/no-album-cover.jpg";
-            songs.push({
-                id: song.id,
-                name: song.name,
-                artist: song.artists[0].name,
-                artist_id: song.artists[0].id,
-                album: song.album.name,
-                album_id: song.album.id,
-                explicit: song.explicit,
-                releaseDate: song.album.release_date,
-                albumArtUrl: albumArtUrl,
-                popularity: song.popularity,
-                previewUrl: song.preview_url,
-                availableMarkets: song.available_markets,
-                rating: rating
-            });
-        }
-        return songs;
+        return await this.formatSongMetadata(
+            spotifyResponse.body.tracks.items.map((item: any) => item.track)
+        );
     }
 
     async searchContent(searchString: string): Promise<SongMetadata[]> {
-        const result = await executeMethod(
+        const spotifyResponse = await executeMethod(
             spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
         );
-        let songs: SongMetadata[] = [];
-        for (const song of result.body.tracks.items) {
-            const rating = await this.fetchSongRating(song.id);
-            let albumArtUrl = song.album.images.length
-                ? song.album.images[0].url
-                : "/no-album-cover.jpg";
-            songs.push({
+        return await this.formatSongMetadata(spotifyResponse.body.tracks.items);
+    }
+
+    /*
+    Given an array of the Spotify Web API's standard output for multiple songs, an array of 
+    objects, return a formatted array of SongMetadata objects formatted for use by components
+    throughout the codebase. An optimized database request is made to enrich the data directly
+    from Spotify with data from our database itself, such as the average rating a song has and the
+    number of reviews it has received.
+    */
+    async formatSongMetadata(spotifyApiResponse: any[]): Promise<SongMetadata[]> {
+        const spotifyIds: string[] = [];
+        const songMetadataMap: {[key: string]: SongMetadata} = {};
+        for (let song of spotifyApiResponse) {
+            spotifyIds.push(song.id);
+            songMetadataMap[song.id] = {
                 id: song.id,
                 name: song.name,
-                artist: song.artists[0].name,
+                artist: song.artists ? song.artists[0].name : null,
                 artist_id: song.artists[0].id,
                 album: song.album.name,
                 album_id: song.album.id,
                 explicit: song.explicit,
                 releaseDate: song.album.release_date,
-                albumArtUrl: albumArtUrl,
+                albumArtUrl: song.album.images.length
+                    ? song.album.images[0].url
+                    : "/no-album-cover.jpg",
                 popularity: song.popularity,
                 previewUrl: song.preview_url,
                 availableMarkets: song.available_markets,
-                rating: rating
-            });
+                rating: null,
+                num_reviews: null
+            };
         }
-        return songs;
-    }
 
-    async fetchSongRating(songid: string): Promise<number | null> {
-        try {
-            const [rows] = (await db.promise().query(
-                `select avg(rating) as avg_rating
-                from user_song
-                where spotify_work_id = ?;`,
-                [songid]
-            )) as RowDataPacket[];
-            return rows.length > 0 ? rows[0].avg_rating : null;
-        } catch (error) {
-            console.error("SONGSCOPE: Unable to fetch song rating", error);
-            throw error; // Rethrow the error to be caught by the caller
+        const [ratingReviewCounts] = await db.promise().query(
+            `
+        SELECT spotify_work_id AS song_id,
+            COUNT(user_id)  AS review_count,
+            AVG(rating)     AS average_rating
+        FROM user_song
+        WHERE spotify_work_id IN (?)
+        GROUP BY spotify_work_id;
+        `,
+            [spotifyIds]
+        );
+        for (const ratingReviewCount of ratingReviewCounts as any[]) {
+            const songId = ratingReviewCount.song_id;
+            songMetadataMap[songId].rating = ratingReviewCount.average_rating;
+            songMetadataMap[songId].num_reviews = ratingReviewCount.review_count;
         }
+        return Object.values(songMetadataMap);
     }
 }
 
