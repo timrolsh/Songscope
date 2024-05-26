@@ -2,11 +2,21 @@ import {db} from "../auth/[...nextauth]";
 import {RowDataPacket} from "mysql2";
 import SpotifyWebApi from "spotify-web-api-node";
 import {SongMetadata} from "@/types";
+import { fetchProfile } from "../db/fetch-profile-songs";
 
 var spotifyWebApi = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET
 });
+
+const shuffleArray = (array: any[]) => {
+    for (let i = array.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      const temp = array[i];
+      array[i] = array[j];
+      array[j] = temp;
+    }
+}
 
 async function getAccessToken() {
     try {
@@ -147,6 +157,51 @@ class SpotifyApi {
         );
         let songs: SongMetadata[] = [];
         for (const song of result.body.tracks.items) {
+            const rating = await this.fetchSongRating(song.id);
+            let albumArtUrl = song.album.images.length
+                ? song.album.images[0].url
+                : "/no-album-cover.jpg";
+            songs.push({
+                id: song.id,
+                name: song.name,
+                artist: song.artists[0].name,
+                artist_id: song.artists[0].id,
+                album: song.album.name,
+                album_id: song.album.id,
+                explicit: song.explicit,
+                releaseDate: song.album.release_date,
+                albumArtUrl: albumArtUrl,
+                popularity: song.popularity,
+                previewUrl: song.preview_url,
+                availableMarkets: song.available_markets,
+                rating: rating
+            });
+        }
+        return songs;
+    }
+
+    // seeded tracks are based on user's liked songs on songscope
+    async getMoreRecommendations(userId: string | undefined): Promise<SongMetadata[]> {
+        let seedTracks: string[] = [];
+
+        if(userId) {
+            const likedSongs = (await fetchProfile(userId)).favoritedSongs;
+            
+            if(likedSongs.length) {
+                shuffleArray(likedSongs);
+                seedTracks = likedSongs.map((song: SongMetadata) => song.id).slice(0, 5);
+            }
+        }
+
+        const result = await executeMethod(
+            spotifyWebApi.getRecommendations.bind(spotifyWebApi, {
+                limit: 30,
+                seed_tracks: seedTracks
+            })
+        );
+        
+        let songs: SongMetadata[] = [];
+        for (const song of result.body.tracks) {
             const rating = await this.fetchSongRating(song.id);
             let albumArtUrl = song.album.images.length
                 ? song.album.images[0].url

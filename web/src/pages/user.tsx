@@ -1,5 +1,5 @@
 import SideBar from "../components/SideBar";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import SongTile from "../components/SongTile";
 import Fuse from "fuse.js";
 
@@ -10,6 +10,7 @@ import {Session} from "@auth/core/types";
 import Spinner from "@/components/Spinner";
 import {SongMetadata, User} from "@/types";
 import Head from "next/head";
+import getRecommendations from "./api/spotify/get-recommendations";
 
 let songsCache: SongMetadata[] = [];
 
@@ -21,9 +22,38 @@ export default ({curSession}: UserProps): JSX.Element => {
     const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
+    const [moreLoading, setMoreLoading] = useState(false);
     const [songs, setSongs] = useState<SongMetadata[]>([]);
     const [showExplicit, setShowExplicit] = useState(false);
     const [userDataFetched, setUserDataFetched] = useState(false);
+
+    const bottomElementRef = useRef(null);
+    
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !loading) {
+                    console.log("NEED TO FETCH MORE!!");
+                    getAdditionalRecommendations();
+                }
+            },
+            {
+                root: null,
+                rootMargin: '20px',
+                threshold: 1.0,
+            }
+        );
+    
+        if (bottomElementRef.current) {
+            observer.observe(bottomElementRef.current);
+        }
+    
+        return () => {
+            if (bottomElementRef.current) {
+                observer.unobserve(bottomElementRef.current);
+            }
+        };
+    }, [loading]);
 
     useEffect(() => {
         const fetchUserData = async () => {
@@ -45,6 +75,49 @@ export default ({curSession}: UserProps): JSX.Element => {
         fetchUserData();
     }, [curSession.user?.id]);
 
+    // This is infinite scroll recommendation fetching
+    const getAdditionalRecommendations = async () => {
+        if(moreLoading) return;
+        setMoreLoading(true);
+
+        try {
+            const res = await fetch("/api/spotify/get-recommendations", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({user_id: curSession.user?.id})
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+
+                let newSongs = data.filter(
+                    (song: SongMetadata) =>
+                        !songs.some((existingSong) => existingSong.id === song.id) &&
+                        !songs.some(
+                            (existingSong) =>
+                                existingSong.name === song.name &&
+                                existingSong.artist === song.artist
+                        )
+                );
+                if (!showExplicit) {
+                    newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
+                }
+
+                setSongs((currentSongs) => [...currentSongs, ...newSongs]);
+            } else {
+                console.error("Error fetching more recommendations");
+                console.error(res.status, res.statusText)
+            }
+        } catch (error) {
+            console.error("Error fetching more recommendations:", error);
+        } finally {
+            setMoreLoading(false);
+        }
+    }
+
+    // This function is meant for a search-based fetch
     const fetchMoreSongs = async () => {
         if (loading) return; // Do not search if already searching
         if (!searchQuery) return; // Do not search if query is empty
@@ -97,28 +170,7 @@ export default ({curSession}: UserProps): JSX.Element => {
         if (!userDataFetched) return;
         const initSongs = async () => {
             setLoading(true);
-            const res = await fetch("/api/spotify/playlist", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                // TODO: If user is integrated with Spotify, use their recommendations
-                body: JSON.stringify({playlist_id: "37i9dQZEVXbLp5XoPON0wI"})
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                songsCache = data;
-                if (!showExplicit) {
-                    songsCache = songsCache.filter((song) => !song.explicit);
-                }
-            } else {
-                throw new Error(
-                    "Error fetching songs from Spotify: " + res.status + " " + res.statusText
-                );
-            }
-
-            setSongs((currentSongs) => [...currentSongs, ...songsCache]);
+            await getAdditionalRecommendations();
             setLoading(false);
         };
 
@@ -196,6 +248,12 @@ export default ({curSession}: UserProps): JSX.Element => {
                             </div>
                         </div>
                     )}
+                    {
+                        (moreLoading && !loading) && <div className="flex h-24 justify-center items-center m-auto">
+                            <Spinner />
+                        </div>
+                    }
+                    <div ref={bottomElementRef}></div>  {/* This is the bottom element */}
                 </div>
             </div>
         </>

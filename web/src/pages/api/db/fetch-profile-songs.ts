@@ -25,7 +25,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 // Returns everything needed for the user profile
-async function fetchProfile(profile_id: string) {
+export async function fetchProfile(profile_id: string) {
     try {
         // TODO --> Again, likely can be optimized. Big query.
         const [favoriteData, pinData, showFavorites] = (await Promise.all([
