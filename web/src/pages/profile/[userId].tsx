@@ -101,9 +101,7 @@ export default ({
                                                             <h3>
                                                                 Average Rating:{" "}
                                                                 {sideStatistics.avg_rating
-                                                                    ? sideStatistics.avg_rating.toFixed(
-                                                                          2
-                                                                      )
+                                                                    ? sideStatistics.avg_rating
                                                                     : "N/A"}
                                                             </h3>
                                                         </>
@@ -127,8 +125,7 @@ export default ({
                                                     .map((song) => (
                                                         <SongTile
                                                             key={song.id}
-                                                            rating={song.avg_rating}
-                                                            metadata={song}
+                                                            songMetadata={song}
                                                             user={user}
                                                         />
                                                     ))
@@ -282,7 +279,10 @@ GROUP BY u.id;
     }
 
     if (spotifyIds.length > 0) {
-        let spotifyResponseArray: SongMetadata[] = await spotifyApi.getMultipleSongs(spotifyIds, session.user);
+        let spotifyResponseArray: SongMetadata[] = await spotifyApi.getMultipleSongs(
+            spotifyIds,
+            session.user
+        );
         let spotifyResponse: any = {};
         for (let a = 0; a < spotifyResponseArray.length; ++a) {
             spotifyResponse[spotifyResponseArray[a].id] = spotifyResponseArray[a];

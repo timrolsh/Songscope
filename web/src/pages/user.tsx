@@ -110,8 +110,7 @@ export default ({
                             {searchedSongs.map((song) => (
                                 <SongTile
                                     key={song.id}
-                                    rating={song.avg_rating}
-                                    metadata={song}
+                                    songMetadata={song}
                                     user={user}
                                 />
                             ))}
@@ -182,16 +181,6 @@ async function loadTopAndHotSongs(user: User) {
     };
 }
 
-/*
-For users who are not logged into their own Spotify accounts and cannot receive their own 
-personalized content: Deliver Spotify's playlist 
-"our weekly update of the most played tracks right now - USA". 
-Cache the results as well as the playlist will generally stay the same during the server's runtime.
-*/
-async function loadInitialSongs(user: User) {
-    return await spotifyApi.getSongsFromPlaylist("37i9dQZEVXbLp5XoPON0wI", user);
-}
-
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // @ts-expect-error
     const session = await getServerSession(ctx.req, ctx.res, authOptions);
@@ -215,7 +204,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             user: session.user,
             hotSongs,
             topSongs,
-            initialSongs: Object.values(loadInitialSongs(session.user))
+            initialSongs: Object.values(
+                await spotifyApi.getSongsFromPlaylist("37i9dQZEVXbLp5XoPON0wI", session.user)
+            )
         }
     };
 };
