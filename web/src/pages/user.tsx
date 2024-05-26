@@ -110,7 +110,7 @@ export default ({
                             {searchedSongs.map((song) => (
                                 <SongTile
                                     key={song.id}
-                                    rating={song.rating}
+                                    rating={song.avg_rating}
                                     metadata={song}
                                     user={user}
                                 />
@@ -134,11 +134,8 @@ export default ({
     );
 };
 
-let hotSongs: SongMetadata[] = [];
-let topSongs: SongMetadata[] = [];
-
 // it is this method here that is causing the thing to fail
-async function loadTopAndHotSongs() {
+async function loadTopAndHotSongs(user: User) {
     const limit = 5;
     // get a date for a week ago
     let date = new Date();
@@ -162,7 +159,10 @@ async function loadTopAndHotSongs() {
 
     // Extract all Spotify IDs to fetch in bulk and fetch song metadata in bulk
     const songsMetadata = Object.values(
-        await spotifyApi.getMultipleSongs(rows.map((row) => row.spotify_work_id))
+        await spotifyApi.getMultipleSongs(
+            rows.map((row) => row.spotify_work_id),
+            user
+        )
     );
 
     // Enrich the metadata with review counts and hotness
@@ -176,19 +176,20 @@ async function loadTopAndHotSongs() {
     });
 
     // Separate into top and hot songs based on flags and limiting the results
-    topSongs = enrichedData.filter((song) => !song.is_hot).slice(0, limit);
-    hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit);
+    return {
+        topSongs: enrichedData.filter((song) => !song.is_hot).slice(0, limit),
+        hotSongs: enrichedData.filter((song) => song.is_hot).slice(0, limit)
+    };
 }
 
-let initialSongs: {[key: string]: SongMetadata} = {};
 /*
 For users who are not logged into their own Spotify accounts and cannot receive their own 
 personalized content: Deliver Spotify's playlist 
 "our weekly update of the most played tracks right now - USA". 
 Cache the results as well as the playlist will generally stay the same during the server's runtime.
 */
-async function loadInitialSongs() {
-    initialSongs = await spotifyApi.getSongsFromPlaylist("37i9dQZEVXbLp5XoPON0wI");
+async function loadInitialSongs(user: User) {
+    return await spotifyApi.getSongsFromPlaylist("37i9dQZEVXbLp5XoPON0wI", user);
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -208,30 +209,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (session.user && session.user.join_date === undefined) {
         session.user.join_date = null; // Or apply any other default value/formatting
     }
-    if (topSongs.length === 0 || hotSongs.length === 0) {
-        await loadTopAndHotSongs();
-    }
-    if (Object.values(initialSongs).length === 0) {
-        await loadInitialSongs();
-    }
-    // Cache only the Spotify API data, do not cache revies or user data
-    const [ratingReviewCounts] = await db.promise().query(
-        `
-    SELECT spotify_work_id AS song_id,
-        COUNT(user_id)  AS review_count,
-        AVG(rating)     AS average_rating
-    FROM user_song
-    WHERE spotify_work_id IN (?)
-    GROUP BY spotify_work_id;
-    `,
-        [Object.keys(initialSongs)]
-    );
-    for (const ratingReviewCount of ratingReviewCounts as any[]) {
-        const songId = ratingReviewCount.song_id;
-        initialSongs[songId].rating = ratingReviewCount.average_rating;
-        initialSongs[songId].num_reviews = ratingReviewCount.review_count;
-    }
+    let {hotSongs, topSongs} = await loadTopAndHotSongs(session.user);
     return {
-        props: {user: session.user, hotSongs, topSongs, initialSongs: Object.values(initialSongs)}
+        props: {
+            user: session.user,
+            hotSongs,
+            topSongs,
+            initialSongs: Object.values(loadInitialSongs(session.user))
+        }
     };
 };

@@ -127,7 +127,7 @@ export default ({
                                                     .map((song) => (
                                                         <SongTile
                                                             key={song.id}
-                                                            rating={song.rating}
+                                                            rating={song.avg_rating}
                                                             metadata={song}
                                                             user={user}
                                                         />
@@ -282,7 +282,7 @@ GROUP BY u.id;
     }
 
     if (spotifyIds.length > 0) {
-        let spotifyResponseArray: SongMetadata[] = await spotifyApi.getMultipleSongs(spotifyIds);
+        let spotifyResponseArray: SongMetadata[] = await spotifyApi.getMultipleSongs(spotifyIds, session.user);
         let spotifyResponse: any = {};
         for (let a = 0; a < spotifyResponseArray.length; ++a) {
             spotifyResponse[spotifyResponseArray[a].id] = spotifyResponseArray[a];

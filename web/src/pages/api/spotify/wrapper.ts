@@ -1,6 +1,6 @@
 import {db} from "../auth/[...nextauth]";
 import SpotifyWebApi from "spotify-web-api-node";
-import {SongMetadata} from "@/types";
+import {SongMetadata, User} from "@/types";
 
 var spotifyWebApi = new SpotifyWebApi({
     clientId: process.env.SPOTIFY_CLIENT_ID,
@@ -32,68 +32,40 @@ async function executeMethod(method: any, ...args: any) {
 }
 
 class SpotifyApi {
-    async getAlbum(albumId: string) {
-        const result = await executeMethod(spotifyWebApi.getAlbum.bind(spotifyWebApi), albumId);
-        return {
-            id: result.body.id,
-            name: result.body.name,
-            artist: result.body.artists[0].name,
-            artist_id: result.body.artists[0].id,
-            releaseDate: result.body.release_date,
-            albumArtUrl: result.body.images[0].url
-        };
-    }
-
-    // TODO, add in market
-    async getSong(songId: string): Promise<SongMetadata> {
-        const result = await executeMethod(spotifyWebApi.getTrack.bind(spotifyWebApi), songId);
-        return (await this.formatSongMetadata([result.body]))[0];
-    }
-
-    async getMultipleSongs(songIds: string[]): Promise<SongMetadata[]> {
+    async getMultipleSongs(songIds: string[], user: User): Promise<SongMetadata[]> {
         console.log("SONGSCOPE: Getting multiple songs", songIds);
         const spotifyResponse = await executeMethod(
             spotifyWebApi.getTracks.bind(spotifyWebApi),
             songIds
         );
-        return Object.values(await this.formatSongMetadata(spotifyResponse.body.tracks));
-    }
-
-    async getSongsFromAlbum(albumId: string): Promise<SongMetadata[]> {
-        const result = await executeMethod(
-            spotifyWebApi.getAlbumTracks.bind(spotifyWebApi),
-            albumId
-        );
-        return result.body.items.map((song: any) => ({
-            id: song.id,
-            name: song.name,
-            artist: song.artists[0].name,
-            artist_id: song.artists[0].id,
-            album: song.album.name,
-            album_id: song.album.id,
-            albumArtUrl: song.album.images[0].url
-        }));
+        return Object.values(await this.formatSongMetadata(spotifyResponse.body.tracks, user));
     }
 
     /*
     This method returns an object of SongMetadata objects indexed by spotify ID, object as opposed
     to simply an array for caching purposes on the user page. 
     */
-    async getSongsFromPlaylist(playlistId: string): Promise<{[key: string]: SongMetadata}> {
+    async getSongsFromPlaylist(
+        playlistId: string,
+        user: User
+    ): Promise<{[key: string]: SongMetadata}> {
         const spotifyResponse = await executeMethod(
             spotifyWebApi.getPlaylist.bind(spotifyWebApi),
             playlistId
         );
         return await this.formatSongMetadata(
-            spotifyResponse.body.tracks.items.map((item: any) => item.track)
+            spotifyResponse.body.tracks.items.map((item: any) => item.track),
+            user
         );
     }
 
-    async searchContent(searchString: string): Promise<SongMetadata[]> {
+    async searchContent(searchString: string, user: User): Promise<SongMetadata[]> {
         const spotifyResponse = await executeMethod(
             spotifyWebApi.search.bind(spotifyWebApi, searchString, ["track"])
         );
-        return Object.values(await this.formatSongMetadata(spotifyResponse.body.tracks.items));
+        return Object.values(
+            await this.formatSongMetadata(spotifyResponse.body.tracks.items, user)
+        );
     }
 
     /*
@@ -103,7 +75,10 @@ class SpotifyApi {
     from Spotify with data from our database itself, such as the average rating a song has and the
     number of reviews it has received.
     */
-    async formatSongMetadata(spotifyApiResponse: any[]): Promise<{[key: string]: SongMetadata}> {
+    async formatSongMetadata(
+        spotifyApiResponse: any[],
+        user: User
+    ): Promise<{[key: string]: SongMetadata}> {
         const spotifyIds: string[] = [];
         const songMetadataMap: {[key: string]: SongMetadata} = {};
         for (let song of spotifyApiResponse) {
@@ -123,26 +98,40 @@ class SpotifyApi {
                 popularity: song.popularity,
                 previewUrl: song.preview_url,
                 availableMarkets: song.available_markets,
-                rating: null,
-                num_reviews: null
+                avg_rating: null,
+                num_reviews: null,
+                user_rating: null,
+                pinned: null,
+                favorited: null
             };
         }
 
         const [ratingReviewCounts] = await db.promise().query(
             `
-        SELECT spotify_work_id AS song_id,
-            COUNT(user_id)  AS review_count,
-            AVG(rating)     AS average_rating
-        FROM user_song
-        WHERE spotify_work_id IN (?)
-        GROUP BY spotify_work_id;
+        SELECT a.spotify_work_id AS song_id,
+            COUNT(b.user_id)  AS num_reviews,
+            AVG(b.rating)     AS avg_rating,
+            a.rating          AS user_rating,
+            a.pinned          AS pinned,
+            a.favorite        AS favorited
+        FROM user_song AS a
+                LEFT JOIN
+            user_song AS b
+            ON
+                a.spotify_work_id = b.spotify_work_id
+        WHERE a.spotify_work_id IN (?)
+            AND a.user_id = ?
+        GROUP BY a.spotify_work_id, a.user_id, a.rating, a.pinned, a.favorite;
         `,
-            [spotifyIds]
+            [spotifyIds, user.id]
         );
         for (const ratingReviewCount of ratingReviewCounts as any[]) {
             const songId = ratingReviewCount.song_id;
-            songMetadataMap[songId].rating = ratingReviewCount.average_rating;
-            songMetadataMap[songId].num_reviews = ratingReviewCount.review_count;
+            songMetadataMap[songId].avg_rating = ratingReviewCount.avg_rating;
+            songMetadataMap[songId].num_reviews = ratingReviewCount.num_reviews;
+            songMetadataMap[songId].user_rating = ratingReviewCount.user_rating;
+            songMetadataMap[songId].pinned = ratingReviewCount.pinned;
+            songMetadataMap[songId].favorited = ratingReviewCount.favorited;
         }
         return songMetadataMap;
     }

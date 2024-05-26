@@ -13,8 +13,11 @@ export interface SongMetadata {
     popularity: string;
     previewUrl: string;
     availableMarkets: string[];
-    rating: number | null;
+    avg_rating: number | null;
     num_reviews: number | null;
+    user_rating: number | null;
+    pinned: boolean | null;
+    favorited: boolean | null;
 }
 
 export interface Song {
