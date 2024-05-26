@@ -101,8 +101,8 @@ class SpotifyApi {
                 avg_rating: null,
                 num_reviews: null,
                 user_rating: null,
-                pinned: null,
-                favorited: null
+                pinned: false,
+                favorited: false
             };
         }
 

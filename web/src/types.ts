@@ -16,8 +16,8 @@ export interface SongMetadata {
     avg_rating: number | null;
     num_reviews: number | null;
     user_rating: number | null;
-    pinned: boolean | null;
-    favorited: boolean | null;
+    pinned: boolean;
+    favorited: boolean;
 }
 
 export interface Song {
@@ -33,6 +33,7 @@ export interface Review {
     name: string;
     time: string;
     num_likes: number;
+    user_liked: boolean;
 }
 
 export interface UserProfileSongs {
