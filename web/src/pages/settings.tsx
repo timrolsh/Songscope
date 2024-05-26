@@ -88,7 +88,6 @@ export default ({
 
     // TODO: If they do not specify a name/bio, then don't set it to something empty...
     const updateUserInfo = async () => {
-        console.log("displayName:", displayName, "bio:", bio);
         try {
             const response = await fetch("/api/db/update-user-info", {
                 method: "POST",

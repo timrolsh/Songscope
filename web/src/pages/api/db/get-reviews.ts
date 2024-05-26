@@ -27,7 +27,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 
 async function fetchSongReviews(user_id: number, song_id: string) {
     // TODO --> Order these reviews by popularity/likes as well
-    // TODO provide the user info and get all of the info whethee they liked or didn't like the song as well and update any necessary types fit here are any
     try {
         const [rows] = (await db.promise().query(
             `

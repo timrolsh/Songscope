@@ -3,7 +3,6 @@ import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {Session} from "next-auth";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session: Session = await getServerSession(request, response, authOptions);
@@ -13,7 +12,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 
     if (request.method === "DELETE") {
-        console.log("reqbody:", request.body);
         const {comment_id, comment_user_id} = request.body;
 
         if (comment_user_id !== session.user.id && !session.user.isAdmin) {
@@ -31,7 +29,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function deleteReview(comment_id: string, comment_user_id: string) {
-    console.log("SONGSCOPE: Deleting review, comment_id:", comment_id, "user_id:", comment_user_id);
     db.execute(
         `
         DELETE FROM comment
@@ -39,7 +36,6 @@ async function deleteReview(comment_id: string, comment_user_id: string) {
     `,
         [comment_id, comment_user_id],
         (error, results, fields) => {
-            console.log("SONGSCOPE: Deleted review");
             if (error) {
                 console.error("SONGSCOPE: Unable to delete review", error);
                 return false;

@@ -61,7 +61,6 @@ export default function ({
         let data: Review[];
         try {
             data = JSON.parse(await res.text());
-            console.log("[INFO] Parsed successfully as JSON: ", data);
         } catch {
             console.log("[WARN] Failed to parse as JSON, setting to empty array");
             data = [];

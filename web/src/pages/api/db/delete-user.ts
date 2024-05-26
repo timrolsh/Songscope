@@ -3,7 +3,6 @@ import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {Session} from "next-auth";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session: Session = await getServerSession(request, response, authOptions);
@@ -13,7 +12,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 
     if (request.method === "DELETE") {
-        console.log("reqbody:", request.body);
         const {user_id} = request.body;
 
         if (user_id !== session.user.id && !session.user.isAdmin) {
@@ -35,7 +33,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function deleteUser(user_id: string) {
-    console.log("SONGSCOPE: Deleting user, user_id:", user_id);
     return new Promise<boolean>((resolve, reject) => {
         db.execute(
             `
@@ -48,7 +45,6 @@ async function deleteUser(user_id: string) {
                     console.error("SONGSCOPE: Unable to delete user", error);
                     resolve(false);
                 } else {
-                    console.log("SONGSCOPE: Deleted user");
                     resolve(true);
                 }
             }

@@ -3,7 +3,6 @@ import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {Session} from "next-auth";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session: Session = await getServerSession(request, response, authOptions);
@@ -13,7 +12,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 
     if (request.method === "POST") {
-        console.log("reqbody:", request.body);
         const {user_id} = request.body;
         const explicitSongVisibility = request.body.value;
         if (user_id !== session.user.id && !session.user.isAdmin) {
@@ -35,12 +33,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function updateExplicitSongVisibility(user_id: string, showExplicitSongs: boolean) {
-    console.log(
-        "SONGSCOPE: updating explicit song visibility: user_id ",
-        user_id,
-        ", visible: ",
-        showExplicitSongs
-    );
     return new Promise<boolean>((resolve, reject) => {
         db.execute(
             `
@@ -50,7 +42,6 @@ async function updateExplicitSongVisibility(user_id: string, showExplicitSongs: 
         `,
             [showExplicitSongs, user_id],
             (error, results, fields) => {
-                console.log("SONGSCOPE: Updated explicit song visibility");
                 if (error) {
                     console.error("SONGSCOPE: Unable to update explicit song visibility", error);
                     resolve(false);
