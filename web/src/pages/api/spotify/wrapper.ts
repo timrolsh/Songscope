@@ -193,13 +193,23 @@ class SpotifyApi {
             }
         }
 
-        const result = await executeMethod(
-            spotifyWebApi.getRecommendations.bind(spotifyWebApi, {
-                limit: 30,
-                seed_tracks: seedTracks
-            })
-        );
-        
+        let result;
+        if(seedTracks.length === 0) {
+            result = await executeMethod(
+                spotifyWebApi.getRecommendations.bind(spotifyWebApi, {
+                    limit: 30,
+                    seed_genres: ["pop", "hip-hop", "rap", "indie", "edm"]
+                })    
+            );
+        } else {
+            result = await executeMethod(
+                spotifyWebApi.getRecommendations.bind(spotifyWebApi, {
+                    limit: 30,
+                    seed_tracks: seedTracks
+                })
+            );
+        }
+
         let songs: SongMetadata[] = [];
         for (const song of result.body.tracks) {
             const rating = await this.fetchSongRating(song.id);
