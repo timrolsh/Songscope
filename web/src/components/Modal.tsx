@@ -9,17 +9,23 @@ export default function ({
     setShowModal,
     songMetadata,
     user,
-    dataEmitter
+    dataEmitter,
+    averageRating,
+    setAverageRating
 }: {
     showModal: boolean;
     setShowModal: (value: boolean) => void;
     songMetadata: SongMetadata;
     user: User;
     dataEmitter?: Function;
+    averageRating?: number;
+    setAverageRating: Function;
 }) {
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
     const [display, setDisplay] = useState(false);
+    
+
     useEffect(() => {
         setDisplay(showModal);
     }, [showModal]);
@@ -36,7 +42,13 @@ export default function ({
                 className="relative mx-auto z-30 border px-8 py-5 border-secondary w-3/5 h-3/5 bg-background/70 backdrop-blur-lg rounded-lg"
                 onClick={(e) => e.stopPropagation()}
             >
-                <SongInfo songMetadata={songMetadata} user={user} dataEmitter={dataEmitter} />
+                <SongInfo
+                    songMetadata={songMetadata}
+                    user={user}
+                    dataEmitter={dataEmitter}
+                    averageRating={averageRating || undefined}
+                    setAverageRating={setAverageRating}
+                />
                 <button
                     className="text-red-700 absolute right-2 top-1 text-2xl"
                     onClick={() => setShowModal(!showModal)}
