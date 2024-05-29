@@ -211,7 +211,12 @@ export default ({
     );
 };
 
-// it is this method here that is causing the thing to fail
+/*
+Cache the top and hot songs
+*/
+let topSongs: SongMetadata[] = [];
+let hotSongs: SongMetadata[] = [];
+let lastRequestTime = 0;
 async function loadTopAndHotSongs(user: User) {
     const limit = 5;
     // get a date for a week ago
@@ -251,12 +256,8 @@ async function loadTopAndHotSongs(user: User) {
             is_hot: songExtra ? songExtra.is_hot : null
         };
     });
-
-    // Separate into top and hot songs based on flags and limiting the results
-    return {
-        topSongs: enrichedData.filter((song) => !song.is_hot).slice(0, limit),
-        hotSongs: enrichedData.filter((song) => song.is_hot).slice(0, limit)
-    };
+    (topSongs = enrichedData.filter((song) => !song.is_hot).slice(0, limit)),
+        (hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit));
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -276,7 +277,10 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     if (session.user && session.user.join_date === undefined) {
         session.user.join_date = null; // Or apply any other default value/formatting
     }
-    let {hotSongs, topSongs} = await loadTopAndHotSongs(session.user);
+    if (Date.now() / 1000 - lastRequestTime > 120) {
+        await loadTopAndHotSongs(session.user);
+        lastRequestTime = Date.now() / 1000;
+    }
     return {
         props: {
             user: session.user,
