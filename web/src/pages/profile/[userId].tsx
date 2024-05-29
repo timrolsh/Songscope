@@ -13,7 +13,6 @@ import {AccountJoinTimestamp} from "@/dates";
 import Head from "next/head";
 import clsx from "clsx";
 import spotifyApi from "../api/spotify/wrapper";
-import {useEffect} from "react";
 
 export default ({
     user,
@@ -262,22 +261,32 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     // Create maps of all favorite songs, pinned songs, and top reviews
     const favoriteSongs: {[key: string]: SongMetadata | null} = {};
     const pinnedSongs: {[key: string]: SongMetadata | null} = {};
-    const profileTopReviews: ProfileTopReviews[] = dbResponseAny.top_reviews;
+    // filter out null reviews that come out of database json array
+    const profileTopReviews: ProfileTopReviews[] = dbResponseAny.top_reviews.filter(
+        (review: ProfileTopReviews) => review.spotify_work_id !== null
+    );
     // Make set of unique spotify works to lookup in the spotify api
     let spotifyIds: Set<string> = new Set();
-    for (let song of dbResponseAny.favoriteSongs) {
-        spotifyIds.add(song);
-        favoriteSongs[song] = null;
+    if (dbResponseAny.favoriteSongs !== null) {
+        for (let song of dbResponseAny.favoriteSongs) {
+            spotifyIds.add(song);
+            favoriteSongs[song] = null;
+        }
     }
-    for (let song of dbResponseAny.pinnedSongs) {
-        spotifyIds.add(song);
-        pinnedSongs[song] = null;
+    if (dbResponseAny.pinnedSongs !== null) {
+        for (let song of dbResponseAny.pinnedSongs) {
+            spotifyIds.add(song);
+            pinnedSongs[song] = null;
+        }
     }
-    // Get spotify metadata for all songs
-    const spotifyApiResponse = await spotifyApi.getMultipleSongs(
-        Array.from(spotifyIds),
-        session.user
-    );
+    let spotifyApiResponse: {[key: string]: SongMetadata} = {};
+    if (spotifyIds.size !== 0) {
+        // Get spotify metadata for all songs
+        spotifyApiResponse = await spotifyApi.getMultipleSongs(
+            Array.from(spotifyIds),
+            session.user
+        );
+    }
     // Add spotify metadata to the appropriate song maps
     for (let song of Object.keys(spotifyApiResponse)) {
         if (favoriteSongs[song] === null) {
@@ -287,11 +296,13 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             pinnedSongs[song] = spotifyApiResponse[song];
         }
     }
-    for (let review of profileTopReviews) {
-        review.title = spotifyApiResponse[review.spotify_work_id].name;
-        review.artist = spotifyApiResponse[review.spotify_work_id].artist;
-        review.album = spotifyApiResponse[review.spotify_work_id].album;
-        review.image = spotifyApiResponse[review.spotify_work_id].albumArtUrl;
+    if (dbResponseAny.top_reviews !== null) {
+        for (let review of profileTopReviews) {
+            review.title = spotifyApiResponse[review.spotify_work_id].name;
+            review.artist = spotifyApiResponse[review.spotify_work_id].artist;
+            review.album = spotifyApiResponse[review.spotify_work_id].album;
+            review.image = spotifyApiResponse[review.spotify_work_id].albumArtUrl;
+        }
     }
 
     return {
@@ -309,7 +320,3 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         }
     };
 };
-
-`
-
-`;
