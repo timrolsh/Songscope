@@ -36,10 +36,9 @@ export default function ({
     setPinned: (value: boolean) => void;
     favorited?: boolean;
     setFavorited: (value: boolean) => void;
-
 }) {
     const userId = user.id;
-    
+
     const [dbUserRating, setDbUserRating] = useState(songMetadata.user_rating);
 
     const containerRef = useRef<any>();

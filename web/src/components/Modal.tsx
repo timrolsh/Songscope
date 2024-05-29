@@ -36,7 +36,6 @@ export default function ({
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
     const [display, setDisplay] = useState(false);
-    
 
     useEffect(() => {
         setDisplay(showModal);
