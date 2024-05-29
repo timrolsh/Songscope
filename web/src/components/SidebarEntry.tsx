@@ -12,6 +12,7 @@ interface SidebarEntryProps {
 const SidebarEntry: React.FC<SidebarEntryProps> = ({song, user}) => {
     const [showModal, setShowModal] = useState(false);
     const [averageRating, setAverageRating] = useState(song.avg_rating);
+    const [userRating, setUserRating] = useState(song.user_rating);
 
     return (
         <>
@@ -24,6 +25,8 @@ const SidebarEntry: React.FC<SidebarEntryProps> = ({song, user}) => {
                         user={user}
                         averageRating={averageRating || undefined}
                         setAverageRating={setAverageRating}
+                        userRating={userRating || undefined}
+                        setUserRating={setUserRating}
                     />
                 )
             }

@@ -11,7 +11,9 @@ export default function ({
     user,
     dataEmitter,
     averageRating,
-    setAverageRating
+    setAverageRating,
+    userRating,
+    setUserRating
 }: {
     showModal: boolean;
     setShowModal: (value: boolean) => void;
@@ -20,10 +22,13 @@ export default function ({
     dataEmitter?: Function;
     averageRating?: number;
     setAverageRating: Function;
+    userRating?: number;
+    setUserRating: Function;
 }) {
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
     const [display, setDisplay] = useState(false);
+    
 
     useEffect(() => {
         setDisplay(showModal);
@@ -47,6 +52,8 @@ export default function ({
                     dataEmitter={dataEmitter}
                     averageRating={averageRating || undefined}
                     setAverageRating={setAverageRating}
+                    userRating={userRating || undefined}
+                    setUserRating={setUserRating}
                 />
                 <button
                     className="text-red-700 absolute right-2 top-1 text-2xl"

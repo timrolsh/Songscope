@@ -17,6 +17,7 @@ export default ({
     // TODO --> Migrate this to global ctx, cannot have more than one modal at a time
     const [showModal, setShowModal] = useState(false);
     const [averageRating, setAverageRating] = useState(songMetadata.avg_rating);
+    const [userRating, setUserRating] = useState(songMetadata.user_rating);
 
     return (
         <>
@@ -29,6 +30,8 @@ export default ({
                     dataEmitter={dataEmitter}
                     averageRating={averageRating || undefined}
                     setAverageRating={setAverageRating}
+                    userRating={userRating || undefined}
+                    setUserRating={setUserRating}
                 />
             )}
             <div

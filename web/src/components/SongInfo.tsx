@@ -17,18 +17,21 @@ export default function ({
     user,
     dataEmitter,
     averageRating,
-    setAverageRating
+    setAverageRating,
+    userRating,
+    setUserRating
 }: {
     songMetadata: SongMetadata;
     user: User;
     dataEmitter?: Function;
     averageRating?: number;
     setAverageRating: Function;
+    userRating?: number;
+    setUserRating: Function;
 }) {
     const userId = user.id;
     const [pinned, setPinned] = useState(songMetadata.pinned);
     const [favorited, setFavorited] = useState(songMetadata.favorited);
-    const [userRating, setUserRating] = useState(songMetadata.user_rating);
     const [dbUserRating, setDbUserRating] = useState(songMetadata.user_rating);
 
     const containerRef = useRef<any>();
@@ -87,8 +90,6 @@ export default function ({
     }
 
     async function updateRatingFavPin(
-        song_id: string,
-        rating: number | undefined,
         favorited: boolean,
         pinned: boolean
     ) {
@@ -132,7 +133,7 @@ export default function ({
         }
 
         if (userRating !== dbUserRating) {
-            updateRatingFavPin(songMetadata.id, userRating || undefined, favorited, pinned);
+            updateRatingFavPin(favorited, pinned);
         }
 
         setReviewText("");
@@ -161,8 +162,6 @@ export default function ({
                                         onClick={() => {
                                             setPinned(false);
                                             updateRatingFavPin(
-                                                songMetadata.id,
-                                                userRating || undefined,
                                                 favorited,
                                                 false
                                             );
@@ -173,8 +172,6 @@ export default function ({
                                         onClick={() => {
                                             setPinned(true);
                                             updateRatingFavPin(
-                                                songMetadata.id,
-                                                userRating || undefined,
                                                 favorited,
                                                 true
                                             );
@@ -186,8 +183,6 @@ export default function ({
                                         onClick={() => {
                                             setFavorited(false);
                                             updateRatingFavPin(
-                                                songMetadata.id,
-                                                userRating || undefined,
                                                 false,
                                                 pinned
                                             );
@@ -198,8 +193,6 @@ export default function ({
                                         onClick={() => {
                                             setFavorited(true);
                                             updateRatingFavPin(
-                                                songMetadata.id,
-                                                userRating || undefined,
                                                 true,
                                                 pinned
                                             );
