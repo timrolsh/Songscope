@@ -1,7 +1,7 @@
 import Link from "next/link";
 import SidebarEntry from "./SidebarEntry";
 import {signOut} from "next-auth/react";
-import {SongMetadata} from "@/types";
+import {SongMetadata, User} from "@/types";
 
 import Spinner from "@/components/Spinner";
 import {useEffect, useState} from "react";
@@ -11,7 +11,7 @@ const LinkStyles =
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 
 // TODO --> Migrate this to slot architecture for better reusability
-function renderDashboardBody() {
+function renderDashboardBody(user?: User) {
     const [hotSongs, setHotSongs] = useState<EnrichedSongMetadata[]>([]);
     const [topSongs, setTopSongs] = useState<EnrichedSongMetadata[]>([]);
     const [loading, setLoading] = useState(true);
@@ -48,7 +48,7 @@ function renderDashboardBody() {
                         <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
                         <div className="flex flex-col overflow-y-scroll max-h-60">
                             {topSongs.map((song: SongMetadata) => (
-                                <SidebarEntry key={song.id} song={song} />
+                                <SidebarEntry key={song.id} song={song} user={user} />
                             ))}
                         </div>
                     </div>
@@ -60,7 +60,7 @@ function renderDashboardBody() {
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
                     <div className="flex flex-col overflow-y-scroll max-h-60">
                         {hotSongs.map((song: SongMetadata) => (
-                            <SidebarEntry key={song.id} song={song} />
+                            <SidebarEntry key={song.id} song={song} user={user}/>
                         ))}
                     </div>
                 </>
@@ -70,9 +70,10 @@ function renderDashboardBody() {
 }
 
 function renderProfileBody(
+    user?: User,
     songs?: SongMetadata[],
     showFavoriteSongs?: boolean,
-    isOwnProfile?: boolean
+    isOwnProfile?: boolean,
 ) {
     if (!isOwnProfile && !showFavoriteSongs) {
         return <></>;
@@ -89,13 +90,13 @@ function renderProfileBody(
         <>
             <h3 className="text-text/90 text-xl font-semibold pb-2">Favorite Songs</h3>
             {isOwnProfile && !showFavoriteSongs && (
-                <div className="text-text/70 text-md font-light pt-2">
+                <div className="text-text/50 text-sm font-light pb-2">
                     <a href="/settings">This section is only visible to you</a>
                 </div>
             )}
             <div className="flex flex-col overflow-scroll">
                 {songs.map((song) => {
-                    return <SidebarEntry key={song.id} song={song} />;
+                    return <SidebarEntry key={song.id} song={song} user={user}/>;
                 })}
             </div>
         </>
@@ -110,7 +111,7 @@ export default ({
     isOwnProfile
 }: {
     variant: string;
-    user: any;
+    user?: any;
     favoriteSongs?: SongMetadata[];
     showFavoriteSongs?: boolean;
     isOwnProfile?: boolean;
@@ -126,11 +127,11 @@ export default ({
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
             {variant == "profile" ? (
-                renderProfileBody(favoriteSongs, showFavoriteSongs, isOwnProfile)
+                renderProfileBody(user, favoriteSongs, showFavoriteSongs, isOwnProfile)
             ) : variant == "settings" ? (
                 <></>
             ) : (
-                renderDashboardBody()
+                renderDashboardBody(user)
             )}
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4 "></hr>
             <div className="w-full h-52 flex flex-col mb-4">

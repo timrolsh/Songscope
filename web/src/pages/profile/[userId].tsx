@@ -235,12 +235,6 @@ export default ({curSession, userId}: ProfileProps): JSX.Element => {
                                                     ) : (
                                                         <Spinner />
                                                     )}
-
-                                                    {/* <h3>Lifetime Stars: 1432</h3>
-                                                <h3>Total Replies: 102</h3>
-                                                <h3>Liked Songs: 3250</h3>
-                                                <h3>Followers: 105</h3>
-                                                <h3>Following: 203</h3> */}
                                                 </div>
                                             </div>
                                         </div>
