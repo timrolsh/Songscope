@@ -19,6 +19,11 @@ export default function ({
 }) {
     const [like, setLike] = useState<boolean>(review.user_liked);
 
+    // Resolves bug where when user likes a comment and makes a new one, the new one is commented and the previous one is not
+    useEffect(() => {
+        setLike(review.user_liked);
+    }, [review.comment_id]);
+
     async function toggleLike() {
         const res = await fetch(`/api/db/like-comment`, {
             method: "POST",

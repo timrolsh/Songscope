@@ -89,10 +89,7 @@ export default function ({
         return response;
     }
 
-    async function updateRatingFavPin(
-        favorited: boolean,
-        pinned: boolean
-    ) {
+    async function updateRatingFavPin(favorited: boolean, pinned: boolean) {
         const response = await fetch("/api/db/rating-fav-pin", {
             method: "POST",
             headers: {
@@ -161,20 +158,14 @@ export default function ({
                                     <BsPinAngleFill
                                         onClick={() => {
                                             setPinned(false);
-                                            updateRatingFavPin(
-                                                favorited,
-                                                false
-                                            );
+                                            updateRatingFavPin(favorited, false);
                                         }}
                                     />
                                 ) : (
                                     <BsPinAngle
                                         onClick={() => {
                                             setPinned(true);
-                                            updateRatingFavPin(
-                                                favorited,
-                                                true
-                                            );
+                                            updateRatingFavPin(favorited, true);
                                         }}
                                     />
                                 )}
@@ -182,20 +173,14 @@ export default function ({
                                     <BsHeartFill
                                         onClick={() => {
                                             setFavorited(false);
-                                            updateRatingFavPin(
-                                                false,
-                                                pinned
-                                            );
+                                            updateRatingFavPin(false, pinned);
                                         }}
                                     />
                                 ) : (
                                     <BsHeart
                                         onClick={() => {
                                             setFavorited(true);
-                                            updateRatingFavPin(
-                                                true,
-                                                pinned
-                                            );
+                                            updateRatingFavPin(true, pinned);
                                         }}
                                     />
                                 )}
