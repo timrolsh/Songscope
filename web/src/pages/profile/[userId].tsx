@@ -265,6 +265,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
     const profileTopReviews: ProfileTopReviews[] = dbResponseAny.top_reviews.filter(
         (review: ProfileTopReviews) => review.spotify_work_id !== null
     );
+    console.log(profileTopReviews);
     // Make set of unique spotify works to lookup in the spotify api
     let spotifyIds: Set<string> = new Set();
     if (dbResponseAny.favoriteSongs !== null) {
@@ -278,6 +279,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             spotifyIds.add(song);
             pinnedSongs[song] = null;
         }
+    }
+    for (let review of profileTopReviews) {
+        spotifyIds.add(review.spotify_work_id);
     }
     let spotifyApiResponse: {[key: string]: SongMetadata} = {};
     if (spotifyIds.size !== 0) {
