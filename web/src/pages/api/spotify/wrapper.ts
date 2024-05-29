@@ -32,12 +32,12 @@ async function executeMethod(method: any, ...args: any) {
 }
 
 class SpotifyApi {
-    async getMultipleSongs(songIds: string[], user: User): Promise<SongMetadata[]> {
+    async getMultipleSongs(songIds: string[], user: User): Promise<{[key: string]: SongMetadata}> {
         const spotifyResponse = await executeMethod(
             spotifyWebApi.getTracks.bind(spotifyWebApi),
             songIds
         );
-        return Object.values(await this.formatSongMetadata(spotifyResponse.body.tracks, user));
+        return await this.formatSongMetadata(spotifyResponse.body.tracks, user);
     }
 
     /*
