@@ -12,7 +12,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 
     if (request.method === "POST") {
-        console.log("reqbody:", request.body);
         const {user_id} = request.body;
         const showReviews = request.body.value;
         if (user_id !== session.user.id && !session.user.isAdmin) {
@@ -34,12 +33,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function updateReviewVisibility(user_id: string, showReviews: boolean) {
-    console.log(
-        "SONGSCOPE: updating reviews visibility: user_id ",
-        user_id,
-        ", visible: ",
-        showReviews
-    );
     return new Promise<boolean>((resolve, reject) => {
         db.execute(
             `
@@ -49,7 +42,6 @@ async function updateReviewVisibility(user_id: string, showReviews: boolean) {
         `,
             [showReviews, user_id],
             (error, results, fields) => {
-                console.log("SONGSCOPE: Updated review visibility");
                 if (error) {
                     console.error("SONGSCOPE: Unable to update review visibility", error);
                     resolve(false);

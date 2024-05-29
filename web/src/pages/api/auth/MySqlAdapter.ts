@@ -16,7 +16,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
     // so you should only create a new instance if you need to or you don't have one.
     return {
         async createUser(user: Omit<AdapterUser, "id">): Promise<AdapterUser> {
-            console.log("Attempting to create user....");
             const {name, email, emailVerified, image} = user;
 
             const sql = `
@@ -41,7 +40,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
                 if (users.length === 0) throw new Error("User creation failed");
 
                 const newUser = users[0];
-                console.log("User created: ", newUser);
                 return newUser as AdapterUser;
             } catch (error: any) {
                 console.error("Error creating user:", error.message);
@@ -53,7 +51,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
             try {
                 const [rows] = await db.promise().execute(sql, [id]);
                 const user = (rows as RowDataPacket[])[0];
-                console.log("User found (by id): ", user);
                 return user as AdapterUser;
             } catch (error: any) {
                 console.error("Error creating user:", error.message);
@@ -66,7 +63,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
             try {
                 const [rows] = await db.promise().execute(sql, [email]);
                 const user = (rows as RowDataPacket[])[0];
-                console.log("User found (by email): ", user);
                 return user as AdapterUser;
             } catch (error: any) {
                 console.error("Error finding user (by email):", error.message);
@@ -85,7 +81,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
             try {
                 const [rows] = await db.promise().execute(sql, [provider, providerAccountId]);
                 const user = (rows as RowDataPacket[])[0];
-                console.log("User found (by account): ", user);
                 return user as AdapterUser;
             } catch (error: any) {
                 console.error("Error finding user (by email):", error.message);
@@ -131,7 +126,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
             await db.promise().execute(`delete from accounts where userId = ?`, [userId]);
         },
         async linkAccount(account) {
-            console.log("Linking account: ", account);
             const sql = `
             insert into accounts (
                 userId, provider, type, providerAccountId, 
@@ -176,8 +170,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
             await db.promise().execute(sql, [providerAccountId, provider]);
         },
         async createSession({sessionToken, userId, expires}): Promise<AdapterSession> {
-            console.log("Attemping to create session....");
-            console.log("SessionInfo: ", sessionToken, userId, expires);
             if (userId === undefined) {
                 throw Error(`userId is undef in createSession`);
             }
@@ -193,7 +185,6 @@ export default function MySqlAdapter(db: Pool): Adapter {
                         sessionToken
                     ]);
                 const session = (rows as RowDataPacket[])[0];
-                console.log("Session created: ", session);
                 // TODO --> Handle this case better, likely means error occurred while inserting user
                 if (!session) throw new Error("Session creation failed");
                 return session as AdapterSession;

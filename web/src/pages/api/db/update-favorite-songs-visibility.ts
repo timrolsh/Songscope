@@ -12,7 +12,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 
     if (request.method === "POST") {
-        console.log("reqbody:", request.body);
         const {user_id} = request.body;
         const showFavoriteSongs = request.body.value;
         if (user_id !== session.user.id && !session.user.isAdmin) {
@@ -34,12 +33,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function updateFavoriteSongsVisibility(user_id: string, showFavoriteSongs: boolean) {
-    console.log(
-        "SONGSCOPE: updating favorite songs visibility: user_id ",
-        user_id,
-        ", visible: ",
-        showFavoriteSongs
-    );
     return new Promise<boolean>((resolve, reject) => {
         db.execute(
             `
@@ -49,7 +42,6 @@ async function updateFavoriteSongsVisibility(user_id: string, showFavoriteSongs:
         `,
             [showFavoriteSongs, user_id],
             (error, results, fields) => {
-                console.log("SONGSCOPE: Updated favorite songs visibility");
                 if (error) {
                     console.error("SONGSCOPE: Unable to update favorite songs visibility", error);
                     resolve(false);

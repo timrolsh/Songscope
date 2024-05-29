@@ -14,17 +14,14 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 
     const user: User = session.user;
 
-    console.log("useid: ", user.id, "reqbody:", request.body.userid );
-    console.log("useid: ", (typeof user.id), "reqbody:", (typeof request.body.userid) );
     if (request.method === "POST") {
-        console.log("reqbody:", request.body);
         const {songid, reviewbody} = request.body;
 
-        if(!songid || !reviewbody) {
+        if (!songid || !reviewbody) {
             response.status(400).send("Malformed Request Body");
             return;
             // TODO --> improve the comparison check here
-        } else if(String(user.id) !== request.body.userid) {
+        } else if (String(user.id) !== request.body.userid) {
             response.status(401).send("Unauthorized");
             return;
         }
@@ -39,14 +36,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function insertReview(songid: string, userid: string, reviewtext: string) {
-    console.log(
-        "SONGSCOPE: Inserting review, songid:",
-        songid,
-        "userid:",
-        userid,
-        "reviewtext:",
-        reviewtext
-    );
     db.execute(
         `
         INSERT INTO comment(user_id, spotify_work_id, comment_text)
@@ -54,7 +43,6 @@ async function insertReview(songid: string, userid: string, reviewtext: string) 
     `,
         [userid, songid, reviewtext],
         (error, results, fields) => {
-            console.log("SONGSCOPE: Inserted review");
             if (error) {
                 console.error("SONGSCOPE: Unable to insert review", error);
                 return false;

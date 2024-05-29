@@ -4,10 +4,10 @@ import {authOptions, db} from "./api/auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
 import {GetServerSideProps} from "next";
 import {MdAccountCircle, MdInfoOutline, MdLink, MdOutlineSecurity} from "react-icons/md";
-import {useEffect, useState} from "react";
+import {useState} from "react";
 import Head from "next/head";
 import ConnectionEntry from "../components/ConnectionEntry";
-import {Session} from "next-auth";
+import {User} from "@/types";
 
 export function TextEntry({
     name,
@@ -52,10 +52,10 @@ export function ButtonEntry({
 }
 
 export default ({
-    curSession,
+    user,
     connections
 }: {
-    curSession: Session;
+    user: User;
     connections: {"google": boolean; "spotify": boolean};
 }): JSX.Element => {
     const [displayName, setDisplayName] = useState("");
@@ -63,32 +63,6 @@ export default ({
     const [showFavoriteSongs, setShowFavoriteSongs] = useState(false);
     const [showReviews, setShowReviews] = useState(false);
     const [showExplicitSongs, setShowExplicitSongs] = useState(false);
-
-    useEffect(() => {
-        const fetchUserData = async () => {
-            const res = await fetch("/api/db/get-user", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({user_id: curSession.user?.id})
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                setDisplayName(data.name);
-                setBio(data.bio);
-                setShowFavoriteSongs(data.show_favorite_songs);
-                setShowReviews(data.show_reviews);
-                setShowExplicitSongs(data.show_explicit);
-            } else {
-                // Handle error case
-                console.error("Error fetching user data");
-            }
-        };
-
-        fetchUserData();
-    }, [curSession.user?.id]);
     const deleteUser = async () => {
         if (!confirm("Are you sure you want to continue?")) {
             return;
@@ -99,7 +73,7 @@ export default ({
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id})
+                body: JSON.stringify({user_id: user.id})
             });
 
             if (response.ok) {
@@ -114,7 +88,6 @@ export default ({
 
     // TODO: If they do not specify a name/bio, then don't set it to something empty...
     const updateUserInfo = async () => {
-        console.log("displayName:", displayName, "bio:", bio);
         try {
             const response = await fetch("/api/db/update-user-info", {
                 method: "POST",
@@ -122,7 +95,7 @@ export default ({
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({
-                    user_id: curSession.user?.id,
+                    user_id: user.id,
                     displayName: displayName,
                     bio: bio
                 })
@@ -147,7 +120,7 @@ export default ({
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id, value: value})
+                body: JSON.stringify({user_id: user.id, value: value})
             });
 
             if (!response.ok) {
@@ -164,7 +137,8 @@ export default ({
                 <title>Songscope - Settings</title>
             </Head>
             <div className="flex flex-row h-full">
-                <SideBar variant={"settings"} user={curSession.user} />
+                {/* Top and Hot Songs are not rendered in the sidebar for the settings page */}
+                <SideBar variant="settings" user={user} hotSongs={[]} topSongs={[]} />
                 <div className="w-4/5 pl-8 h-screen overflow-auto">
                     <h2 className="text-2xl font-bold pt-6 pb-2 flex flex-row">
                         <MdAccountCircle className="my-auto text-xl mr-3" />
@@ -243,28 +217,16 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    const results = await new Promise((resolve, reject) => {
-        db.execute(
-            `select provider FROM accounts WHERE userId = ?`,
-            [session.user.id],
-            (error, results, fields) => {
-                if (error) {
-                    console.error("SONGSCOPE: Unable to fetch user connections", error);
-                    reject(error);
-                } else {
-                    console.log("SONGSCOPE: Fetched user connections");
-                    const booleans = {google: false, spotify: false};
-                    for (const object of results as Array<object>) {
-                        if ((object as any)["provider"] === "google") {
-                            booleans.google = true;
-                        } else if ((object as any)["provider"] === "spotify") {
-                            booleans.spotify = true;
-                        }
-                    }
-                    resolve(booleans);
-                }
-            }
-        );
-    });
-    return {props: {curSession: session, connections: results}};
+    const results = await db
+        .promise()
+        .query(`select provider FROM accounts WHERE userId = ?`, [session.user.id]);
+    const booleans = {google: false, spotify: false};
+    for (const entry of (results as any)[0]) {
+        if (entry.provider === "spotify") {
+            booleans.spotify = true;
+        } else if (entry.provider === "google") {
+            booleans.google = true;
+        }
+    }
+    return {props: {user: session.user, connections: booleans}};
 };

@@ -14,7 +14,6 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 
     const user: User = session.user;
     if (request.method === "POST") {
-        console.log("reqbody:", request.body);
         const name = request.body.displayName;
         const bio = request.body.bio;
         if (user.id !== request.body.user_id && !user.isAdmin) {
@@ -60,7 +59,6 @@ async function checkName(name: string): Promise<boolean> {
 }
 
 async function updateUserInfo(userid: string, name: string, bio: string) {
-    console.log("SONGSCOPE: changing user info, userid:", userid, "name:", name, "bio:", bio);
     db.execute(
         `
         UPDATE users

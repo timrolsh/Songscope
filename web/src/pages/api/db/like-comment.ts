@@ -2,7 +2,6 @@ import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
 import {getServerSession, Session} from "next-auth";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     // @ts-expect-error
     const session: Session = await getServerSession(request, response, authOptions);
@@ -53,9 +52,6 @@ async function likeComment(user_id: string, comment_id: string, like: boolean) {
                 `,
             [user_id, comment_id, like, like],
             (error, results, fields) => {
-                console.log(
-                    "SONGSCOPE: Updated like state for user/comment: " + user_id + "/" + comment_id
-                );
                 if (error) {
                     console.error("SONGSCOPE: Unable to like comment", error);
                     return false;

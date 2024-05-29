@@ -1,3 +1,5 @@
+import {RowDataPacket} from "mysql2";
+
 export interface SongMetadata {
     id: string;
     name: string;
@@ -11,7 +13,11 @@ export interface SongMetadata {
     popularity: string;
     previewUrl: string;
     availableMarkets: string[];
-    rating?: number | null;
+    avg_rating: number | null;
+    num_reviews: number | null;
+    user_rating: number | null;
+    pinned: boolean;
+    favorited: boolean;
 }
 
 export interface Song {
@@ -27,6 +33,7 @@ export interface Review {
     name: string;
     time: string;
     num_likes: number;
+    user_liked: boolean;
 }
 
 export interface UserProfileSongs {
@@ -52,7 +59,36 @@ export interface User {
 export interface ProfileStatistics {
     total_comments: number;
     total_favorites: number;
-    avg_rating?: number;
+    avg_rating: number;
     totalFollowers?: number;
     totalFollowing?: number;
+}
+
+export interface SongReviewRow extends RowDataPacket {
+    id: string;
+    num_reviews: number;
+    title: string;
+    artist: string;
+}
+
+export interface UserTopReviews extends RowDataPacket {
+    user_id: string;
+    comment_id: string;
+    spotify_work_id: string;
+    comment_text: string;
+    time: string;
+    num_likes: number;
+}
+
+export interface ProfileTopReviews {
+    spotify_work_id: string;
+    title: string;
+    artist: string;
+    album: string;
+    image: string;
+    user_id: string;
+    comment_id: string;
+    comment_text: string;
+    time: string;
+    num_likes: number;
 }

@@ -1,10 +1,11 @@
-import NextAuth from "next-auth";
+import NextAuth, {Session} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import SpotifyProvider from "next-auth/providers/spotify";
 
 import MySqlAdapter from "./MySqlAdapter";
 
 import {createPool} from "mysql2";
+import {User} from "@/types";
 
 // check to make sure all environment variables are set
 if (
@@ -17,7 +18,6 @@ if (
     )
 ) {
     console.log("Error: Environment variables for the database are not set.");
-    process.exit(1);
 }
 
 // create the connection to database
@@ -26,7 +26,7 @@ export const db = createPool({
     user: process.env.DB_USER,
     database: process.env.DB_SCHEMA,
     password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT), // Convert the port value to a number
+    port: parseInt(process.env.DB_PORT || "3306"), // Convert the port value to a number
     waitForConnections: true,
     connectionLimit: 180, // Arbitrarily picked, likely will be fine for the database size we have
     queueLimit: 0
@@ -45,12 +45,11 @@ export const authOptions = {
         })
     ],
     callbacks: {
-        async session({session, token, user}: {session: any; token: any; user: any}) {
-            session.user.id = user.id;
-            session.user.bio = user.bio;
-            session.user.join_date = JSON.stringify(user.join_date);
-            session.user.role = user.role ?? "user";
-            session.user.isAdmin = Boolean(user.isAdmin);
+        // Using the session callback to add user data to the session so it can be easily accessed, the User type is our type for our database custom table for Users
+        async session({session, user}: {session: Session; user: User}) {
+            session.user = user;
+            // Convert the date to a string so it can be serialized to prevent error
+            session.user.join_date = JSON.stringify(user.join_date).slice(1, -1);
             return session;
         }
     },

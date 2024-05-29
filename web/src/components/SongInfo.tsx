@@ -15,135 +15,32 @@ const tailwindColors = theme.extend.colors;
 export default function ({
     songMetadata,
     user,
-    dataEmitter
+    dataEmitter,
+    averageRating,
+    setAverageRating,
+    userRating,
+    setUserRating,
+    pinned,
+    setPinned,
+    favorited,
+    setFavorited
 }: {
     songMetadata: SongMetadata;
     user: User;
     dataEmitter?: Function;
+    averageRating?: number;
+    setAverageRating: (value: number) => void;
+    userRating?: number;
+    setUserRating: (value: number) => void;
+    pinned?: boolean;
+    setPinned: (value: boolean) => void;
+    favorited?: boolean;
+    setFavorited: (value: boolean) => void;
+
 }) {
     const userId = user.id;
-    const [pinned, setPinned] = useState(false);
-    const [favorite, setFavorite] = useState(false);
-    const [pinfavFetched, setPinfavFetched] = useState(false);
-    const [rating, setRating] = useState(0);
-    const [initialRating, setInitialRating] = useState(0);
-
-    useEffect(() => {
-        async function fetchRating() {
-            const res = await fetch(`/api/db/get-rating`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({songid: songMetadata.id, userid: userId})
-            });
-
-            if (res.status !== 200) console.log("Non 200 code received");
-
-            let data: number;
-
-            if (res.ok) {
-                data = await res.json();
-                console.log("[INFO] Parsed successfully as JSON: ", data);
-                setRating(data);
-                setInitialRating(data);
-            } else {
-                throw new Error("Error fetching rating: " + res.status + " " + res.statusText);
-            }
-        }
-
-        fetchRating().catch((error) => {
-            console.error("Error fetching rating:", error);
-        });
-    }, []);
-
-    useEffect(() => {
-        async function fetchPinFav() {
-            const res = await fetch(`/api/db/get-favorite-pin`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({user_id: userId, song_id: songMetadata.id})
-            });
-
-            if (res.status !== 200) console.log("Non 200 code received");
-
-            let data: Record<string, boolean>;
-
-            if (res.ok) {
-                const data = await res.json();
-                console.log("[INFO] Parsed successfully as JSON: ", data);
-                setPinned(data.pinned);
-                setFavorite(data.favorite);
-                setPinfavFetched(true);
-            } else {
-                throw new Error("Error fetching pin/fav: " + res.status + " " + res.statusText);
-            }
-        }
-
-        fetchPinFav().catch((error) => {
-            console.error("Error fetching pin/fav:", error);
-        });
-    }, []);
-
-    function togglePin() {
-        const res = fetch(`/api/db/pin-or-favorite-song`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                song_id: songMetadata.id,
-                pin_state: !pinned,
-                fav_state: favorite
-            })
-        });
-
-        res.then((res) => {
-            if (res.status !== 200) console.log("Non 200 code received");
-            if (res.ok) {
-                setPinned(!pinned);
-                if (dataEmitter) dataEmitter();
-            } else {
-                console.error("Error toggling pin/fav (db): ", res.status, res.statusText);
-            }
-        }).catch((e) => {
-            console.error("Error toggling pin/fav (fetch): ", e);
-        });
-    }
-
-    function toggleFavorite() {
-        const res = fetch(`/api/db/pin-or-favorite-song`, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({
-                user_id: userId,
-                song_id: songMetadata.id,
-                pin_state: pinned,
-                fav_state: !favorite
-            })
-        });
-
-        res.then((res) => {
-            if (res.status !== 200) console.log("Non 200 code received");
-            if (res.ok) {
-                setFavorite(!favorite);
-                if (dataEmitter) dataEmitter();
-            } else {
-                console.error("Error toggling pin/fav (db): ", res.status, res.statusText);
-            }
-        }).catch((e) => {
-            console.error("Error toggling pin/fav (fetch): ", e);
-        });
-    }
-
-    function leaveRating(newRating: number) {
-        setRating(newRating);
-    }
+    
+    const [dbUserRating, setDbUserRating] = useState(songMetadata.user_rating);
 
     const containerRef = useRef<any>();
 
@@ -175,7 +72,6 @@ export default function ({
         let data: Review[];
         try {
             data = JSON.parse(await res.text());
-            console.log("[INFO] Parsed successfully as JSON: ", data);
         } catch {
             console.log("[WARN] Failed to parse as JSON, setting to empty array");
             data = [];
@@ -201,6 +97,31 @@ export default function ({
         return response;
     }
 
+    async function updateRatingFavPin(favorited: boolean, pinned: boolean) {
+        const response = await fetch("/api/db/rating-fav-pin", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                song_id: songMetadata.id,
+                rating: userRating,
+                favorited,
+                pinned
+            })
+        });
+        const jsonResponse = await response.json();
+        setAverageRating(jsonResponse.avg_rating);
+        setFavorited(jsonResponse.favorited);
+        setPinned(jsonResponse.pinned);
+        setUserRating(jsonResponse.user_rating);
+        setDbUserRating(jsonResponse.user_rating);
+
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+    }
+
     async function submitReview(event: React.FormEvent<HTMLFormElement>): Promise<void> {
         event.preventDefault();
         if (reviewText) {
@@ -216,22 +137,8 @@ export default function ({
             await submitToServer(data, "/api/db/insert-review");
         }
 
-        if (rating !== initialRating) {
-            const response = await fetch("/api/db/leave-rating", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    songId: songMetadata.id,
-                    userId: userId,
-                    rating: rating
-                })
-            });
-
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
+        if (userRating !== dbUserRating) {
+            updateRatingFavPin(favorited || false, pinned || false);
         }
 
         setReviewText("");
@@ -252,27 +159,48 @@ export default function ({
                             height={150}
                             className="border border-accent-neutral/5 shadow-xl rounded-xl select-none"
                         ></Image>
-                        {pinfavFetched && (
+                        {
+                            // React does not update state fast enough, hardcoded values are passed into request
                             <div className="flex flex-col space-y-4">
                                 {pinned ? (
-                                    <BsPinAngleFill onClick={togglePin} />
+                                    <BsPinAngleFill
+                                        onClick={() => {
+                                            setPinned(false);
+                                            updateRatingFavPin(favorited || false, false);
+                                        }}
+                                    />
                                 ) : (
-                                    <BsPinAngle onClick={togglePin} />
+                                    <BsPinAngle
+                                        onClick={() => {
+                                            setPinned(true);
+                                            updateRatingFavPin(favorited || false, true);
+                                        }}
+                                    />
                                 )}
-                                {favorite ? (
-                                    <BsHeartFill onClick={toggleFavorite} />
+                                {favorited ? (
+                                    <BsHeartFill
+                                        onClick={() => {
+                                            setFavorited(false);
+                                            updateRatingFavPin(false, pinned || false);
+                                        }}
+                                    />
                                 ) : (
-                                    <BsHeart onClick={toggleFavorite} />
+                                    <BsHeart
+                                        onClick={() => {
+                                            setFavorited(true);
+                                            updateRatingFavPin(true, pinned || false);
+                                        }}
+                                    />
                                 )}
                             </div>
-                        )}
+                        }
                     </div>
-                    {songMetadata.rating && (
+                    {averageRating && (
                         <div className="flex flex-row space-x-0 mx-auto my-1">
-                            {Array.from({length: Math.floor(songMetadata.rating)}, (_, index) => (
+                            {Array.from({length: Math.floor(averageRating)}, (_, index) => (
                                 <IoMdStar key={index} className="text-secondary text-3xl" />
                             ))}
-                            {songMetadata.rating - Math.floor(songMetadata.rating) >= 0.5 && (
+                            {averageRating - Math.floor(averageRating) >= 0.5 && (
                                 <IoMdStarHalf className="text-secondary text-3xl" />
                             )}
                         </div>
@@ -373,9 +301,9 @@ export default function ({
                                 return (
                                     <IoMdStar
                                         key={ratingValue}
-                                        onClick={() => leaveRating(ratingValue)}
+                                        onClick={() => setUserRating(ratingValue)}
                                         className={`cursor-pointer ${
-                                            ratingValue <= rating
+                                            ratingValue <= (userRating ? userRating : 0)
                                                 ? "text-primary"
                                                 : "text-accent-neutral/20"
                                         } text-3xl`}

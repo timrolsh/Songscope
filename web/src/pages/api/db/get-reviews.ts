@@ -1,13 +1,20 @@
 import {NextApiRequest, NextApiResponse} from "next";
-import {db} from "../auth/[...nextauth]";
+import {authOptions, db} from "../auth/[...nextauth]";
 import {RowDataPacket} from "mysql2";
 import {Review} from "@/types";
+import {getServerSession} from "next-auth";
 
-// TODO: Add authentication
 export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "GET") {
         const song_id = request.query.songid as string;
-        const results = await fetchSongReviews(song_id);
+        // Authenticate user
+        // @ts-expect-error
+        const session = await getServerSession(request, response, authOptions);
+        if (!session || !session.user) {
+            response.status(401).send("Unauthorized");
+            return;
+        }
+        const results = await fetchSongReviews(session.user.id, song_id);
         // TODO --> Swap from JSON stringify to just pure JSON
 
         response.status(200).send(JSON.stringify(results));
@@ -18,17 +25,28 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 };
 
-async function fetchSongReviews(songid: string) {
+async function fetchSongReviews(user_id: number, song_id: string) {
     // TODO --> Order these reviews by popularity/likes as well
     try {
         const [rows] = (await db.promise().query(
-            `select u.id user_id, u.name, c.id comment_id, c.comment_text, c.time,
-                (SELECT CAST(coalesce(sum(liked), 0) as unsigned) from user_comment uc where uc.comment_id = c.id) as num_likes
-            from comment c, users u
-            where c.user_id = u.id
-            and c.spotify_work_id = ?
-            order by c.time desc, num_likes asc;`,
-            [songid]
+            `
+        SELECT u.id                                                                                               AS user_id,
+            u.name,
+            c.id                                                                                               AS comment_id,
+            c.comment_text,
+            c.time,
+            (SELECT CAST(COALESCE(SUM(liked), 0) AS UNSIGNED) FROM user_comment uc WHERE uc.comment_id = c.id) AS num_likes,
+            CAST(COALESCE(SUM(uc.liked = 1 AND uc.user_id = ?), 0) AS UNSIGNED)                                AS user_liked
+        FROM comment c
+                JOIN
+            users u ON c.user_id = u.id
+                LEFT JOIN
+            user_comment uc ON uc.comment_id = c.id
+        WHERE c.spotify_work_id = ?
+        GROUP BY c.id, u.id, u.name, c.comment_text, c.time
+        ORDER BY c.time DESC;
+            `,
+            [user_id, song_id]
         )) as RowDataPacket[];
 
         return rows.length > 0 ? (rows as Review[]) : null;

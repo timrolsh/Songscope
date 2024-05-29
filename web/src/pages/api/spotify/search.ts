@@ -1,5 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import spotifyApi from "./wrapper";
+import {authOptions} from "../auth/[...nextauth]";
+import {getServerSession} from "next-auth";
 
 /*
 Given a string that the user will pass in by a post request where the body looks like this:
@@ -10,6 +12,12 @@ body: {
 Use the Spotify API to search for a song and return its results
 */
 export default async (request: NextApiRequest, response: NextApiResponse) => {
+    // @ts-expect-error
+    const session: Session = await getServerSession(request, response, authOptions);
+    if (!session || !session.user) {
+        response.status(401).send("Unauthorized");
+        return;
+    }
     if (request.method !== "POST") {
         response.status(400).send("Invalid request method.");
         return;
@@ -21,7 +29,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     }
 
     try {
-        const result = await spotifyApi.searchContent(search_string);
+        const result = await spotifyApi.searchContent(search_string, session.user);
         response.status(200).json(result);
     } catch (error) {
         console.error("SONGSCOPE: Error while searching content: ", error);

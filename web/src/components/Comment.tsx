@@ -17,34 +17,11 @@ export default function ({
     review: Review;
     dataEmitter?: Function;
 }) {
-    const [like, setLike] = useState(false);
+    const [like, setLike] = useState<boolean>(review.user_liked);
 
+    // Resolves bug where when user likes a comment and makes a new one, the new one is commented and the previous one is not
     useEffect(() => {
-        async function fetchCommentLike() {
-            const res = await fetch(`/api/db/get-like-comment`, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({user_id: user.id, comment_id: review.comment_id})
-            });
-
-            if (res.status !== 200) console.log("Non 200 code received");
-
-            let data: {like: boolean};
-
-            if (res.ok) {
-                data = await res.json();
-                console.log("[INFO] Parsed successfully as JSON: ", data);
-                setLike(data.like);
-            } else {
-                throw new Error("Error fetching rating: " + res.status + " " + res.statusText);
-            }
-        }
-
-        fetchCommentLike().catch((error) => {
-            console.error("Error fetching rating:", error);
-        });
+        setLike(review.user_liked);
     }, [review.comment_id]);
 
     async function toggleLike() {
