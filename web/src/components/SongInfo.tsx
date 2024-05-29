@@ -104,7 +104,7 @@ export default function ({
             },
             body: JSON.stringify({
                 song_id: songMetadata.id,
-                rating: userRating,
+                rating: userRating || null,
                 favorited,
                 pinned
             })
