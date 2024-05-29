@@ -1,5 +1,5 @@
 import SideBar from "../components/SideBar";
-import {useEffect, useState} from "react";
+import {useEffect, useRef, useState} from "react";
 import SongTile from "../components/SongTile";
 import Fuse from "fuse.js";
 import {getServerSession} from "next-auth/next";
@@ -13,19 +13,58 @@ import spotifyApi from "./api/spotify/wrapper";
 export default ({
     user,
     hotSongs,
-    topSongs,
-    initialSongs
+    topSongs
 }: {
     user: User;
     hotSongs: SongMetadata[];
     topSongs: SongMetadata[];
-    initialSongs: SongMetadata[];
 }): JSX.Element => {
-    const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>(initialSongs);
+    const [searchedSongs, setSearchedSongs] = useState<SongMetadata[]>([]);
     const [searchQuery, setSearchQuery] = useState("");
     const [loading, setLoading] = useState(false);
-    const [songs, setSongs] = useState<SongMetadata[]>(initialSongs);
+    const [moreLoading, setMoreLoading] = useState(false);
+    const [songs, setSongs] = useState<SongMetadata[]>([]);
 
+    const bottomElementRef = useRef(null);
+
+    // This is infinite scroll recommendation fetching
+    const getAdditionalRecommendations = async () => {
+        if (moreLoading) return;
+        setMoreLoading(true);
+
+        try {
+            const res = await fetch("/api/spotify/get-recommendations");
+
+            if (res.ok) {
+                const data = await res.json();
+
+                let newSongs = data.filter(
+                    (song: SongMetadata) =>
+                        !songs.some((existingSong) => existingSong.id === song.id) &&
+                        !songs.some(
+                            (existingSong) =>
+                                existingSong.name === song.name &&
+                                existingSong.artist === song.artist
+                        ) &&
+                        !searchedSongs.some((existingSong) => existingSong.id === song.id)
+                );
+                if (!user.show_explicit) {
+                    newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
+                }
+
+                setSongs((currentSongs) => [...currentSongs, ...newSongs]);
+            } else {
+                console.error("Error fetching more recommendations");
+                console.error(res.status, res.statusText);
+            }
+        } catch (error) {
+            console.error("Error fetching more recommendations:", error);
+        } finally {
+            setMoreLoading(false);
+        }
+    };
+
+    // This function is meant for a search-based fetch
     const fetchMoreSongs = async () => {
         if (loading || !searchQuery) return; // Do not search if already searching or query is empty
 
@@ -64,6 +103,17 @@ export default ({
     });
 
     useEffect(() => {
+        const initSongs = async () => {
+            setLoading(true);
+            await getAdditionalRecommendations();
+            setLoading(false);
+        };
+        initSongs().catch((error) => {
+            console.error("Error fetching songs:", error);
+        });
+    }, []);
+
+    useEffect(() => {
         if (searchQuery) {
             const results = fuse.search(searchQuery).map((result) => result.item);
             setSearchedSongs(results);
@@ -71,6 +121,32 @@ export default ({
             setSearchedSongs(songs);
         }
     }, [songs, searchQuery]);
+
+    useEffect(() => {
+        const observer = new IntersectionObserver(
+            (entries) => {
+                if (entries[0].isIntersecting && !loading) {
+                    console.log("NEED TO FETCH MORE!!");
+                    getAdditionalRecommendations();
+                }
+            },
+            {
+                root: null,
+                rootMargin: "20px",
+                threshold: 1.0
+            }
+        );
+
+        if (bottomElementRef.current) {
+            observer.observe(bottomElementRef.current);
+        }
+
+        return () => {
+            if (bottomElementRef.current) {
+                observer.unobserve(bottomElementRef.current);
+            }
+        };
+    }, [loading]);
 
     // TODO --> Center this properly so it doesn't look bad
     return (
@@ -123,6 +199,12 @@ export default ({
                             </div>
                         </div>
                     )}
+                    {moreLoading && !loading && (
+                        <div className="flex h-24 justify-center items-center m-auto">
+                            <Spinner />
+                        </div>
+                    )}
+                    <div ref={bottomElementRef}></div> {/* This is the bottom element */}
                 </div>
             </div>
         </>
@@ -199,10 +281,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         props: {
             user: session.user,
             hotSongs,
-            topSongs,
-            initialSongs: Object.values(
-                await spotifyApi.getSongsFromPlaylist("37i9dQZEVXbLp5XoPON0wI", session.user)
-            )
+            topSongs
         }
     };
 };

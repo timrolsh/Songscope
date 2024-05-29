@@ -7,6 +7,15 @@ var spotifyWebApi = new SpotifyWebApi({
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET
 });
 
+function shuffleArray(array: any[]): void {
+    for (let i = array.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        const temp = array[i];
+        array[i] = array[j];
+        array[j] = temp;
+    }
+}
+
 async function getAccessToken() {
     try {
         const data = await spotifyWebApi.clientCredentialsGrant();
@@ -65,6 +74,45 @@ class SpotifyApi {
         return Object.values(
             await this.formatSongMetadata(spotifyResponse.body.tracks.items, user)
         );
+    }
+
+    // Seeded tracks are based on user's liked songs on Songscope
+    async getMoreRecommendations(user: User): Promise<SongMetadata[]> {
+        let seedTracks: string[] = [];
+
+        const likedSongs = (
+            (await db.promise().query(
+                `
+        SELECT us.spotify_work_id
+        FROM user_song us
+        WHERE us.user_id = ?
+            AND us.favorite = 1;
+        `,
+                [user.id]
+            )) as any
+        )[0];
+        if (likedSongs.length > 0) {
+            shuffleArray(likedSongs);
+            seedTracks = likedSongs.map((song: any) => song.spotify_work_id).slice(0, 5);
+        }
+
+        let result;
+        if (seedTracks.length === 0) {
+            result = await executeMethod(
+                spotifyWebApi.getRecommendations.bind(spotifyWebApi, {
+                    limit: 30,
+                    seed_genres: ["pop", "hip-hop", "rap", "indie", "edm"]
+                })
+            );
+        } else {
+            result = await executeMethod(
+                spotifyWebApi.getRecommendations.bind(spotifyWebApi, {
+                    limit: 30,
+                    seed_tracks: seedTracks
+                })
+            );
+        }
+        return Object.values(await this.formatSongMetadata(result.body.tracks, user));
     }
 
     /*

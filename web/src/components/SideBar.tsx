@@ -1,14 +1,18 @@
 import Link from "next/link";
 import SidebarEntry from "./SidebarEntry";
 import {signOut} from "next-auth/react";
-import {SongMetadata} from "@/types";
+import {SongMetadata, User} from "@/types";
 
 const LinkStyles =
     "w-full rounded-md border bg-accent-neutral/5 border-accent-neutral/10 hover:bg-accent-neutral/20 pl-4 \
     transition py-1 hover:-translate-y-0.5 aria-disabled:cursor-default aria-disabled:opacity-50 aria-disabled:hover:translate-y-0 aria-disabled:hover:bg-accent-neutral/5";
 
 // TODO --> Migrate this to slot architecture for better reusability
-function renderDashboardBody(hotSongs: SongMetadata[], topSongs: SongMetadata[]): JSX.Element {
+function renderDashboardBody(
+    user: User,
+    hotSongs: SongMetadata[],
+    topSongs: SongMetadata[]
+): JSX.Element {
     return (
         <>
             {topSongs && (
@@ -17,7 +21,7 @@ function renderDashboardBody(hotSongs: SongMetadata[], topSongs: SongMetadata[])
                         <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
                         <div className="flex flex-col overflow-y-scroll max-h-60">
                             {topSongs.map((song: SongMetadata) => (
-                                <SidebarEntry key={song.id} song={song} />
+                                <SidebarEntry key={song.id} song={song} user={user} />
                             ))}
                         </div>
                     </div>
@@ -29,7 +33,7 @@ function renderDashboardBody(hotSongs: SongMetadata[], topSongs: SongMetadata[])
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
                     <div className="flex flex-col overflow-y-scroll max-h-60">
                         {hotSongs.map((song: SongMetadata) => (
-                            <SidebarEntry key={song.id} song={song} />
+                            <SidebarEntry key={song.id} song={song} user={user} />
                         ))}
                     </div>
                 </>
@@ -39,6 +43,7 @@ function renderDashboardBody(hotSongs: SongMetadata[], topSongs: SongMetadata[])
 }
 
 function renderProfileBody(
+    user: User,
     songs?: SongMetadata[],
     showFavoriteSongs?: boolean,
     isOwnProfile?: boolean
@@ -64,7 +69,7 @@ function renderProfileBody(
             )}
             <div className="flex flex-col overflow-scroll">
                 {songs.map((song) => {
-                    return <SidebarEntry key={song.id} song={song} />;
+                    return <SidebarEntry key={song.id} song={song} user={user} />;
                 })}
             </div>
         </>
@@ -82,7 +87,7 @@ export default ({
     topSongs
 }: {
     variant: string;
-    user: any;
+    user: User;
     favoriteSongs?: SongMetadata[];
     showFavoriteSongs?: boolean;
     isOwnProfile?: boolean;
@@ -100,11 +105,11 @@ export default ({
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
             {variant == "profile" ? (
-                renderProfileBody(favoriteSongs, showFavoriteSongs, isOwnProfile)
+                renderProfileBody(user, favoriteSongs, showFavoriteSongs, isOwnProfile)
             ) : variant == "settings" ? (
                 <></>
             ) : (
-                renderDashboardBody(hotSongs, topSongs)
+                renderDashboardBody(user, hotSongs, topSongs)
             )}
             <hr className="border-t-2 border-accent-neutral/20 mt-auto mb-4 "></hr>
             <div className="w-full h-52 flex flex-col mb-4">
