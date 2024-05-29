@@ -77,7 +77,7 @@ export default ({curSession}: UserProps): JSX.Element => {
 
     // This is infinite scroll recommendation fetching
     const getAdditionalRecommendations = async () => {
-        if(moreLoading) return;
+        if (moreLoading) return;
         setMoreLoading(true);
 
         try {
@@ -86,7 +86,7 @@ export default ({curSession}: UserProps): JSX.Element => {
                 headers: {
                     "Content-Type": "application/json"
                 },
-                body: JSON.stringify({user_id: curSession.user?.id})
+                body: JSON.stringify({ user_id: curSession.user?.id })
             });
 
             if (res.ok) {
@@ -99,23 +99,24 @@ export default ({curSession}: UserProps): JSX.Element => {
                             (existingSong) =>
                                 existingSong.name === song.name &&
                                 existingSong.artist === song.artist
-                        )
+                        ) &&
+                        !searchedSongs.some((existingSong) => existingSong.id === song.id)
                 );
                 if (!showExplicit) {
                     newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
                 }
-
+    
                 setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
                 console.error("Error fetching more recommendations");
-                console.error(res.status, res.statusText)
+                console.error(res.status, res.statusText);
             }
         } catch (error) {
             console.error("Error fetching more recommendations:", error);
         } finally {
             setMoreLoading(false);
         }
-    }
+    };
 
     // This function is meant for a search-based fetch
     const fetchMoreSongs = async () => {
