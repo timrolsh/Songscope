@@ -10,7 +10,7 @@ export default ({
     return (
         <div className="h-screen w-screen m-auto flex place-content-center bg-gradient-radial from-primary/5  to-accent-vivid/5">
             <div className="flex flex-col place-content-center m-auto w-full h-screen">
-                <div className="w-1/3 h-3/5 m-auto border border-accent-neutral/50 rounded-xl bg-background shadow-2xl">
+                <div className="w-5/6 sm:w-1/3 h-3/5 m-auto border border-accent-neutral/50 rounded-xl bg-background shadow-2xl">
                     <div className="h-1/4">
                         <div className="bg-clip-text py-3 bg-gradient-to-r from-primary to-accent-vivid pt-8">
                             <h1 className="text-4xl text-center text-transparent font-bold tracking-wide">
