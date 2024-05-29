@@ -32,7 +32,7 @@ export default async function handler(request: NextApiRequest, response: NextApi
         const userid = parseInt(request.body.user_id as string, 10) || 5; // Default limit to 5 if not specified
         try {
             const results = await fetchTopUserReviews(userid);
-            console.log("Results: ", results);
+            // console.log("Results: ", results);
             response.status(200).json(results);
         } catch (error) {
             console.error("Error fetching top songs: ", error);

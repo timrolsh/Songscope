@@ -45,7 +45,7 @@ export default function ({
         fetchCommentLike().catch((error) => {
             console.error("Error fetching rating:", error);
         });
-    }, []);
+    }, [review.comment_id]);
 
     async function toggleLike() {
         const res = await fetch(`/api/db/like-comment`, {

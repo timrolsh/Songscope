@@ -77,7 +77,7 @@ class SpotifyApi {
     }
 
     async getMultipleSongs(songIds: string[]): Promise<SongMetadata[]> {
-        console.log("SONGSCOPE: Getting multiple songs", songIds);
+        // console.log("SONGSCOPE: Getting multiple songs", songIds);
         const result = await executeMethod(spotifyWebApi.getTracks.bind(spotifyWebApi), songIds);
         const songs: SongMetadata[] = [];
         for (const song of result.body.tracks) {

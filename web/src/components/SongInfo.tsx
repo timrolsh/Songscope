@@ -185,7 +185,7 @@ export default function ({
 
     useEffect(() => {
         getReviews();
-        const interval = setInterval(getReviews, 3000);
+        const interval = setInterval(getReviews, 2000);
         return () => clearInterval(interval);
     }, []);
 
