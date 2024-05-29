@@ -1,5 +1,7 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import spotifyApi from "./wrapper";
+import {authOptions} from "../auth/[...nextauth]";
+import {getServerSession} from "next-auth";
 
 /*
 Given a string that the user will pass in by a post request where the body looks like this:
