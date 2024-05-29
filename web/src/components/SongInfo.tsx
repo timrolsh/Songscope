@@ -19,19 +19,27 @@ export default function ({
     averageRating,
     setAverageRating,
     userRating,
-    setUserRating
+    setUserRating,
+    pinned,
+    setPinned,
+    favorited,
+    setFavorited
 }: {
     songMetadata: SongMetadata;
     user: User;
     dataEmitter?: Function;
     averageRating?: number;
-    setAverageRating: Function;
+    setAverageRating: (value: number) => void;
     userRating?: number;
-    setUserRating: Function;
+    setUserRating: (value: number) => void;
+    pinned?: boolean;
+    setPinned: (value: boolean) => void;
+    favorited?: boolean;
+    setFavorited: (value: boolean) => void;
+
 }) {
     const userId = user.id;
-    const [pinned, setPinned] = useState(songMetadata.pinned);
-    const [favorited, setFavorited] = useState(songMetadata.favorited);
+    
     const [dbUserRating, setDbUserRating] = useState(songMetadata.user_rating);
 
     const containerRef = useRef<any>();
@@ -130,7 +138,7 @@ export default function ({
         }
 
         if (userRating !== dbUserRating) {
-            updateRatingFavPin(favorited, pinned);
+            updateRatingFavPin(favorited || false, pinned || false);
         }
 
         setReviewText("");
@@ -158,14 +166,14 @@ export default function ({
                                     <BsPinAngleFill
                                         onClick={() => {
                                             setPinned(false);
-                                            updateRatingFavPin(favorited, false);
+                                            updateRatingFavPin(favorited || false, false);
                                         }}
                                     />
                                 ) : (
                                     <BsPinAngle
                                         onClick={() => {
                                             setPinned(true);
-                                            updateRatingFavPin(favorited, true);
+                                            updateRatingFavPin(favorited || false, true);
                                         }}
                                     />
                                 )}
@@ -173,14 +181,14 @@ export default function ({
                                     <BsHeartFill
                                         onClick={() => {
                                             setFavorited(false);
-                                            updateRatingFavPin(false, pinned);
+                                            updateRatingFavPin(false, pinned || false);
                                         }}
                                     />
                                 ) : (
                                     <BsHeart
                                         onClick={() => {
                                             setFavorited(true);
-                                            updateRatingFavPin(true, pinned);
+                                            updateRatingFavPin(true, pinned || false);
                                         }}
                                     />
                                 )}

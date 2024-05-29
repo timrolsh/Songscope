@@ -18,6 +18,8 @@ export default ({
     const [showModal, setShowModal] = useState(false);
     const [averageRating, setAverageRating] = useState(songMetadata.avg_rating);
     const [userRating, setUserRating] = useState(songMetadata.user_rating);
+    const [pinned, setPinned] = useState(songMetadata.pinned);
+    const [favorited, setFavorited] = useState(songMetadata.favorited);
 
     return (
         <>
@@ -32,6 +34,10 @@ export default ({
                     setAverageRating={setAverageRating}
                     userRating={userRating || undefined}
                     setUserRating={setUserRating}
+                    pinned={pinned}
+                    setPinned={setPinned}
+                    favorited={favorited}
+                    setFavorited={setFavorited}
                 />
             )}
             <div

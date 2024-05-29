@@ -13,7 +13,11 @@ export default function ({
     averageRating,
     setAverageRating,
     userRating,
-    setUserRating
+    setUserRating,
+    pinned,
+    setPinned,
+    favorited,
+    setFavorited
 }: {
     showModal: boolean;
     setShowModal: (value: boolean) => void;
@@ -21,9 +25,13 @@ export default function ({
     user: User;
     dataEmitter?: Function;
     averageRating?: number;
-    setAverageRating: Function;
+    setAverageRating: (value: number) => void;
     userRating?: number;
-    setUserRating: Function;
+    setUserRating: (value: number) => void;
+    pinned?: boolean;
+    setPinned: (value: boolean) => void;
+    favorited?: boolean;
+    setFavorited: (value: boolean) => void;
 }) {
     // Used to smoothly transition in modal
     // Needed a changing state since otherwise Next will not render the transition from opacity 0 to 100
@@ -54,6 +62,10 @@ export default function ({
                     setAverageRating={setAverageRating}
                     userRating={userRating || undefined}
                     setUserRating={setUserRating}
+                    pinned={pinned}
+                    setPinned={setPinned}
+                    favorited={favorited}
+                    setFavorited={setFavorited}
                 />
                 <button
                     className="text-red-700 absolute right-2 top-1 text-2xl"

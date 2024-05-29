@@ -21,7 +21,7 @@ function renderDashboardBody(
                         <h3 className="text-text/90 text-xl font-semibold pb-2">Top Songs</h3>
                         <div className="flex flex-col overflow-y-scroll max-h-60">
                             {topSongs.map((song: SongMetadata) => (
-                                <SidebarEntry key={song.id} song={song} user={user} />
+                                <SidebarEntry key={song.id} songMetadata={song} user={user} />
                             ))}
                         </div>
                     </div>
@@ -33,7 +33,7 @@ function renderDashboardBody(
                     <h3 className="text-text/90 text-xl font-semibold pb-2">Hot Reviews</h3>
                     <div className="flex flex-col overflow-y-scroll max-h-60">
                         {hotSongs.map((song: SongMetadata) => (
-                            <SidebarEntry key={song.id} song={song} user={user} />
+                            <SidebarEntry key={song.id} songMetadata={song} user={user} />
                         ))}
                     </div>
                 </>
@@ -69,7 +69,7 @@ function renderProfileBody(
             )}
             <div className="flex flex-col overflow-scroll">
                 {songs.map((song) => {
-                    return <SidebarEntry key={song.id} song={song} user={user} />;
+                    return <SidebarEntry key={song.id} songMetadata={song} user={user} />;
                 })}
             </div>
         </>
