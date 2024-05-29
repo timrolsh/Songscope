@@ -63,7 +63,7 @@ function renderProfileBody(
         <>
             <h3 className="text-text/90 text-xl font-semibold pb-2">Favorite Songs</h3>
             {isOwnProfile && !showFavoriteSongs && (
-                <div className="text-text/70 text-md font-light pt-2">
+                <div className="text-text/50 text-sm font-light pb-2">
                     <a href="/settings">This section is only visible to you</a>
                 </div>
             )}
@@ -76,7 +76,6 @@ function renderProfileBody(
     );
 }
 
-// TODO for these components, put the db requests in server side props on the user page and then pass down all the user data to the export default component and then have that one pass all the needed props down to these components
 export default ({
     variant,
     user,
