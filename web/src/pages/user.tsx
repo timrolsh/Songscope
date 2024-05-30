@@ -25,6 +25,9 @@ export default ({
     const [moreLoading, setMoreLoading] = useState(false);
     const [songs, setSongs] = useState<SongMetadata[]>([]);
     const [firstHydration, setFirstHydration] = useState(true);
+    const [importedNewSongs, setImportedNewSongs] = useState(false);
+
+    const imported = () => { setImportedNewSongs(!importedNewSongs)}
 
     const bottomElementRef = useRef(null);
 
@@ -55,6 +58,7 @@ export default ({
                 const newSetSongs = songs.concat(newSongs);
                 const m = new Map();
                 setSongs(newSetSongs.filter((song) => !m.has(song.id) && m.set(song.id, 1)));
+                imported();
                 // setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
                 console.error("Error fetching more recommendations");
@@ -89,6 +93,7 @@ export default ({
                     .filter((song: SongMetadata) => user.show_explicit || !song.explicit);
 
                 setSongs((currentSongs) => [...currentSongs, ...filteredSongs]);
+                imported();
             } else {
                 console.error("Error fetching more songs from Spotify");
             }
@@ -99,12 +104,21 @@ export default ({
         }
     };
 
-    const fuse = new Fuse(songs, {
+    let fuse = new Fuse(songs, {
         keys: ["name", "artist", "album"],
         threshold: 0.4,
         findAllMatches: true,
         isCaseSensitive: false
     });
+
+    useEffect(() => {
+        fuse = new Fuse(songs, {
+            keys: ["name", "artist", "album"],
+            threshold: 0.4,
+            findAllMatches: true,
+            isCaseSensitive: false
+        })
+    }, [importedNewSongs])
 
     useEffect(() => {
         const initSongs = async () => {
