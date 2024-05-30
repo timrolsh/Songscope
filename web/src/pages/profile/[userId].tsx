@@ -125,7 +125,7 @@ export default ({
                                                         <SongTile
                                                             key={song.id}
                                                             songMetadata={song}
-                                                            user={targetUser}
+                                                            user={user}
                                                         />
                                                     ))
                                             ) : (
