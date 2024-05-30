@@ -27,7 +27,9 @@ export default ({
     const [firstHydration, setFirstHydration] = useState(true);
     const [importedNewSongs, setImportedNewSongs] = useState(false);
 
-    const imported = () => { setImportedNewSongs(!importedNewSongs)}
+    const imported = () => {
+        setImportedNewSongs(!importedNewSongs);
+    };
 
     const bottomElementRef = useRef(null);
 
@@ -44,12 +46,13 @@ export default ({
 
                 let newSongs = data.filter(
                     (song: SongMetadata) =>
-                        (
-                            !songs.some((existingSong) => existingSong.id === song.id) ||
-                            !songs.some((existingSong) =>
+                        !songs.some((existingSong) => existingSong.id === song.id) ||
+                        !songs.some(
+                            (existingSong) =>
                                 existingSong.name === song.name &&
                                 existingSong.artist === song.artist
-                        )) || !searchedSongs.some((existingSong) => existingSong.id === song.id)
+                        ) ||
+                        !searchedSongs.some((existingSong) => existingSong.id === song.id)
                 );
                 if (!user.show_explicit) {
                     newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
@@ -117,8 +120,8 @@ export default ({
             threshold: 0.4,
             findAllMatches: true,
             isCaseSensitive: false
-        })
-    }, [importedNewSongs])
+        });
+    }, [importedNewSongs]);
 
     useEffect(() => {
         const initSongs = async () => {
@@ -219,7 +222,7 @@ export default ({
                             </div>
                         </div>
                     )}
-                    {(moreLoading && !loading && !searchQuery) && (
+                    {moreLoading && !loading && !searchQuery && (
                         <div className="flex h-24 justify-center items-center m-auto">
                             <Spinner />
                         </div>
@@ -238,46 +241,49 @@ let topSongs: SongMetadata[] = [];
 let hotSongs: SongMetadata[] = [];
 let lastRequestTime = 0;
 async function loadTopAndHotSongs(user: User) {
-    const limit = 5;
-    // get a date for a week ago
-    let date = new Date();
-    date.setDate(date.getDate() - 7);
-    // put date into mysql format
-    const daysAgo = 7; // Number of days to consider a song as hot
-    const recentDate = new Date();
-    recentDate.setDate(recentDate.getDate() - daysAgo);
-
     const [rows] = await db.promise().query<SongReviewRow[]>(
         `
-        SELECT c.spotify_work_id, COUNT(*) as num_reviews,
-            CASE WHEN c.time >= ? THEN 1 ELSE 0 END as is_hot
-        FROM comment c
-        GROUP BY c.spotify_work_id
-        ORDER BY num_reviews DESC, c.time DESC
-        LIMIT ?;
-        `,
-        [recentDate, 10]
-    );
+    (SELECT spotify_work_id,
+            COUNT(*)  AS num_reviews,
+            MAX(time) AS latest_review_time,
+            TRUE      AS is_hot,
+            FALSE     AS is_top
+    FROM comment
+    WHERE time >= NOW() - INTERVAL 7 DAY
+    GROUP BY spotify_work_id
+    ORDER BY num_reviews DESC,
+            latest_review_time DESC
+    LIMIT 5)
+    UNION ALL
 
-    // Extract all Spotify IDs to fetch in bulk and fetch song metadata in bulk
-    const songsMetadata = Object.values(
-        await spotifyApi.getMultipleSongs(
-            rows.map((row) => row.spotify_work_id),
-            user
-        )
+    (SELECT spotify_work_id,
+            COUNT(*)  AS num_reviews,
+            MAX(time) AS latest_review_time,
+            FALSE     AS is_hot,
+            TRUE      AS is_top
+    FROM comment
+    GROUP BY spotify_work_id
+    ORDER BY num_reviews DESC,
+            latest_review_time DESC
+    LIMIT 5)
+    ORDER BY is_hot DESC,
+            num_reviews DESC,
+            latest_review_time DESC;    
+        `
     );
-
-    // Enrich the metadata with review counts and hotness
-    const enrichedData = songsMetadata.map((songMetadata) => {
-        const songExtra = rows.find((row) => row.spotify_work_id === songMetadata.id);
-        return {
-            ...songMetadata,
-            num_reviews: songExtra ? songExtra.num_reviews : null,
-            is_hot: songExtra ? songExtra.is_hot : null
-        };
-    });
-    (topSongs = enrichedData.filter((song) => !song.is_hot).slice(0, limit)),
-        (hotSongs = enrichedData.filter((song) => song.is_hot).slice(0, limit));
+    const songIds: Set<string> = new Set();
+    for (const row of rows) {
+        songIds.add(row.spotify_work_id);
+    }
+    const songs = await spotifyApi.getMultipleSongs(Array.from(songIds), user);
+    for (const row of rows) {
+        if (row.is_hot) {
+            hotSongs.push(songs[row.spotify_work_id]);
+        }
+        if (row.is_top) {
+            topSongs.push(songs[row.spotify_work_id]);
+        }
+    }
 }
 
 export const getServerSideProps: GetServerSideProps = async (ctx) => {
@@ -298,6 +304,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         session.user.join_date = null; // Or apply any other default value/formatting
     }
     if (Date.now() / 1000 - lastRequestTime > 120) {
+        hotSongs = [];
+        topSongs = [];
         await loadTopAndHotSongs(session.user);
         lastRequestTime = Date.now() / 1000;
     }
