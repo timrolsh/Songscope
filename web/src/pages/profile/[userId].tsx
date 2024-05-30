@@ -16,11 +16,11 @@ import spotifyApi from "../api/spotify/wrapper";
 
 export default ({
     user,
-    userId,
     sideStatistics,
     reviews,
     favoriteSongs,
-    pinnedSongs
+    pinnedSongs,
+    targetUser
 }: {
     user: User;
     userId: string;
@@ -28,8 +28,9 @@ export default ({
     reviews: ProfileTopReviews[];
     favoriteSongs: SongMetadata[];
     pinnedSongs: SongMetadata[];
+    targetUser: User;
 }): JSX.Element => {
-    const isOwnProfile = user.id === userId;
+    const isOwnProfile = targetUser.id === user.id;
 
     return (
         <>
@@ -40,21 +41,20 @@ export default ({
                 <SideBar
                     variant={"profile"}
                     user={user}
+                    targetUser={targetUser}
                     favoriteSongs={favoriteSongs}
-                    showFavoriteSongs={user.show_favorite_songs}
-                    isOwnProfile={isOwnProfile}
                     // Top and Hot Songs are not rendered in the sidebar for the profile page
                     topSongs={[]}
                     hotSongs={[]}
                 />
                 <div className="w-4/5 sm:w-5/6 h-screen overflow-auto">
                     <div className="pt-8 px-8">
-                        {user ? (
+                        {targetUser ? (
                             <>
                                 <div className="flex flex-row space-x-4">
                                     <div className="flex flex-col space-y-2 w-1/6">
                                         <Image
-                                            src={user.image || "/default-profile.jpg"}
+                                            src={targetUser.image || "/default-profile.jpg"}
                                             width={225}
                                             height={225}
                                             className="border border-accent-neutral/30 rounded-xl"
@@ -67,16 +67,16 @@ export default ({
                                     <div className="w-1/2 sm:w-4/6 text-lg flex flex-col place-content-between">
                                         <div>
                                             <h1 className="font-bold text-2xl mx-auto">
-                                                {user.name}
+                                                {targetUser.name}
                                             </h1>
                                             {/* TODO --> Improve placeholder */}
                                             <h3 className="text-text/90">
-                                                {user.bio || "No bio yet!"}
+                                                {targetUser.bio || "No bio yet!"}
                                             </h3>
                                         </div>
                                         <h3 className="text-text/50 italic font-light sm:pb-1">
                                             Scoping out songs since:{" "}
-                                            {AccountJoinTimestamp(user.join_date)}
+                                            {AccountJoinTimestamp(targetUser.join_date)}
                                         </h3>
                                     </div>
                                     <div className="border-l-2 border-l-accent-neutral/20 pl-6 w-2/6 sm:w-1/6">
@@ -125,7 +125,7 @@ export default ({
                                                         <SongTile
                                                             key={song.id}
                                                             songMetadata={song}
-                                                            user={user}
+                                                            user={targetUser}
                                                         />
                                                     ))
                                             ) : (
@@ -142,20 +142,20 @@ export default ({
                                         )}
                                     </div>
                                 </div>
-                                {isOwnProfile || user.show_reviews ? (
+                                {isOwnProfile || targetUser.show_reviews ? (
                                     <div className="pt-5">
                                         <h2 className="text-2xl pl-2 font-bold">
                                             Top Reviews
                                             <p
                                                 className={clsx(
                                                     "text-text/70 text-md font-light pt-2",
-                                                    !user.show_reviews && "hidden"
+                                                    !targetUser.show_reviews && "hidden"
                                                 )}
                                             >
                                                 <a href="/settings">
                                                     {" "}
                                                     {isOwnProfile &&
-                                                        !user.show_reviews &&
+                                                        !targetUser.show_reviews &&
                                                         "This section is only visible to you"}
                                                 </a>
                                             </p>
@@ -310,7 +310,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             },
             reviews: Object.values(profileTopReviews),
             userId: ctx.params.userId,
-            user: {
+            targetUser: {
                 id: dbResponseAny.id,
                 name: dbResponseAny.name,
                 first_name: dbResponseAny.first_name,
@@ -321,7 +321,8 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
                 show_favorite_songs: dbResponseAny.show_favorite_songs,
                 show_reviews: dbResponseAny.show_reviews,
                 show_explicit: dbResponseAny.show_explicit
-            }
+            },
+            user: session.user
         }
     };
 };

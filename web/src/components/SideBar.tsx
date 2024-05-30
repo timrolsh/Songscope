@@ -80,16 +80,14 @@ export default ({
     variant,
     user,
     favoriteSongs,
-    showFavoriteSongs,
-    isOwnProfile,
     hotSongs,
-    topSongs
+    topSongs,
+    targetUser
 }: {
     variant: string;
     user: User;
+    targetUser?: User;
     favoriteSongs?: SongMetadata[];
-    showFavoriteSongs?: boolean;
-    isOwnProfile?: boolean;
     hotSongs: SongMetadata[];
     topSongs: SongMetadata[];
 }) => {
@@ -104,7 +102,12 @@ export default ({
             </h1>
             <hr className="border-t-2 border-accent-neutral/20 pt-2 pb-1"></hr>
             {variant == "profile" ? (
-                renderProfileBody(user, favoriteSongs, showFavoriteSongs, isOwnProfile)
+                renderProfileBody(
+                    user,
+                    favoriteSongs,
+                    targetUser?.show_favorite_songs,
+                    targetUser?.id == user.id
+                )
             ) : variant == "settings" ? (
                 <></>
             ) : (
@@ -127,7 +130,14 @@ export default ({
                                 pathname: "/profile/[id]",
                                 query: {id: user.id}
                             }}
-                            aria-disabled={variant === "profile"} // Make this non-disabled if you are on someone else's profile that isn't your own
+                            aria-disabled={variant === "profile" && targetUser?.id === user.id}
+                            style={{
+                                pointerEvents:
+                                    variant === "profile" && targetUser?.id === user.id
+                                        ? "none"
+                                        : "auto"
+                            }}
+                            tabIndex={variant === "profile" && targetUser?.id === user.id ? -1 : 0}
                         >
                             Profile
                         </Link>
