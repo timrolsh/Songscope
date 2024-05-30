@@ -1,4 +1,3 @@
-import ToggleButton from "../components/ToggleButton";
 import SideBar from "../components/SideBar";
 import {authOptions, db} from "./api/auth/[...nextauth]";
 import {getServerSession} from "next-auth/next";
@@ -33,19 +32,25 @@ export function TextEntry({
 export function ButtonEntry({
     name,
     onChange,
-    apiRoute,
     checked
 }: {
     name: string;
-    onChange: (isChecked: boolean, value: string) => void;
-    apiRoute: string;
+    onChange: any;
     checked: boolean;
 }) {
     return (
         <div className="flex flex-row h-6 w-3/5">
             <h3 className="w-2/3">{name}:</h3>
             <div className="ml-auto">
-                <ToggleButton onChange={onChange} apiRoute={apiRoute} checked={checked} />
+                <label className="relative inline-flex items-center mb-5 cursor-pointer">
+                    <input
+                        type="checkbox"
+                        className="sr-only peer"
+                        onChange={onChange}
+                        checked={checked}
+                    />
+                    <div className="w-11 h-6 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-blue-800 rounded-full peer bg-gray-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all border-gray-600 peer-checked:bg-green-600"></div>
+                </label>
             </div>
         </div>
     );
@@ -158,17 +163,31 @@ export default ({
                         <ButtonEntry
                             name={"Show Favorite Songs"}
                             onChange={() => {
-                                const notFavoriteSongs 
-                                setShowFavoriteSongs(!showFavoriteSongs);
-
+                                const notFavoriteSongs = !showFavoriteSongs;
+                                setShowFavoriteSongs(notFavoriteSongs);
+                                updateUserInfo(
+                                    displayName,
+                                    bio,
+                                    notFavoriteSongs,
+                                    showReviews,
+                                    showExplicitSongs
+                                );
                             }}
-                            apiRoute={"api/db/update-favorite-songs-visibility"}
                             checked={showFavoriteSongs}
                         />
                         <ButtonEntry
                             name={"Show Reviews on Profile"}
-                            onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
-                            apiRoute={"api/db/update-review-visibility"}
+                            onChange={() => {
+                                const notShowReviews = !showReviews;
+                                setShowReviews(notShowReviews);
+                                updateUserInfo(
+                                    displayName,
+                                    bio,
+                                    showFavoriteSongs,
+                                    notShowReviews,
+                                    showExplicitSongs
+                                );
+                            }}
                             checked={showReviews}
                         />
                     </div>
@@ -179,8 +198,17 @@ export default ({
                     <div className="space-y-4">
                         <ButtonEntry
                             name={"Show Explicit Songs"}
-                            onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
-                            apiRoute={"api/db/update-explicit-song-visibility"}
+                            onChange={() => {
+                                const notShowExplicit = !showExplicitSongs;
+                                setShowExplicitSongs(notShowExplicit);
+                                updateUserInfo(
+                                    displayName,
+                                    bio,
+                                    showFavoriteSongs,
+                                    showReviews,
+                                    notShowExplicit
+                                );
+                            }}
                             checked={showExplicitSongs}
                         />
                         <button className="text-red-500" onClick={deleteUser}>
