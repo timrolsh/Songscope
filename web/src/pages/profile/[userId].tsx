@@ -212,38 +212,40 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             }
         };
     }
+    console.log("IDENTIFIERS: ", session.user.id, ctx.params.userId)
+    const updateconcatlen = await db.promise().execute("SET SESSION group_concat_max_len = 1000000;");
     const dbResponse = await db.promise().query(
         `
-    SELECT u.*,
-        IF(? = u.id OR u.show_favorite_songs = 1,
-            CAST(CONCAT('[', GROUP_CONCAT(DISTINCT '"', usf.spotify_work_id, '"'), ']') AS JSON),
-            NULL)                                                AS favoriteSongs,
-        IF(? = u.id OR u.show_reviews = 1,
-            CAST(CONCAT('[', GROUP_CONCAT(DISTINCT '"', usp.spotify_work_id, '"'), ']') AS JSON),
-            NULL)                                                AS pinnedSongs,
-        IF(? = u.id OR u.show_favorite_songs = 1, (SELECT COUNT(*) FROM user_song WHERE favorite = 1 AND user_id = u.id),
-            NULL)                                                AS total_favorites,
-        (SELECT AVG(rating) FROM user_song WHERE user_id = u.id) AS avg_rating,
-        (SELECT COUNT(*) FROM comment WHERE user_id = u.id)      AS total_comments,
-        CASE
-            WHEN ? = u.id OR u.show_reviews = 1 THEN
-                CAST(CONCAT('[', GROUP_CONCAT(DISTINCT JSON_OBJECT(
-                        'user_id', u.id,
-                        'comment_id', c.id,
-                        'spotify_work_id', c.spotify_work_id,
-                        'comment_text', c.comment_text,
-                        'time', c.time,
-                        'num_likes', (SELECT CAST(COALESCE(SUM(liked), 0) AS UNSIGNED)
-                                    FROM user_comment uc
-                                    WHERE uc.comment_id = c.id)
-                                                    ) ORDER BY c.time DESC), ']') AS JSON)
-            END                                                  AS top_reviews
-    FROM users u
-        LEFT JOIN user_song usf ON u.id = usf.user_id AND usf.favorite = 1
-        LEFT JOIN user_song usp ON u.id = usp.user_id AND usp.pinned = 1
-        LEFT JOIN comment c ON u.id = c.user_id
-    WHERE u.id = ?
-    GROUP BY u.id;
+        SELECT u.*,
+            IF(? = u.id OR u.show_favorite_songs = 1,
+                CAST(CONCAT('[', GROUP_CONCAT(DISTINCT '"', usf.spotify_work_id, '"'), ']') AS JSON),
+                NULL)                                                AS favoriteSongs,
+            IF(? = u.id OR u.show_reviews = 1,
+                CAST(CONCAT('[', GROUP_CONCAT(DISTINCT '"', usp.spotify_work_id, '"'), ']') AS JSON),
+                NULL)                                                AS pinnedSongs,
+            IF(? = u.id OR u.show_favorite_songs = 1, (SELECT COUNT(*) FROM user_song WHERE favorite = 1 AND user_id = u.id),
+                NULL)                                                AS total_favorites,
+            (SELECT AVG(rating) FROM user_song WHERE user_id = u.id) AS avg_rating,
+            (SELECT COUNT(*) FROM comment WHERE user_id = u.id)      AS total_comments,
+            CASE
+                WHEN ? = u.id OR u.show_reviews = 1 THEN
+                    CAST(CONCAT('[', GROUP_CONCAT(DISTINCT JSON_OBJECT(
+                            'user_id', u.id,
+                            'comment_id', c.id,
+                            'spotify_work_id', c.spotify_work_id,
+                            'comment_text', c.comment_text,
+                            'time', c.time,
+                            'num_likes', (SELECT CAST(COALESCE(SUM(liked), 0) AS UNSIGNED)
+                                        FROM user_comment uc
+                                        WHERE uc.comment_id = c.id)
+                                                        ) ORDER BY c.time DESC), ']') AS JSON)
+                END                                                  AS top_reviews
+        FROM users u
+            LEFT JOIN user_song usf ON u.id = usf.user_id AND usf.favorite = 1
+            LEFT JOIN user_song usp ON u.id = usp.user_id AND usp.pinned = 1
+            LEFT JOIN comment c ON u.id = c.user_id
+        WHERE u.id = ?
+        GROUP BY u.id;
         `,
         [session.user.id, session.user.id, session.user.id, session.user.id, ctx.params.userId]
     );
