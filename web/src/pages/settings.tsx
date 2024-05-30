@@ -58,11 +58,11 @@ export default ({
     user: User;
     connections: {"google": boolean; "spotify": boolean};
 }): JSX.Element => {
-    const [displayName, setDisplayName] = useState("");
-    const [bio, setBio] = useState("");
-    const [showFavoriteSongs, setShowFavoriteSongs] = useState(false);
-    const [showReviews, setShowReviews] = useState(false);
-    const [showExplicitSongs, setShowExplicitSongs] = useState(false);
+    const [displayName, setDisplayName] = useState(user.name);
+    const [bio, setBio] = useState(user.bio);
+    const [showFavoriteSongs, setShowFavoriteSongs] = useState(user.show_favorite_songs);
+    const [showReviews, setShowReviews] = useState(user.show_reviews);
+    const [showExplicitSongs, setShowExplicitSongs] = useState(user.show_explicit);
     const deleteUser = async () => {
         if (!confirm("Are you sure you want to continue?")) {
             return;
@@ -86,50 +86,27 @@ export default ({
         }
     };
 
-    // TODO: If they do not specify a name/bio, then don't set it to something empty...
-    const updateUserInfo = async () => {
-        try {
-            const response = await fetch("/api/db/update-user-info", {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    user_id: user.id,
-                    displayName: displayName,
-                    bio: bio
-                })
-            });
-
-            if (!response.ok) {
-                if (response.status === 409) {
-                    alert("Display name already taken");
-                } else {
-                    alert("Error updating user info, please try again later");
-                }
-            }
-        } catch (error) {
-            console.error("Error updating user info:", error);
-        }
-    };
-
-    const updateToggleSetting = async (apiRoute: string, value: boolean) => {
-        try {
-            const response = await fetch(apiRoute, {
-                method: "POST",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({user_id: user.id, value: value})
-            });
-
-            if (!response.ok) {
-                alert("Error updating settings, please try again later");
-            }
-        } catch (error) {
-            console.error("Error updating settings:", error);
-        }
-    };
+    async function updateUserInfo(
+        name: string,
+        bio: string,
+        show_favorite_songs: boolean,
+        show_reviews: boolean,
+        show_explicit: boolean
+    ) {
+        await fetch("/api/db/settings", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                name,
+                bio,
+                show_favorite_songs,
+                show_reviews,
+                show_explicit
+            })
+        });
+    }
 
     return (
         <>
@@ -153,7 +130,15 @@ export default ({
                         <TextEntry name={"Bio"} value={bio} onChange={setBio} />
                         <button
                             className="bg-secondary/80 hover:bg-secondary text-text/80 hover:text-text py-2 px-4 rounded-md transition"
-                            onClick={updateUserInfo}
+                            onClick={() => {
+                                updateUserInfo(
+                                    displayName,
+                                    bio,
+                                    showFavoriteSongs,
+                                    showReviews,
+                                    showExplicitSongs
+                                );
+                            }}
                         >
                             Update
                         </button>
@@ -172,7 +157,11 @@ export default ({
                     <div className="space-y-4">
                         <ButtonEntry
                             name={"Show Favorite Songs"}
-                            onChange={(isChecked, value) => updateToggleSetting(value, isChecked)}
+                            onChange={() => {
+                                const notFavoriteSongs 
+                                setShowFavoriteSongs(!showFavoriteSongs);
+
+                            }}
                             apiRoute={"api/db/update-favorite-songs-visibility"}
                             checked={showFavoriteSongs}
                         />
