@@ -24,6 +24,7 @@ export default ({
     const [loading, setLoading] = useState(false);
     const [moreLoading, setMoreLoading] = useState(false);
     const [songs, setSongs] = useState<SongMetadata[]>([]);
+    const [firstHydration, setFirstHydration] = useState(true);
 
     const bottomElementRef = useRef(null);
 
@@ -40,19 +41,21 @@ export default ({
 
                 let newSongs = data.filter(
                     (song: SongMetadata) =>
-                        !songs.some((existingSong) => existingSong.id === song.id) &&
-                        !songs.some(
-                            (existingSong) =>
+                        (
+                            !songs.some((existingSong) => existingSong.id === song.id) ||
+                            !songs.some((existingSong) =>
                                 existingSong.name === song.name &&
                                 existingSong.artist === song.artist
-                        ) &&
-                        !searchedSongs.some((existingSong) => existingSong.id === song.id)
+                        )) || !searchedSongs.some((existingSong) => existingSong.id === song.id)
                 );
                 if (!user.show_explicit) {
                     newSongs = newSongs.filter((song: SongMetadata) => !song.explicit);
                 }
 
-                setSongs((currentSongs) => [...currentSongs, ...newSongs]);
+                const newSetSongs = songs.concat(newSongs);
+                const m = new Map();
+                setSongs(newSetSongs.filter((song) => !m.has(song.id) && m.set(song.id, 1)));
+                // setSongs((currentSongs) => [...currentSongs, ...newSongs]);
             } else {
                 console.error("Error fetching more recommendations");
                 console.error(res.status, res.statusText);
@@ -84,6 +87,7 @@ export default ({
                             !songs.some((existingSong) => existingSong.id === song.id)
                     )
                     .filter((song: SongMetadata) => user.show_explicit || !song.explicit);
+
                 setSongs((currentSongs) => [...currentSongs, ...filteredSongs]);
             } else {
                 console.error("Error fetching more songs from Spotify");
@@ -106,6 +110,7 @@ export default ({
         const initSongs = async () => {
             setLoading(true);
             await getAdditionalRecommendations();
+            setFirstHydration(false);
             setLoading(false);
         };
         initSongs().catch((error) => {
@@ -125,8 +130,7 @@ export default ({
     useEffect(() => {
         const observer = new IntersectionObserver(
             (entries) => {
-                if (entries[0].isIntersecting && !loading) {
-                    console.log("NEED TO FETCH MORE!!");
+                if (entries[0].isIntersecting && !loading && !firstHydration) {
                     getAdditionalRecommendations();
                 }
             },
@@ -180,7 +184,9 @@ export default ({
                         </div>
                     </div>
                     {loading ? (
-                        <Spinner />
+                        <div className="h-full w-full flex place-content-center">
+                            <Spinner />
+                        </div>
                     ) : searchedSongs.length ? (
                         <div className="flex flex-row flex-wrap gap-10 p-12 overflow-auto">
                             {searchedSongs.map((song) => (
@@ -199,7 +205,7 @@ export default ({
                             </div>
                         </div>
                     )}
-                    {moreLoading && !loading && (
+                    {(moreLoading && !loading && !searchQuery) && (
                         <div className="flex h-24 justify-center items-center m-auto">
                             <Spinner />
                         </div>
