@@ -162,7 +162,7 @@ export default ({
                                         </h2>
                                         <div className="flex flex-row w-full mx-auto place-content-evenly pt-1">
                                             {reviews?.length ? (
-                                                reviews.map((review) => (
+                                                reviews.sort((a, b) => b.num_likes - a.num_likes).slice(0, 3).map((review) => (
                                                     <ReviewTile
                                                         key={review.comment_id}
                                                         profileReview={review}
