@@ -2,10 +2,9 @@ import NextAuth, {Session} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import SpotifyProvider from "next-auth/providers/spotify";
 
-import MySqlAdapter from "./MySqlAdapter";
-
 import {Pool} from "pg";
 import {User} from "@/types";
+import PostgresAdapter from "@auth/pg-adapter";
 
 // check to make sure all environment variables are set
 if (
@@ -24,7 +23,7 @@ if (
 export const db = new Pool();
 
 export const authOptions = {
-    adapter: MySqlAdapter(db),
+    adapter: PostgresAdapter(db),
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID ?? "",

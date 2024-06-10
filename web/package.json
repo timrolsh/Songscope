@@ -10,6 +10,7 @@
     },
     "dependencies": {
         "@auth/core": "^0.25.0",
+        "@auth/pg-adapter": "^1.2.0",
         "@wavesurfer/react": "^1.0.4",
         "body-parser": "^1.20.2",
         "clsx": "^2.1.0",
