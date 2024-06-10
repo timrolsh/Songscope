@@ -52,11 +52,13 @@ NEXTAUTH_SECRET=w9BcqHKmK+yVyH1o1tAVg+UVabGm9m10/gIglifxXfI=
 NEXTAUTH_URL=http://localhost:3000
 ```
 
-* **Initialize the Database**: After you've set the environment variables with the .env file, you can easily initialize a local MySQL database using Docker and docker-compose. Run the following command in the root of the project:
+* **Initialize the Database**: After you've set the environment variables with the .env file, you can easily initialize a local Postgres database using Docker and docker-compose. Run the following command in the root of the project:
 
 ```bash
 docker-compose up
 ```
+
+* Note: We were given and used a school issued MySQL database for the project during the school year. However, the database is now being hosted on a CockroachDB instance in production, and we use postgres to have a common sql syntax that will work with both CockroachDB in production and a Postgres local server in development. The instructions above are for creating this lcoal Postgres server.
 
 * **Set up the web project**: After the database is running, you can set up the web project by running the following commands in the web folder. The project is runtime agnostic and can be run with any runtime, but the following commands are for Node.js with NPM:
 
