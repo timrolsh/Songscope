@@ -1,12 +1,10 @@
-version: "3"
-
 services:
     db:
         build:
             context: ./db
             dockerfile: Dockerfile
         ports:
-            - ${PGPORT}:26257
+            - ${PGPORT}:5432
         environment:
             POSTGRES_USER: ${PGUSER}
             POSTGRES_PASSWORD: ${PGPASSWORD}
