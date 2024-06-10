@@ -1,27 +1,18 @@
--- Use our assigned schema
-USE capstone_2324_songscope;
-
 /*
 A user's primary account for the platform.
 */
 create table if not exists users
 (
-    id                  bigint unsigned auto_increment
-        primary key,
-    name                varchar(255)                         not null,
-    first_name          text                                 null,
-    last_name           text                                 null,
-    email               varchar(255)                         not null,
-    image               text                                 null,
-    emailVerified       timestamp                            null,
-    bio                 text                                 null,
-    show_favorite_songs tinyint(1) default 1                 not null,
-    show_reviews        tinyint(1) default 1                 not null,
-    show_explicit       tinyint(1) default 1                 not null,
-    join_date           timestamp  default CURRENT_TIMESTAMP not null,
-    isAdmin             tinyint(1) default 0                 not null,
-    constraint id
-        unique (id)
+    id                  bigserial primary key               not null,
+    name                text                                not null,
+    email               text                                not null,
+    image               text,
+    bio                 text,
+    show_favorite_songs boolean   default true              not null,
+    show_reviews        boolean   default true              not null,
+    show_explicit       boolean   default true              not null,
+    join_date           timestamp default current_timestamp not null,
+    is_admin            boolean   default false             not null
 );
 
 /*
@@ -31,77 +22,57 @@ An auth account is tied to a user account, and for each provider, there can only
 */
 create table if not exists accounts
 (
-    id                bigint unsigned auto_increment not null primary key,
-    userId            bigint unsigned                not null,
-    type              varchar(255)                   not null,
-    provider          varchar(255)                   not null,
-    providerAccountId varchar(255)                   not null,
-    refresh_token     text                           null,
-    access_token      text                           null,
-    expires_at        bigint                         null,
-    id_token          text                           null,
-    scope             text                           null,
-    session_state     text                           null,
-    token_type        text                           null,
-    constraint accounts_pk
-        unique (provider, providerAccountId),
-    constraint accounts_users_id_fk
-        foreign key (userId) references users (id) on delete cascade
+    id                  bigserial primary key not null,
+    user_id             bigint                not null,
+    type                text                  not null,
+    provider            text                  not null,
+    provider_account_id text                  not null,
+    refresh_token       text,
+    access_token        text,
+    expires_at          bigint,
+    id_token            text,
+    scope               text,
+    session_state       text,
+    token_type          text,
+    unique (provider, provider_account_id),
+    foreign key (user_id) references users (id) on delete cascade
 );
 
 create table if not exists sessions
 (
-    id           bigint unsigned auto_increment
-        primary key,
-    userId       int          not null,
-    expires      timestamp    not null,
-    sessionToken varchar(255) not null,
-    constraint id
-        unique (id)
+    id            bigserial primary key not null,
+    user_id       bigint                not null,
+    expires       timestamp             not null,
+    session_token text                  not null
 );
 
-create table if not exists comment
+create table if not exists comments
 (
-    id              int auto_increment
-        primary key,
-    user_id         bigint unsigned                     not null,
+    id              bigserial primary key               not null,
+    user_id         bigint                              not null,
     spotify_work_id text                                not null,
     comment_text    text                                not null,
-    time            timestamp default CURRENT_TIMESTAMP not null,
-    constraint comment_users_id_fk
-        foreign key (user_id) references users (id) on delete cascade
+    time            TIMESTAMP DEFAULT CURRENT_TIMESTAMP not null,
+    foreign key (user_id) references users (id) on delete cascade
 );
 
 create table if not exists user_comment
 (
-    user_id    bigint unsigned      not null,
-    comment_id int                  not null,
-    liked      tinyint(1) default 0 not null,
+    user_id    bigint                not null,
+    comment_id bigint                not null,
+    liked      boolean default false not null,
     primary key (user_id, comment_id),
-    constraint user_comment_comment_fk
-        foreign key (comment_id) references comment (id)
-            on delete cascade,
-    constraint user_comment_user_fk
-        foreign key (user_id) references users (id)
-            on delete cascade
+    foreign key (comment_id) REFERENCES comments (id) on delete cascade,
+    foreign key (user_id) REFERENCES users (id) on delete cascade
 );
 
 create table if not exists user_song
 (
-    user_id         bigint unsigned      not null,
-    spotify_work_id varchar(255)         not null,
-    rating          int        default 0 null,
-    favorite        tinyint(1) default 0 not null,
-    pinned          tinyint(1) default 0 not null,
+    user_id         bigint                not null,
+    spotify_work_id text                  not null,
+    rating          int     DEFAULT 0,
+    favorite        boolean default false not null,
+    pinned          boolean default false not null,
     primary key (user_id, spotify_work_id),
-    constraint user_song_users_id_fk
-        foreign key (user_id) references users (id) on delete cascade
-);
-
-create table if not exists verification_token
-(
-    identifier text      not null,
-    expires    timestamp not null,
-    token      text      not null,
-    primary key (identifier(128), token(128))
+    foreign key (user_id) references users (id) on delete cascade
 );
