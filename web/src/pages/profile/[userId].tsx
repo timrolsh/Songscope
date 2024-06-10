@@ -213,8 +213,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
     console.log("IDENTIFIERS: ", session.user.id, ctx.params.userId)
-    const updateconcatlen = await db.promise().execute("SET SESSION group_concat_max_len = 1000000;");
-    const dbResponse = await db.promise().query(
+    // TODO potentially clean this up as well with postgres as one transaction potentially might not even need the first thing
+    const updateconcatlen = await db.query("SET SESSION group_concat_max_len = 1000000;");
+    const dbResponse = await db.query(
         `
         SELECT u.*,
             IF(? = u.id OR u.show_favorite_songs = 1,

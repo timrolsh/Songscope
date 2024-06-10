@@ -28,7 +28,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 
-    await db.promise().query(
+    await db.query(
         `
     UPDATE users
     SET name                = ?,

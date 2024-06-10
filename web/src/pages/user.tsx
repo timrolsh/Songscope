@@ -6,7 +6,7 @@ import {getServerSession} from "next-auth/next";
 import {authOptions, db} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import Spinner from "@/components/Spinner";
-import {SongMetadata, User, SongReviewRow} from "@/types";
+import {SongMetadata, User} from "@/types";
 import Head from "next/head";
 import spotifyApi from "./api/spotify/wrapper";
 
@@ -241,7 +241,7 @@ let topSongs: SongMetadata[] = [];
 let hotSongs: SongMetadata[] = [];
 let lastRequestTime = 0;
 async function loadTopAndHotSongs(user: User) {
-    const [rows] = await db.promise().query<SongReviewRow[]>(
+    const {rows} = await db.query(
         `
     (SELECT spotify_work_id,
             COUNT(*)  AS num_reviews,

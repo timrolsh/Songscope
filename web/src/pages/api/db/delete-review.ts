@@ -14,7 +14,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "DELETE") {
         const {comment_id, comment_user_id} = request.body;
 
-        if (comment_user_id !== session.user.id && !session.user.isAdmin) {
+        if (comment_user_id !== session.user.id && !session.user.is_admin) {
             response.status(401).send("Unauthorized");
             return;
         }
@@ -29,18 +29,11 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 };
 
 async function deleteReview(comment_id: string, comment_user_id: string) {
-    db.execute(
+    await db.query(
         `
-        DELETE FROM comment
-        WHERE id = ? AND user_id = ?
-    `,
-        [comment_id, comment_user_id],
-        (error, results, fields) => {
-            if (error) {
-                console.error("SONGSCOPE: Unable to delete review", error);
-                return false;
-            }
-            return true;
-        }
+    DELETE FROM comment
+    WHERE id = ? AND user_id = ?
+`,
+        [comment_id, comment_user_id]
     );
 }

@@ -234,9 +234,9 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    const results = await db
-        .promise()
-        .query(`select provider FROM accounts WHERE userId = ?`, [session.user.id]);
+    const results = await db.query(`select provider FROM accounts WHERE userId = ?`, [
+        session.user.id
+    ]);
     const booleans = {google: false, spotify: false};
     for (const entry of (results as any)[0]) {
         if (entry.provider === "spotify") {

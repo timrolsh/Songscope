@@ -31,8 +31,8 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 
-    // Mysql2 does not allow you to do start transaction and commit, done as 2 separate queries
-    await db.promise().query(
+    // TODO clean this up to work with postgres potentially 
+    await db.query(
         `    
     INSERT INTO user_song (user_id, spotify_work_id, rating, pinned, favorite)
     VALUES (?, ?, ?, ?, ?)
@@ -48,7 +48,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
             request.body.favorited
         ]
     );
-    const dbResponse = await db.promise().query(
+    const dbResponse = await db.query(
         `
     SELECT us.spotify_work_id,
         AVG(us.rating)   AS avg_rating,

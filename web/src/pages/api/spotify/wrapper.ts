@@ -81,7 +81,7 @@ class SpotifyApi {
         let seedTracks: string[] = [];
 
         const likedSongs = (
-            (await db.promise().query(
+            (await db.query(
                 `
         SELECT us.spotify_work_id
         FROM user_song us
@@ -153,7 +153,7 @@ class SpotifyApi {
             };
         }
 
-        const [ratingReviewCounts] = await db.promise().query(
+        const {rows: ratingReviewCounts} = await db.query(
             `
         SELECT a.spotify_work_id AS song_id,
             COUNT(b.user_id)  AS num_reviews,

@@ -1,6 +1,5 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
-import {RowDataPacket} from "mysql2";
 import {Review} from "@/types";
 import {getServerSession} from "next-auth";
 
@@ -28,7 +27,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 async function fetchSongReviews(user_id: number, song_id: string) {
     // TODO --> Order these reviews by popularity/likes as well
     try {
-        const [rows] = (await db.promise().query(
+        const {rows} = await db.query(
             `
         SELECT u.id                                                                                               AS user_id,
             u.name,
@@ -47,7 +46,7 @@ async function fetchSongReviews(user_id: number, song_id: string) {
         ORDER BY c.time DESC;
             `,
             [user_id, song_id]
-        )) as RowDataPacket[];
+        );
 
         return rows.length > 0 ? (rows as Review[]) : null;
     } catch (error) {

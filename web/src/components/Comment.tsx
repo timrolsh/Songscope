@@ -47,7 +47,7 @@ export default function ({
             console.error("No user session found");
             return;
         }
-        if (comment_user_id !== review.user_id && !user.isAdmin) {
+        if (comment_user_id !== review.user_id && !user.is_admin) {
             console.error("Unauthorized to delete review");
             return;
         }
@@ -73,7 +73,7 @@ export default function ({
     return (
         <div
             className={clsx(
-                (user.isAdmin || review.user_id === user.id) &&
+                (user.is_admin || review.user_id === user.id) &&
                     "hover:bg-accent-neutral/10 rounded-md",
                 "w-full flex flex-col py-2 group pl-3 pr-5"
             )}
@@ -117,7 +117,7 @@ export default function ({
                             ? review.num_likes + " like"
                             : review.num_likes + " likes"}
                     </span>
-                    {(user.isAdmin || review.user_id === user.id) && (
+                    {(user.is_admin || review.user_id === user.id) && (
                         <button
                             className="text-primary hover:text-red-700 hover:cursor-pointer invisible group-hover:visible"
                             onClick={() => deleteReview(review.comment_id, review.user_id)}
