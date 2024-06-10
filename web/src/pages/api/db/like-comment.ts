@@ -26,7 +26,14 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         }
 
         try {
-            const results = await likeComment(user_id, comment_id, like);
+            await db.query(
+                `
+            INSERT INTO user_comment(user_id, comment_id, liked)
+            VALUES (?, ?, ?)
+            ON DUPLICATE KEY UPDATE liked=?;
+            `,
+                [user_id, comment_id, like, like]
+            );
         } catch (e: any) {
             response.status(500).send("Unable to like comment: ".concat(e.message));
             return;
@@ -40,27 +47,3 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 };
-
-async function likeComment(user_id: string, comment_id: string, like: boolean) {
-    try {
-        // TODO --> Likely can be optimized. Big query.
-        return db.execute(
-            `
-                INSERT INTO user_comment(user_id, comment_id, liked)
-                VALUES (?, ?, ?)
-                ON DUPLICATE KEY UPDATE liked=?;
-                `,
-            [user_id, comment_id, like, like],
-            (error, results, fields) => {
-                if (error) {
-                    console.error("SONGSCOPE: Unable to like comment", error);
-                    return false;
-                }
-                return true;
-            }
-        );
-    } catch (error) {
-        console.error("SONGSCOPE: Unable to like comment (outer)", error);
-        throw error; // Rethrow the error to be caught by the caller
-    }
-}

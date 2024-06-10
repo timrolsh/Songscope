@@ -26,7 +26,12 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
             return;
         }
 
-        await insertReview(songid, user.id, reviewbody);
+        await db.query(
+            `
+        INSERT INTO comment(user_id, spotify_work_id, comment_text)
+        VALUES(?, ?, ?)`,
+            [user.id, songid, reviewbody]
+        );
         response.status(200).send("Inserted review");
         return;
     } else {
@@ -34,20 +39,3 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 };
-
-async function insertReview(songid: string, userid: string, reviewtext: string) {
-    db.execute(
-        `
-        INSERT INTO comment(user_id, spotify_work_id, comment_text)
-        VALUES(?, ?, ?)    
-    `,
-        [userid, songid, reviewtext],
-        (error, results, fields) => {
-            if (error) {
-                console.error("SONGSCOPE: Unable to insert review", error);
-                return false;
-            }
-            return true;
-        }
-    );
-}
