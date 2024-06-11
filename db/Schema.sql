@@ -6,6 +6,7 @@ create table if not exists users
     id                  bigserial primary key               not null,
     name                text                                not null,
     email               text                                not null,
+    "emailVerified"     boolean   default false,
     image               text,
     bio                 text,
     show_favorite_songs boolean   default true              not null,
@@ -23,10 +24,10 @@ An auth account is tied to a user account, and for each provider, there can only
 create table if not exists accounts
 (
     id                  bigserial primary key not null,
-    user_id             bigint                not null,
+    "userId"            bigint                not null,
     type                text                  not null,
     provider            text                  not null,
-    provider_account_id text                  not null,
+    "providerAccountId" text                  not null,
     refresh_token       text,
     access_token        text,
     expires_at          bigint,
@@ -34,16 +35,16 @@ create table if not exists accounts
     scope               text,
     session_state       text,
     token_type          text,
-    unique (provider, provider_account_id),
-    foreign key (user_id) references users (id) on delete cascade
+    unique (provider, "providerAccountId"),
+    foreign key ("userId") references users (id) on delete cascade
 );
 
 create table if not exists sessions
 (
-    id            bigserial primary key not null,
-    user_id       bigint                not null,
-    expires       timestamp             not null,
-    session_token text                  not null
+    id             bigserial primary key not null,
+    "userId"       bigint                not null,
+    expires        timestamp             not null,
+    "sessionToken" text                  not null
 );
 
 create table if not exists comments
