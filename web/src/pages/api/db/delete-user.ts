@@ -14,12 +14,18 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
     if (request.method === "DELETE") {
         const {user_id} = request.body;
 
-        if (user_id !== session.user.id && !session.user.isAdmin) {
+        if (user_id !== session.user.id && !session.user.is_admin) {
             response.status(401).send("Unauthorized");
             return;
         }
 
-        const success = await deleteUser(user_id);
+        const success = await db.query(
+            `
+            DELETE FROM users
+            WHERE id = $1
+        `,
+            [user_id]
+        );
         if (success) {
             response.status(200).send("Deleted user");
         } else {
@@ -31,23 +37,3 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 };
-
-async function deleteUser(user_id: string) {
-    return new Promise<boolean>((resolve, reject) => {
-        db.execute(
-            `
-            DELETE FROM users
-            WHERE id = ?
-        `,
-            [user_id],
-            (error, results, fields) => {
-                if (error) {
-                    console.error("SONGSCOPE: Unable to delete user", error);
-                    resolve(false);
-                } else {
-                    resolve(true);
-                }
-            }
-        );
-    });
-}

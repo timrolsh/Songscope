@@ -162,12 +162,15 @@ export default ({
                                         </h2>
                                         <div className="flex flex-row w-full mx-auto place-content-evenly pt-1">
                                             {reviews?.length ? (
-                                                reviews.sort((a, b) => b.num_likes - a.num_likes).slice(0, 3).map((review) => (
-                                                    <ReviewTile
-                                                        key={review.comment_id}
-                                                        profileReview={review}
-                                                    />
-                                                ))
+                                                reviews
+                                                    .sort((a, b) => b.num_likes - a.num_likes)
+                                                    .slice(0, 3)
+                                                    .map((review) => (
+                                                        <ReviewTile
+                                                            key={review.comment_id}
+                                                            profileReview={review}
+                                                        />
+                                                    ))
                                             ) : (
                                                 <div className="w-full flex place-content-center h-80">
                                                     <h3 className="text-text/50 italic m-auto">
@@ -212,62 +215,68 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             }
         };
     }
-    console.log("IDENTIFIERS: ", session.user.id, ctx.params.userId)
-    const updateconcatlen = await db.promise().execute("SET SESSION group_concat_max_len = 1000000;");
-    const dbResponse = await db.promise().query(
-        `
-        SELECT u.*,
-            IF(? = u.id OR u.show_favorite_songs = 1,
-                CAST(CONCAT('[', GROUP_CONCAT(DISTINCT '"', usf.spotify_work_id, '"'), ']') AS JSON),
-                NULL)                                                AS favoriteSongs,
-            IF(? = u.id OR u.show_reviews = 1,
-                CAST(CONCAT('[', GROUP_CONCAT(DISTINCT '"', usp.spotify_work_id, '"'), ']') AS JSON),
-                NULL)                                                AS pinnedSongs,
-            IF(? = u.id OR u.show_favorite_songs = 1, (SELECT COUNT(*) FROM user_song WHERE favorite = 1 AND user_id = u.id),
-                NULL)                                                AS total_favorites,
-            (SELECT AVG(rating) FROM user_song WHERE user_id = u.id) AS avg_rating,
-            (SELECT COUNT(*) FROM comment WHERE user_id = u.id)      AS total_comments,
-            CASE
-                WHEN ? = u.id OR u.show_reviews = 1 THEN
-                    CAST(CONCAT('[', GROUP_CONCAT(DISTINCT JSON_OBJECT(
+    const dbResponse = (
+        await db.query(
+            `
+    SELECT u.*,
+        CASE
+            WHEN $1 = u.id OR u.show_favorite_songs
+                THEN json_agg(DISTINCT usf.spotify_work_id) FILTER (WHERE usf.favorite)
+            END                                                  AS favorite_songs,
+        CASE
+            WHEN $1 = u.id OR u.show_reviews
+                THEN json_agg(DISTINCT usp.spotify_work_id) FILTER (WHERE usp.pinned)
+            END                                                  AS pinned_songs,
+        CASE
+            WHEN $1 = u.id OR u.show_favorite_songs
+                THEN (SELECT COUNT(*) FROM user_song WHERE favorite = true AND user_id = u.id)
+            END                                                  AS total_favorites,
+        (SELECT AVG(rating) FROM user_song WHERE user_id = u.id) AS avg_rating,
+        (SELECT COUNT(*) FROM comments WHERE user_id = u.id)      AS total_comments,
+        CASE
+            WHEN $1 = u.id OR u.show_reviews
+                THEN json_agg(
+                    json_build_object(
                             'user_id', u.id,
                             'comment_id', c.id,
                             'spotify_work_id', c.spotify_work_id,
                             'comment_text', c.comment_text,
                             'time', c.time,
-                            'num_likes', (SELECT CAST(COALESCE(SUM(liked), 0) AS UNSIGNED)
-                                        FROM user_comment uc
-                                        WHERE uc.comment_id = c.id)
-                                                        ) ORDER BY c.time DESC), ']') AS JSON)
-                END                                                  AS top_reviews
-        FROM users u
-            LEFT JOIN user_song usf ON u.id = usf.user_id AND usf.favorite = 1
-            LEFT JOIN user_song usp ON u.id = usp.user_id AND usp.pinned = 1
-            LEFT JOIN comment c ON u.id = c.user_id
-        WHERE u.id = ?
-        GROUP BY u.id;
+                            'num_likes', (SELECT COALESCE(SUM(CASE WHEN uc.liked THEN 1 ELSE 0 END), 0)
+                                            FROM user_comment uc
+                                            WHERE uc.comment_id = c.id)
+                    ) ORDER BY c.time DESC
+                        )
+            END                                                  AS top_reviews
+    FROM users u
+            LEFT JOIN user_song usf ON u.id = usf.user_id AND usf.favorite = true
+            LEFT JOIN user_song usp ON u.id = usp.user_id AND usp.pinned = true
+            LEFT JOIN comments c ON u.id = c.user_id
+    WHERE u.id = $2
+    GROUP BY u.id;
         `,
-        [session.user.id, session.user.id, session.user.id, session.user.id, ctx.params.userId]
-    );
+            [session.user.id, ctx.params.userId]
+        )
+    ).rows[0];
+    console.log(dbResponse);
 
-    const dbResponseAny = (dbResponse as any)[0][0];
     // Create maps of all favorite songs, pinned songs, and top reviews
     const favoriteSongs: {[key: string]: SongMetadata | null} = {};
     const pinnedSongs: {[key: string]: SongMetadata | null} = {};
     // filter out null reviews that come out of database json array
-    const profileTopReviews: ProfileTopReviews[] = dbResponseAny.top_reviews.filter(
+    const profileTopReviews: ProfileTopReviews[] = dbResponse.top_reviews.filter(
         (review: ProfileTopReviews) => review.spotify_work_id !== null
     );
     // Make set of unique spotify works to lookup in the spotify api
     let spotifyIds: Set<string> = new Set();
-    if (dbResponseAny.favoriteSongs !== null) {
-        for (let song of dbResponseAny.favoriteSongs) {
+    if (dbResponse.favorite_songs !== null) {
+        for (let song of dbResponse.favorite_songs) {
             spotifyIds.add(song);
             favoriteSongs[song] = null;
         }
     }
-    if (dbResponseAny.pinnedSongs !== null) {
-        for (let song of dbResponseAny.pinnedSongs) {
+    if (dbResponse.pinned_songs !== null) {
+        for (let song of dbResponse.pinned_songs) {
             spotifyIds.add(song);
             pinnedSongs[song] = null;
         }
@@ -292,7 +301,7 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             pinnedSongs[song] = spotifyApiResponse[song];
         }
     }
-    if (dbResponseAny.top_reviews !== null) {
+    if (dbResponse.top_reviews !== null) {
         for (let review of profileTopReviews) {
             review.title = spotifyApiResponse[review.spotify_work_id].name;
             review.artist = spotifyApiResponse[review.spotify_work_id].artist;
@@ -306,23 +315,21 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
             favoriteSongs: Object.values(favoriteSongs),
             pinnedSongs: Object.values(pinnedSongs),
             sideStatistics: {
-                total_comments: dbResponseAny.total_comments,
-                total_favorites: dbResponseAny.total_favorites,
-                avg_rating: dbResponseAny.avg_rating
+                total_comments: dbResponse.total_comments,
+                total_favorites: dbResponse.total_favorites,
+                avg_rating: dbResponse.avg_rating
             },
             reviews: Object.values(profileTopReviews),
             userId: ctx.params.userId,
             targetUser: {
-                id: dbResponseAny.id,
-                name: dbResponseAny.name,
-                first_name: dbResponseAny.first_name,
-                last_name: dbResponseAny.last_name,
-                image: dbResponseAny.image,
-                bio: dbResponseAny.bio,
-                join_date: JSON.stringify(dbResponseAny.join_date).slice(1, -1),
-                show_favorite_songs: dbResponseAny.show_favorite_songs,
-                show_reviews: dbResponseAny.show_reviews,
-                show_explicit: dbResponseAny.show_explicit
+                id: dbResponse.id,
+                name: dbResponse.name,
+                image: dbResponse.image,
+                bio: dbResponse.bio,
+                join_date: JSON.stringify(dbResponse.join_date).slice(1, -1),
+                show_favorite_songs: dbResponse.show_favorite_songs,
+                show_reviews: dbResponse.show_reviews,
+                show_explicit: dbResponse.show_explicit
             },
             user: session.user
         }

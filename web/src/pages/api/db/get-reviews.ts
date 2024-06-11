@@ -1,6 +1,5 @@
 import {NextApiRequest, NextApiResponse} from "next";
 import {authOptions, db} from "../auth/[...nextauth]";
-import {RowDataPacket} from "mysql2";
 import {Review} from "@/types";
 import {getServerSession} from "next-auth";
 
@@ -28,26 +27,24 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 async function fetchSongReviews(user_id: number, song_id: string) {
     // TODO --> Order these reviews by popularity/likes as well
     try {
-        const [rows] = (await db.promise().query(
+        const {rows} = await db.query(
             `
-        SELECT u.id                                                                                               AS user_id,
-            u.name,
-            c.id                                                                                               AS comment_id,
-            c.comment_text,
-            c.time,
-            (SELECT CAST(COALESCE(SUM(liked), 0) AS UNSIGNED) FROM user_comment uc WHERE uc.comment_id = c.id) AS num_likes,
-            CAST(COALESCE(SUM(uc.liked = 1 AND uc.user_id = ?), 0) AS UNSIGNED)                                AS user_liked
-        FROM comment c
-                JOIN
-            users u ON c.user_id = u.id
-                LEFT JOIN
-            user_comment uc ON uc.comment_id = c.id
-        WHERE c.spotify_work_id = ?
+        SELECT u.id                                                                       AS user_id,
+                u.name,
+                c.id                                                                       AS comment_id,
+                c.comment_text,
+                c.time,
+                COALESCE(SUM(CASE WHEN uc.liked THEN 1 ELSE 0 END), 0)                     AS num_likes,
+                COALESCE(MAX(CASE WHEN uc.user_id = $1 AND uc.liked THEN 1 ELSE 0 END), 0) AS user_liked
+        FROM comments c
+                JOIN users u ON c.user_id = u.id
+                LEFT JOIN user_comment uc ON uc.comment_id = c.id
+        WHERE c.spotify_work_id = $2
         GROUP BY c.id, u.id, u.name, c.comment_text, c.time
         ORDER BY c.time DESC;
             `,
             [user_id, song_id]
-        )) as RowDataPacket[];
+        );
 
         return rows.length > 0 ? (rows as Review[]) : null;
     } catch (error) {

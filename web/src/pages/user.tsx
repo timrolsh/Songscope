@@ -6,7 +6,7 @@ import {getServerSession} from "next-auth/next";
 import {authOptions, db} from "./api/auth/[...nextauth]";
 import {GetServerSideProps} from "next";
 import Spinner from "@/components/Spinner";
-import {SongMetadata, User, SongReviewRow} from "@/types";
+import {SongMetadata, User} from "@/types";
 import Head from "next/head";
 import spotifyApi from "./api/spotify/wrapper";
 
@@ -241,41 +241,39 @@ let topSongs: SongMetadata[] = [];
 let hotSongs: SongMetadata[] = [];
 let lastRequestTime = 0;
 async function loadTopAndHotSongs(user: User) {
-    const [rows] = await db.promise().query<SongReviewRow[]>(
+    const {rows} = await db.query(
         `
     (SELECT spotify_work_id,
             COUNT(*)  AS num_reviews,
             MAX(time) AS latest_review_time,
             TRUE      AS is_hot,
             FALSE     AS is_top
-    FROM comment
-    WHERE time >= NOW() - INTERVAL 7 DAY
+    FROM comments
+    WHERE time >= NOW() - INTERVAL '7 days'
     GROUP BY spotify_work_id
-    ORDER BY num_reviews DESC,
-            latest_review_time DESC
+    ORDER BY num_reviews DESC, latest_review_time DESC
     LIMIT 5)
     UNION ALL
-
     (SELECT spotify_work_id,
             COUNT(*)  AS num_reviews,
             MAX(time) AS latest_review_time,
             FALSE     AS is_hot,
             TRUE      AS is_top
-    FROM comment
+    FROM comments
     GROUP BY spotify_work_id
-    ORDER BY num_reviews DESC,
-            latest_review_time DESC
+    ORDER BY num_reviews DESC, latest_review_time DESC
     LIMIT 5)
-    ORDER BY is_hot DESC,
-            num_reviews DESC,
-            latest_review_time DESC;    
+    ORDER BY is_hot DESC, num_reviews DESC, latest_review_time DESC;
         `
     );
     const songIds: Set<string> = new Set();
     for (const row of rows) {
         songIds.add(row.spotify_work_id);
     }
-    const songs = await spotifyApi.getMultipleSongs(Array.from(songIds), user);
+    let songs: {[key: string]: SongMetadata} = {}
+    if (songIds.size > 0) {
+        songs = await spotifyApi.getMultipleSongs(Array.from(songIds), user);
+    }
     for (const row of rows) {
         if (row.is_hot) {
             hotSongs.push(songs[row.spotify_work_id]);

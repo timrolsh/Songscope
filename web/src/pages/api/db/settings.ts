@@ -28,15 +28,15 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 
-    await db.promise().query(
+    await db.query(
         `
     UPDATE users
-    SET name                = ?,
-        bio                 = ?,
-        show_favorite_songs = ?,
-        show_reviews        = ?,
-        show_explicit       = ?
-    WHERE id = ?;                   
+    SET name                = $1,
+        bio                 = $2,
+        show_favorite_songs = $3,
+        show_reviews        = $4,
+        show_explicit       = $5
+    WHERE id = $6;                   
 `,
         [name, bio, show_favorite_songs, show_reviews, show_explicit, session.user.id]
     );

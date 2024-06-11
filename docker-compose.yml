@@ -1,14 +1,11 @@
-version: "3"
-
 services:
     db:
         build:
             context: ./db
             dockerfile: Dockerfile
         ports:
-            - ${DB_PORT}:3306
+            - ${PGPORT}:5432
         environment:
-            MYSQL_ROOT_PASSWORD: root
-            MYSQL_DATABASE: ${DB_SCHEMA}
-            MYSQL_USER: ${DB_USER}
-            MYSQL_PASSWORD: ${DB_PASSWORD}
+            POSTGRES_USER: ${PGUSER}
+            POSTGRES_PASSWORD: ${PGPASSWORD}
+            POSTGRES_DB: ${PGDATABASE}

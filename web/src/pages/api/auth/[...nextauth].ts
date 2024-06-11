@@ -2,38 +2,35 @@ import NextAuth, {Session} from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 import SpotifyProvider from "next-auth/providers/spotify";
 
-import MySqlAdapter from "./MySqlAdapter";
-
-import {createPool} from "mysql2";
+import {Pool} from "pg";
 import {User} from "@/types";
+import PostgresAdapter from "@auth/pg-adapter";
 
 // check to make sure all environment variables are set
 if (
     !(
-        process.env.DB_HOST &&
-        process.env.DB_USER &&
-        process.env.DB_SCHEMA &&
-        process.env.DB_PASSWORD &&
-        process.env.DB_PORT
+        process.env.PGHOST &&
+        process.env.PGUSER &&
+        process.env.PGDATABASE &&
+        process.env.PGPASSWORD &&
+        process.env.PGPORT
     )
 ) {
     console.log("Error: Environment variables for the database are not set.");
 }
 
 // create the connection to database
-export const db = createPool({
-    host: process.env.DB_HOST,
-    user: process.env.DB_USER,
-    database: process.env.DB_SCHEMA,
-    password: process.env.DB_PASSWORD,
-    port: parseInt(process.env.DB_PORT || "3306"), // Convert the port value to a number
-    waitForConnections: true,
-    connectionLimit: 180, // Arbitrarily picked, likely will be fine for the database size we have
-    queueLimit: 0
+export const db = new Pool({
+    ssl: process.env.PGHOST !== "localhost",
+    host: process.env.PGHOST,
+    user: process.env.PGUSER,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: parseInt(process.env.PGPORT || "")
 });
 
 export const authOptions = {
-    adapter: MySqlAdapter(db),
+    adapter: PostgresAdapter(db),
     providers: [
         GoogleProvider({
             clientId: process.env.GOOGLE_CLIENT_ID ?? "",

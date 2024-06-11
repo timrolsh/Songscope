@@ -1,5 +1,3 @@
-import {RowDataPacket} from "mysql2";
-
 export interface SongMetadata {
     id: string;
     name: string;
@@ -53,7 +51,7 @@ export interface User {
     show_favorite_songs: boolean;
     show_reviews: boolean;
     show_explicit: boolean;
-    isAdmin: boolean;
+    is_admin: boolean;
 }
 
 export interface ProfileStatistics {
@@ -64,14 +62,7 @@ export interface ProfileStatistics {
     totalFollowing?: number;
 }
 
-export interface SongReviewRow extends RowDataPacket {
-    id: string;
-    num_reviews: number;
-    title: string;
-    artist: string;
-}
-
-export interface UserTopReviews extends RowDataPacket {
+export interface UserTopReviews {
     user_id: string;
     comment_id: string;
     spotify_work_id: string;

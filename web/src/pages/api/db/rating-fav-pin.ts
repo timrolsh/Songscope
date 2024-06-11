@@ -31,14 +31,15 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         return;
     }
 
-    // Mysql2 does not allow you to do start transaction and commit, done as 2 separate queries
-    await db.promise().query(
+
+    await db.query(
         `    
     INSERT INTO user_song (user_id, spotify_work_id, rating, pinned, favorite)
-    VALUES (?, ?, ?, ?, ?)
-    ON DUPLICATE KEY UPDATE rating   = VALUES(rating),
-                            pinned   = VALUES(pinned),
-                            favorite = VALUES(favorite);
+        VALUES ($1, $2, $3, $4, $5)
+        ON CONFLICT (user_id, spotify_work_id)
+            DO UPDATE SET rating   = EXCLUDED.rating,
+                        pinned   = EXCLUDED.pinned,
+                        favorite = EXCLUDED.favorite;
     `,
         [
             session.user.id,
@@ -48,21 +49,19 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
             request.body.favorited
         ]
     );
-    const dbResponse = await db.promise().query(
+    const dbResponse = await db.query(
         `
     SELECT us.spotify_work_id,
-        AVG(us.rating)   AS avg_rating,
-        MAX(us.pinned)   AS pinned,
-        MAX(us.favorite) AS favorited,
-        us.rating        AS user_rating
+            AVG(us.rating)   AS avg_rating,
+            (MAX(CASE WHEN us.pinned THEN 1 ELSE 0 END) = 1) AS pinned,
+            (MAX(CASE WHEN us.favorite THEN 1 ELSE 0 END) = 1) AS favorited,
+            us.rating        AS user_rating
     FROM user_song us
-            JOIN
-        users u ON us.user_id = u.id
-    WHERE us.user_id = ?
-        AND us.spotify_work_id = ?
-    GROUP BY us.spotify_work_id;
+    WHERE us.user_id = $1
+        AND us.spotify_work_id = $2
+    GROUP BY us.spotify_work_id, us.rating;
         `,
         [session.user.id, request.body.song_id]
     );
-    response.send((dbResponse as any)[0][0]);
+    response.send(dbResponse.rows[0]);
 };
