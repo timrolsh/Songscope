@@ -22,7 +22,7 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         const success = await db.query(
             `
             DELETE FROM users
-            WHERE id = ?
+            WHERE id = $1
         `,
             [user_id]
         );

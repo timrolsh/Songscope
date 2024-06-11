@@ -81,16 +81,17 @@ class SpotifyApi {
         let seedTracks: string[] = [];
 
         const likedSongs = (
-            (await db.query(
+            await db.query(
                 `
         SELECT us.spotify_work_id
         FROM user_song us
-        WHERE us.user_id = ?
-            AND us.favorite = 1;
+        WHERE us.user_id = $1
+            AND us.favorite = true;
         `,
                 [user.id]
-            )) as any
-        )[0];
+            )
+        ).rows;
+
         if (likedSongs.length > 0) {
             shuffleArray(likedSongs);
             seedTracks = likedSongs.map((song: any) => song.spotify_work_id).slice(0, 5);
@@ -156,18 +157,15 @@ class SpotifyApi {
         const {rows: ratingReviewCounts} = await db.query(
             `
         SELECT a.spotify_work_id AS song_id,
-            COUNT(b.user_id)  AS num_reviews,
-            AVG(b.rating)     AS avg_rating,
-            a.rating          AS user_rating,
-            a.pinned          AS pinned,
-            a.favorite        AS favorited
+                COUNT(b.user_id) AS num_reviews,
+                AVG(b.rating) AS avg_rating,
+                a.rating AS user_rating,
+                a.pinned AS pinned,
+                a.favorite AS favorited
         FROM user_song AS a
-                LEFT JOIN
-            user_song AS b
-            ON
-                a.spotify_work_id = b.spotify_work_id
-        WHERE a.spotify_work_id IN (?)
-            AND a.user_id = ?
+                LEFT JOIN user_song AS b ON a.spotify_work_id = b.spotify_work_id
+        WHERE a.spotify_work_id = ANY($1)
+        AND a.user_id = $2
         GROUP BY a.spotify_work_id, a.user_id, a.rating, a.pinned, a.favorite;
         `,
             [spotifyIds, user.id]

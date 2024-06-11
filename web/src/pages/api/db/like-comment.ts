@@ -28,11 +28,12 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
         try {
             await db.query(
                 `
-            INSERT INTO user_comment(user_id, comment_id, liked)
-            VALUES (?, ?, ?)
-            ON DUPLICATE KEY UPDATE liked=?;
+            INSERT INTO user_comment (user_id, comment_id, liked)
+            VALUES ($1, $2, $3)
+            ON CONFLICT (user_id, comment_id)
+                DO UPDATE SET liked = EXCLUDED.liked;  
             `,
-                [user_id, comment_id, like, like]
+                [user_id, comment_id, like]
             );
         } catch (e: any) {
             response.status(500).send("Unable to like comment: ".concat(e.message));

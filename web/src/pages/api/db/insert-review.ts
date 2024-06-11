@@ -28,8 +28,8 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 
         await db.query(
             `
-        INSERT INTO comment(user_id, spotify_work_id, comment_text)
-        VALUES(?, ?, ?)`,
+        INSERT INTO comments(user_id, spotify_work_id, comment_text)
+        VALUES($1, $2, $3)`,
             [user.id, songid, reviewbody]
         );
         response.status(200).send("Inserted review");

@@ -31,8 +31,8 @@ export default async (request: NextApiRequest, response: NextApiResponse) => {
 async function deleteReview(comment_id: string, comment_user_id: string) {
     await db.query(
         `
-    DELETE FROM comment
-    WHERE id = ? AND user_id = ?
+    DELETE FROM comments
+    WHERE id = $1 AND user_id = $2
 `,
         [comment_id, comment_user_id]
     );

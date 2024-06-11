@@ -234,11 +234,11 @@ export const getServerSideProps: GetServerSideProps = async (ctx) => {
         };
     }
 
-    const results = await db.query(`select provider FROM accounts WHERE userId = ?`, [
-        session.user.id
-    ]);
+    const results = (
+        await db.query(`select provider FROM accounts WHERE "userId" = $1`, [session.user.id])
+    ).rows;
     const booleans = {google: false, spotify: false};
-    for (const entry of (results as any)[0]) {
+    for (const entry of results) {
         if (entry.provider === "spotify") {
             booleans.spotify = true;
         } else if (entry.provider === "google") {
