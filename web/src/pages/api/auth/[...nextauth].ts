@@ -20,7 +20,14 @@ if (
 }
 
 // create the connection to database
-export const db = new Pool();
+export const db = new Pool({
+    ssl: process.env.PGHOST !== "localhost",
+    host: process.env.PGHOST,
+    user: process.env.PGUSER,
+    database: process.env.PGDATABASE,
+    password: process.env.PGPASSWORD,
+    port: parseInt(process.env.PGPORT || "")
+});
 
 export const authOptions = {
     adapter: PostgresAdapter(db),
