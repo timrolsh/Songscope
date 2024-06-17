@@ -151,13 +151,13 @@ export default function ({
             <div className="flex flex-col place-content-between h-full w-2/5 overflow-scroll pr-6">
                 <div>
                     <div className="w-full flex flex-row place-content-between">
-                        <Image
+                        <img
                             src={songMetadata.albumArtUrl}
                             alt="Album Art"
                             width={150}
                             height={150}
                             className="border border-accent-neutral/5 shadow-xl rounded-xl select-none"
-                        ></Image>
+                        />
                         {
                             // React does not update state fast enough, hardcoded values are passed into request
                             <div className="flex flex-col space-y-4">

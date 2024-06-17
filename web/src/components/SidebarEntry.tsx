@@ -38,7 +38,7 @@ const SidebarEntry: React.FC<SidebarEntryProps> = ({songMetadata, user}) => {
                 className="flex flex-row place-content-before hover:bg-accent-neutral/20 transition px-2.5 py-1.5 my-0.5 rounded-md hover:cursor-pointer"
                 onClick={() => setShowModal(!showModal)}
             >
-                <Image
+                <img
                     src={songMetadata.albumArtUrl}
                     alt="Album Art"
                     width={40}

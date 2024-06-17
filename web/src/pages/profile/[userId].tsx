@@ -53,13 +53,13 @@ export default ({
                             <>
                                 <div className="flex flex-row space-x-4">
                                     <div className="flex flex-col space-y-2 w-1/6">
-                                        <Image
+                                        <img
                                             src={targetUser.image || "/default-profile.jpg"}
                                             width={225}
                                             height={225}
                                             className="border border-accent-neutral/30 rounded-xl"
                                             alt="Profile Picture"
-                                        ></Image>
+                                        />
                                         <div className="flex flex-row space-x-2">
                                             {/* <div className="w-5 h-5 rounded-2xl bg-lime-400 mb-auto"></div> */}
                                         </div>

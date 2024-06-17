@@ -44,13 +44,13 @@ export default ({
                 className="mx-auto select-none group h-80 w-64 rounded-xl border-2 border-secondary/20 bg-secondary/5 hover:bg-secondary/20 hover:border-secondary/30 hover:cursor-pointer transition-all hover:shadow-lg hover:shadow-secondary/20"
                 onClick={() => setShowModal(!showModal)}
             >
-                <Image
+                <img
                     src={songMetadata.albumArtUrl}
                     alt="Album Art"
                     width={150}
                     height={150}
                     className="group-hover:border-accent-neutral/10 transition-all mx-auto mt-6 border border-accent-neutral/5 shadow-xl rounded-xl select-none"
-                ></Image>
+                />
                 <div className="flex flex-col select-text place-content-start pt-4">
                     <h1 className="text-xl font-bold text-center text-text/90 group-hover:text-text line-clamp-1 px-1">
                         {songMetadata.name}
