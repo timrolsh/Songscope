@@ -144,7 +144,7 @@ class SpotifyApi {
                     ? song.album.images[0].url
                     : "/no-album-cover.jpg",
                 popularity: song.popularity,
-                previewUrl: song.preview_url,
+                previewUrl: song.preview_url ? song.preview_url : null,
                 availableMarkets: song.available_markets,
                 avg_rating: null,
                 num_reviews: null,
